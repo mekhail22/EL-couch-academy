@@ -71,7 +71,14 @@ st.markdown("""
         height: 90px;
     }
     
-    /* تنسيق الروابط في الهيدر */
+    /* تنسيق الروابط في الهيدر للشاشات الكبيرة */
+    .nav-links {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
     .nav-link {
         padding: 10px 15px;
         background: none;
@@ -83,6 +90,7 @@ st.markdown("""
         display: inline-block;
         transition: all 0.3s ease;
         border-radius: 6px;
+        font-size: 14px;
     }
     
     .nav-link:hover {
@@ -90,13 +98,122 @@ st.markdown("""
         color: #3b82f6;
     }
     
+    .nav-link.active {
+        background-color: #3b82f6;
+        color: white;
+    }
+    
+    /* برجر منيو - يظهر فقط في الهواتف */
+    .burger-menu {
+        display: none;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30px;
+        height: 21px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 1001;
+    }
+    
+    .burger-menu span {
+        width: 100%;
+        height: 3px;
+        background-color: #1e3a8a;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+    
+    .burger-menu.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+    }
+    
+    .burger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+    
+    .burger-menu.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+    
+    /* القائمة الجانبية للهواتف */
+    .side-nav {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 280px;
+        height: 100vh;
+        background-color: white;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        transition: all 0.3s ease;
+        overflow-y: auto;
+        padding-top: 80px;
+    }
+    
+    .side-nav.active {
+        right: 0;
+    }
+    
+    .side-nav ul {
+        list-style: none;
+        padding: 20px;
+    }
+    
+    .side-nav li {
+        margin-bottom: 15px;
+    }
+    
+    .side-nav a {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #1e293b;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 12px 15px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .side-nav a:hover, .side-nav a.active {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+    
+    .nav-overlay {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+    }
+    
+    .nav-overlay.active {
+        display: block;
+    }
+    
     /* تنسيق للهواتف */
-    @media (max-width: 768px) {
-        .custom-header {
-            padding: 10px 0;
+    @media (max-width: 992px) {
+        .nav-links {
+            display: none;
+        }
+        .burger-menu {
+            display: flex;
         }
         .custom-header-spacer {
             height: 70px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .custom-header {
+            padding: 10px 0;
         }
         .nav-link {
             padding: 5px 8px;
@@ -108,47 +225,209 @@ st.markdown("""
         .logo-subtitle {
             font-size: 0.7rem !important;
         }
-        .logo-icon {
-            width: 40px !important;
-            height: 40px !important;
-            font-size: 1.5rem !important;
+    }
+    
+    /* تنسيق الشعار */
+    .logo-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid #3b82f6;
+    }
+    
+    @media (max-width: 768px) {
+        .logo-img {
+            width: 45px;
+            height: 45px;
         }
     }
 </style>
+
+<script>
+// جافا سكريبت للبرجر منيو والتنقل
+document.addEventListener('DOMContentLoaded', function() {
+    // عناصر البرجر منيو
+    const burgerMenu = document.getElementById('burgerMenu');
+    const sideNav = document.getElementById('sideNav');
+    const navOverlay = document.getElementById('navOverlay');
+    
+    if (burgerMenu) {
+        burgerMenu.addEventListener('click', function() {
+            this.classList.toggle('active');
+            sideNav.classList.toggle('active');
+            navOverlay.classList.toggle('active');
+        });
+    }
+    
+    if (navOverlay) {
+        navOverlay.addEventListener('click', function() {
+            this.classList.remove('active');
+            sideNav.classList.remove('active');
+            burgerMenu.classList.remove('active');
+        });
+    }
+    
+    // إغلاق القائمة عند تغيير حجم النافذة
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 992) {
+            if (sideNav) sideNav.classList.remove('active');
+            if (navOverlay) navOverlay.classList.remove('active');
+            if (burgerMenu) burgerMenu.classList.remove('active');
+        }
+    });
+});
+</script>
 """, unsafe_allow_html=True)
 
-# ===== الهيدر المخصص =====
-st.markdown("""
+# ===== التحقق من وجود صورة الشعار =====
+logo_exists = os.path.exists('logo.jpg')
+
+# ===== الهيدر المخصص مع برجر منيو =====
+if logo_exists:
+    logo_html = f'''
+    <div class="logo-img" style="background-image: url('logo.jpg'); background-size: cover; background-position: center;"></div>
+    '''
+else:
+    logo_html = '''
+    <div class="logo-img" style="background: linear-gradient(45deg, #3b82f6, #1e3a8a); display: flex; align-items: center; justify-content: center;">
+        <span style="font-size: 1.8rem;">⚽</span>
+    </div>
+    '''
+
+st.markdown(f'''
 <div class="custom-header">
-    <div style="width: 90%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <div style="width: 90%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="logo-icon" style="width: 60px; height: 60px; border-radius: 10px; background: linear-gradient(45deg, #3b82f6, #1e3a8a); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <span style="font-size: 2rem;">⚽</span>
-            </div>
+            {logo_html}
             <div>
                 <h1 class="logo-title" style="font-size: 1.6rem; margin: 0; color: #1e3a8a;">الكوتش <span style="color: #f59e0b;">أكاديمي</span></h1>
                 <p class="logo-subtitle" style="font-size: 0.9rem; color: #666; margin: 0;">أكاديمية كرة القدم المتخصصة</p>
             </div>
         </div>
-        <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
-            <a href="/?page=home" class="nav-link" style="padding: 10px 15px;">🏠 الرئيسية</a>
-            <a href="/?page=about" class="nav-link" style="padding: 10px 15px;">ℹ️ من نحن</a>
-            <a href="/?page=programs" class="nav-link" style="padding: 10px 15px;">⚽ البرامج</a>
-            <a href="/?page=coaches" class="nav-link" style="padding: 10px 15px;">👨‍🏫 المدربون</a>
-            <a href="/?page=registration" class="nav-link" style="padding: 10px 15px;">📝 التسجيل</a>
-            <a href="/?page=faq" class="nav-link" style="padding: 10px 15px;">❓ الأسئلة</a>
-            <a href="/?page=contact" class="nav-link" style="padding: 10px 15px;">📞 اتصل بنا</a>
+        
+        <!-- روابط للشاشات الكبيرة -->
+        <div class="nav-links">
+            <a class="nav-link" data-page="home">🏠 الرئيسية</a>
+            <a class="nav-link" data-page="about">ℹ️ من نحن</a>
+            <a class="nav-link" data-page="programs">⚽ البرامج</a>
+            <a class="nav-link" data-page="coaches">👨‍🏫 المدربون</a>
+            <a class="nav-link" data-page="registration">📝 التسجيل</a>
+            <a class="nav-link" data-page="faq">❓ الأسئلة</a>
+            <a class="nav-link" data-page="contact">📞 اتصل بنا</a>
         </div>
+        
+        <!-- زر برجر منيو للهواتف -->
+        <button class="burger-menu" id="burgerMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </div>
 </div>
+
+<!-- القائمة الجانبية للهواتف -->
+<div class="side-nav" id="sideNav">
+    <ul>
+        <li><a class="side-nav-link" data-page="home">🏠 الرئيسية</a></li>
+        <li><a class="side-nav-link" data-page="about">ℹ️ من نحن</a></li>
+        <li><a class="side-nav-link" data-page="programs">⚽ البرامج التدريبية</a></li>
+        <li><a class="side-nav-link" data-page="coaches">👨‍🏫 المدربون</a></li>
+        <li><a class="side-nav-link" data-page="registration">📝 تسجيل لاعب جديد</a></li>
+        <li><a class="side-nav-link" data-page="faq">❓ الأسئلة الشائعة</a></li>
+        <li><a class="side-nav-link" data-page="contact">📞 اتصل بنا</a></li>
+    </ul>
+</div>
+
+<!-- طبقة التعتيم -->
+<div class="nav-overlay" id="navOverlay"></div>
+
 <div class="custom-header-spacer"></div>
-""", unsafe_allow_html=True)
+''', unsafe_allow_html=True)
 
 # ===== إدارة حالة الجلسة =====
 if 'page' not in st.session_state:
     st.session_state.page = 'home'
 if 'show_success' not in st.session_state:
     st.session_state.show_success = False
+
+# ===== جافا سكريبت للتنقل في نفس التاب =====
+st.markdown("""
+<script>
+// وظيفة التنقل بين الصفحات بدون إعادة تحميل
+function navigateTo(page) {
+    // تحديث حالة الجلسة عبر Streamlit
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.history.pushState({}, '', url);
+    
+    // تحديث الواجهة عبر Streamlit
+    const event = new Event('streamlit:setQueryParams');
+    window.dispatchEvent(event);
+    
+    // تحديث القائمة النشطة
+    document.querySelectorAll('.nav-link, .side-nav-link').forEach(link => {
+        link.classList.remove('active');
+        if(link.getAttribute('data-page') === page) {
+            link.classList.add('active');
+        }
+    });
+    
+    // إغلاق القائمة الجانبية
+    const sideNav = document.getElementById('sideNav');
+    const burgerMenu = document.getElementById('burgerMenu');
+    const navOverlay = document.getElementById('navOverlay');
+    if(sideNav) sideNav.classList.remove('active');
+    if(burgerMenu) burgerMenu.classList.remove('active');
+    if(navOverlay) navOverlay.classList.remove('active');
+    
+    // التمرير لأعلى
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// إضافة مستمعي الأحداث لروابط التنقل
+document.addEventListener('DOMContentLoaded', function() {
+    // روابط القائمة العلوية
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.getAttribute('data-page');
+            navigateTo(page);
+        });
+    });
+    
+    // روابط القائمة الجانبية
+    document.querySelectorAll('.side-nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.getAttribute('data-page');
+            navigateTo(page);
+        });
+    });
+    
+    // تحديث القائمة النشطة بناءً على الصفحة الحالية
+    function updateActiveLink() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentPage = urlParams.get('page') || 'home';
+        
+        document.querySelectorAll('.nav-link, .side-nav-link').forEach(link => {
+            link.classList.remove('active');
+            if(link.getAttribute('data-page') === currentPage) {
+                link.classList.add('active');
+            }
+        });
+    }
+    
+    updateActiveLink();
+    
+    // مراقبة تغييرات URL
+    window.addEventListener('popstate', function() {
+        updateActiveLink();
+        window.location.reload();
+    });
+});
+</script>
+""", unsafe_allow_html=True)
 
 # ===== ملفات حفظ البيانات =====
 DATA_FILE = 'registrations.json'
@@ -486,7 +765,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ===== التنقل بين الصفحات =====
+# ===== الحصول على الصفحة الحالية =====
 query_params = st.query_params
 if 'page' in query_params:
     st.session_state.page = query_params['page']
@@ -509,9 +788,14 @@ if page == 'home':
     # أزرار الإجراء
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("📝 سجل ابنك الآن", use_container_width=True):
-            st.session_state.page = 'registration'
-            st.rerun()
+        # زر التسجيل مع التنقل في نفس الصفحة
+        st.markdown("""
+        <div style="text-align: center;">
+            <button onclick="navigateTo('registration')" style="background-color: #f59e0b; color: #1e293b; padding: 12px 30px; border-radius: 5px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); font-size: 16px;">
+                📝 سجل ابنك الآن
+            </button>
+        </div>
+        """, unsafe_allow_html=True)
     
     # قسم الإحصائيات
     st.markdown("---")
@@ -964,11 +1248,11 @@ st.markdown("""
             <div>
                 <h4 style="color: white;">روابط سريعة</h4>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><a href="/?page=home" style="color: #cbd5e1; text-decoration: none;">← الرئيسية</a></li>
-                    <li style="margin-bottom: 10px;"><a href="/?page=about" style="color: #cbd5e1; text-decoration: none;">← من نحن</a></li>
-                    <li style="margin-bottom: 10px;"><a href="/?page=programs" style="color: #cbd5e1; text-decoration: none;">← البرامج التدريبية</a></li>
-                    <li style="margin-bottom: 10px;"><a href="/?page=coaches" style="color: #cbd5e1; text-decoration: none;">← المدربون</a></li>
-                    <li style="margin-bottom: 10px;"><a href="/?page=faq" style="color: #cbd5e1; text-decoration: none;">← الأسئلة الشائعة</a></li>
+                    <li style="margin-bottom: 10px;"><a onclick="navigateTo('home')" style="color: #cbd5e1; text-decoration: none; cursor: pointer;">← الرئيسية</a></li>
+                    <li style="margin-bottom: 10px;"><a onclick="navigateTo('about')" style="color: #cbd5e1; text-decoration: none; cursor: pointer;">← من نحن</a></li>
+                    <li style="margin-bottom: 10px;"><a onclick="navigateTo('programs')" style="color: #cbd5e1; text-decoration: none; cursor: pointer;">← البرامج التدريبية</a></li>
+                    <li style="margin-bottom: 10px;"><a onclick="navigateTo('coaches')" style="color: #cbd5e1; text-decoration: none; cursor: pointer;">← المدربون</a></li>
+                    <li style="margin-bottom: 10px;"><a onclick="navigateTo('faq')" style="color: #cbd5e1; text-decoration: none; cursor: pointer;">← الأسئلة الشائعة</a></li>
                 </ul>
             </div>
             <div>
@@ -988,4 +1272,14 @@ st.markdown("""
         </div>
     </div>
 </div>
+
+<script>
+// إضافة وظيفة navigateTo للنطاق العام
+window.navigateTo = function(page) {
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.history.pushState({}, '', url);
+    window.location.reload();
+};
+</script>
 """, unsafe_allow_html=True)
