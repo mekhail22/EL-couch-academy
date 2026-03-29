@@ -51,6 +51,8 @@ st.markdown("""
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
         max-width: 100% !important;
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
     }
     
     /* ضبط الهيدر المخصص */
@@ -60,10 +62,9 @@ st.markdown("""
         left: 0;
         right: 0;
         z-index: 999999;
-        background-color: rgba(255, 255, 255, 0.98);
+        background-color: white;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         padding: 15px 0;
-        backdrop-filter: blur(5px);
     }
     
     /* مساحة تعويضية للهيدر */
@@ -96,11 +97,6 @@ st.markdown("""
     .nav-link:hover {
         background-color: rgba(59, 130, 246, 0.1);
         color: #3b82f6;
-    }
-    
-    .nav-link.active {
-        background-color: #3b82f6;
-        color: white;
     }
     
     /* برجر منيو - يظهر فقط في الهواتف */
@@ -159,6 +155,7 @@ st.markdown("""
     .side-nav ul {
         list-style: none;
         padding: 20px;
+        margin: 0;
     }
     
     .side-nav li {
@@ -176,9 +173,10 @@ st.markdown("""
         border-radius: 8px;
         transition: all 0.3s ease;
         cursor: pointer;
+        font-size: 16px;
     }
     
-    .side-nav a:hover, .side-nav a.active {
+    .side-nav a:hover {
         background-color: rgba(59, 130, 246, 0.1);
         color: #3b82f6;
     }
@@ -198,6 +196,32 @@ st.markdown("""
         display: block;
     }
     
+    /* تنسيق الشعار */
+    .logo-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid #3b82f6;
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .header-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
     /* تنسيق للهواتف */
     @media (max-width: 992px) {
         .nav-links {
@@ -209,15 +233,9 @@ st.markdown("""
         .custom-header-spacer {
             height: 70px;
         }
-    }
-    
-    @media (max-width: 768px) {
-        .custom-header {
-            padding: 10px 0;
-        }
-        .nav-link {
-            padding: 5px 8px;
-            font-size: 12px;
+        .logo-img {
+            width: 45px;
+            height: 45px;
         }
         .logo-title {
             font-size: 1.2rem !important;
@@ -226,28 +244,86 @@ st.markdown("""
             font-size: 0.7rem !important;
         }
     }
-    
-    /* تنسيق الشعار */
-    .logo-img {
-        width: 60px;
-        height: 60px;
-        border-radius: 10px;
-        object-fit: cover;
-        border: 2px solid #3b82f6;
-    }
-    
-    @media (max-width: 768px) {
-        .logo-img {
-            width: 45px;
-            height: 45px;
-        }
-    }
 </style>
+""", unsafe_allow_html=True)
 
+# ===== التحقق من وجود صورة الشعار =====
+logo_exists = os.path.exists('logo.jpg')
+
+# ===== الهيدر المخصص مع برجر منيو =====
+if logo_exists:
+    logo_style = "background-image: url('logo.jpg'); background-size: cover; background-position: center;"
+else:
+    logo_style = "background: linear-gradient(45deg, #3b82f6, #1e3a8a); display: flex; align-items: center; justify-content: center;"
+
+# الهيدر كـ HTML
+header_html = f'''
+<div class="custom-header">
+    <div class="header-container">
+        <div class="logo-container">
+            <div class="logo-img" style="{logo_style}">
+                {'' if logo_exists else '<span style="font-size: 1.8rem;">⚽</span>'}
+            </div>
+            <div>
+                <h1 class="logo-title" style="font-size: 1.6rem; margin: 0; color: #1e3a8a;">الكوتش <span style="color: #f59e0b;">أكاديمي</span></h1>
+                <p class="logo-subtitle" style="font-size: 0.9rem; color: #666; margin: 0;">أكاديمية كرة القدم المتخصصة</p>
+            </div>
+        </div>
+        
+        <!-- روابط للشاشات الكبيرة -->
+        <div class="nav-links">
+            <a class="nav-link" onclick="navigateTo('home')">🏠 الرئيسية</a>
+            <a class="nav-link" onclick="navigateTo('about')">ℹ️ من نحن</a>
+            <a class="nav-link" onclick="navigateTo('programs')">⚽ البرامج</a>
+            <a class="nav-link" onclick="navigateTo('coaches')">👨‍🏫 المدربون</a>
+            <a class="nav-link" onclick="navigateTo('registration')">📝 التسجيل</a>
+            <a class="nav-link" onclick="navigateTo('faq')">❓ الأسئلة</a>
+            <a class="nav-link" onclick="navigateTo('contact')">📞 اتصل بنا</a>
+        </div>
+        
+        <!-- زر برجر منيو للهواتف -->
+        <button class="burger-menu" id="burgerMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</div>
+
+<!-- القائمة الجانبية للهواتف -->
+<div class="side-nav" id="sideNav">
+    <ul>
+        <li><a onclick="navigateTo('home')">🏠 الرئيسية</a></li>
+        <li><a onclick="navigateTo('about')">ℹ️ من نحن</a></li>
+        <li><a onclick="navigateTo('programs')">⚽ البرامج التدريبية</a></li>
+        <li><a onclick="navigateTo('coaches')">👨‍🏫 المدربون</a></li>
+        <li><a onclick="navigateTo('registration')">📝 تسجيل لاعب جديد</a></li>
+        <li><a onclick="navigateTo('faq')">❓ الأسئلة الشائعة</a></li>
+        <li><a onclick="navigateTo('contact')">📞 اتصل بنا</a></li>
+    </ul>
+</div>
+
+<!-- طبقة التعتيم -->
+<div class="nav-overlay" id="navOverlay"></div>
+
+<div class="custom-header-spacer"></div>
+'''
+
+st.markdown(header_html, unsafe_allow_html=True)
+
+# ===== جافا سكريبت للبرجر منيو والتنقل =====
+st.markdown("""
 <script>
-// جافا سكريبت للبرجر منيو والتنقل
+// وظيفة التنقل بين الصفحات
+function navigateTo(page) {
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.history.pushState({}, '', url);
+    window.location.reload();
+}
+
+// برجر منيو
 document.addEventListener('DOMContentLoaded', function() {
-    // عناصر البرجر منيو
     const burgerMenu = document.getElementById('burgerMenu');
     const sideNav = document.getElementById('sideNav');
     const navOverlay = document.getElementById('navOverlay');
@@ -255,16 +331,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (burgerMenu) {
         burgerMenu.addEventListener('click', function() {
             this.classList.toggle('active');
-            sideNav.classList.toggle('active');
-            navOverlay.classList.toggle('active');
+            if (sideNav) sideNav.classList.toggle('active');
+            if (navOverlay) navOverlay.classList.toggle('active');
         });
     }
     
     if (navOverlay) {
         navOverlay.addEventListener('click', function() {
-            this.classList.remove('active');
-            sideNav.classList.remove('active');
-            burgerMenu.classList.remove('active');
+            navOverlay.classList.remove('active');
+            if (sideNav) sideNav.classList.remove('active');
+            if (burgerMenu) burgerMenu.classList.remove('active');
         });
     }
     
@@ -280,154 +356,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 """, unsafe_allow_html=True)
 
-# ===== التحقق من وجود صورة الشعار =====
-logo_exists = os.path.exists('logo.jpg')
-
-# ===== الهيدر المخصص مع برجر منيو =====
-if logo_exists:
-    logo_html = f'''
-    <div class="logo-img" style="background-image: url('logo.jpg'); background-size: cover; background-position: center;"></div>
-    '''
-else:
-    logo_html = '''
-    <div class="logo-img" style="background: linear-gradient(45deg, #3b82f6, #1e3a8a); display: flex; align-items: center; justify-content: center;">
-        <span style="font-size: 1.8rem;">⚽</span>
-    </div>
-    '''
-
-st.markdown(f'''
-<div class="custom-header">
-    <div style="width: 90%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            {logo_html}
-            <div>
-                <h1 class="logo-title" style="font-size: 1.6rem; margin: 0; color: #1e3a8a;">الكوتش <span style="color: #f59e0b;">أكاديمي</span></h1>
-                <p class="logo-subtitle" style="font-size: 0.9rem; color: #666; margin: 0;">أكاديمية كرة القدم المتخصصة</p>
-            </div>
-        </div>
-        
-        <!-- روابط للشاشات الكبيرة -->
-        <div class="nav-links">
-            <a class="nav-link" data-page="home">🏠 الرئيسية</a>
-            <a class="nav-link" data-page="about">ℹ️ من نحن</a>
-            <a class="nav-link" data-page="programs">⚽ البرامج</a>
-            <a class="nav-link" data-page="coaches">👨‍🏫 المدربون</a>
-            <a class="nav-link" data-page="registration">📝 التسجيل</a>
-            <a class="nav-link" data-page="faq">❓ الأسئلة</a>
-            <a class="nav-link" data-page="contact">📞 اتصل بنا</a>
-        </div>
-        
-        <!-- زر برجر منيو للهواتف -->
-        <button class="burger-menu" id="burgerMenu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-    </div>
-</div>
-
-<!-- القائمة الجانبية للهواتف -->
-<div class="side-nav" id="sideNav">
-    <ul>
-        <li><a class="side-nav-link" data-page="home">🏠 الرئيسية</a></li>
-        <li><a class="side-nav-link" data-page="about">ℹ️ من نحن</a></li>
-        <li><a class="side-nav-link" data-page="programs">⚽ البرامج التدريبية</a></li>
-        <li><a class="side-nav-link" data-page="coaches">👨‍🏫 المدربون</a></li>
-        <li><a class="side-nav-link" data-page="registration">📝 تسجيل لاعب جديد</a></li>
-        <li><a class="side-nav-link" data-page="faq">❓ الأسئلة الشائعة</a></li>
-        <li><a class="side-nav-link" data-page="contact">📞 اتصل بنا</a></li>
-    </ul>
-</div>
-
-<!-- طبقة التعتيم -->
-<div class="nav-overlay" id="navOverlay"></div>
-
-<div class="custom-header-spacer"></div>
-''', unsafe_allow_html=True)
-
 # ===== إدارة حالة الجلسة =====
 if 'page' not in st.session_state:
     st.session_state.page = 'home'
 if 'show_success' not in st.session_state:
     st.session_state.show_success = False
-
-# ===== جافا سكريبت للتنقل في نفس التاب =====
-st.markdown("""
-<script>
-// وظيفة التنقل بين الصفحات بدون إعادة تحميل
-function navigateTo(page) {
-    // تحديث حالة الجلسة عبر Streamlit
-    const url = new URL(window.location);
-    url.searchParams.set('page', page);
-    window.history.pushState({}, '', url);
-    
-    // تحديث الواجهة عبر Streamlit
-    const event = new Event('streamlit:setQueryParams');
-    window.dispatchEvent(event);
-    
-    // تحديث القائمة النشطة
-    document.querySelectorAll('.nav-link, .side-nav-link').forEach(link => {
-        link.classList.remove('active');
-        if(link.getAttribute('data-page') === page) {
-            link.classList.add('active');
-        }
-    });
-    
-    // إغلاق القائمة الجانبية
-    const sideNav = document.getElementById('sideNav');
-    const burgerMenu = document.getElementById('burgerMenu');
-    const navOverlay = document.getElementById('navOverlay');
-    if(sideNav) sideNav.classList.remove('active');
-    if(burgerMenu) burgerMenu.classList.remove('active');
-    if(navOverlay) navOverlay.classList.remove('active');
-    
-    // التمرير لأعلى
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// إضافة مستمعي الأحداث لروابط التنقل
-document.addEventListener('DOMContentLoaded', function() {
-    // روابط القائمة العلوية
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const page = this.getAttribute('data-page');
-            navigateTo(page);
-        });
-    });
-    
-    // روابط القائمة الجانبية
-    document.querySelectorAll('.side-nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const page = this.getAttribute('data-page');
-            navigateTo(page);
-        });
-    });
-    
-    // تحديث القائمة النشطة بناءً على الصفحة الحالية
-    function updateActiveLink() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentPage = urlParams.get('page') || 'home';
-        
-        document.querySelectorAll('.nav-link, .side-nav-link').forEach(link => {
-            link.classList.remove('active');
-            if(link.getAttribute('data-page') === currentPage) {
-                link.classList.add('active');
-            }
-        });
-    }
-    
-    updateActiveLink();
-    
-    // مراقبة تغييرات URL
-    window.addEventListener('popstate', function() {
-        updateActiveLink();
-        window.location.reload();
-    });
-});
-</script>
-""", unsafe_allow_html=True)
 
 # ===== ملفات حفظ البيانات =====
 DATA_FILE = 'registrations.json'
@@ -537,6 +470,14 @@ st.markdown("""
         height: 4px;
         background-color: #f59e0b;
         border-radius: 2px;
+    }
+    
+    /* حاوية المحتوى الرئيسي */
+    .content-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
     }
     
     /* بطاقات */
@@ -707,13 +648,6 @@ st.markdown("""
         border-radius: 5px;
         margin-bottom: 20px;
         text-align: center;
-        animation: fadeOut 3s ease forwards;
-    }
-    
-    @keyframes fadeOut {
-        0% { opacity: 1; }
-        70% { opacity: 1; }
-        100% { opacity: 0; display: none; }
     }
     
     /* تنسيقات الروابط */
@@ -761,6 +695,11 @@ st.markdown("""
         .card, .program-card, .coach-card, .stat-box {
             margin-bottom: 15px;
         }
+        
+        .content-container {
+            width: 95%;
+            padding: 0 10px;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -772,12 +711,15 @@ if 'page' in query_params:
 
 page = st.session_state.page
 
+# حاوية المحتوى
+st.markdown('<div class="content-container">', unsafe_allow_html=True)
+
 # ===== الصفحة الرئيسية =====
 if page == 'home':
     # القسم الرئيسي
     st.markdown("""
     <div class="hero">
-        <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
+        <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
             <h1>⚽ الكوتش أكاديمي</h1>
             <p>أول أكاديمية متخصصة في مصر تركز على بناء اللاعب الشامل من الناحية الفنية والبدنية والنفسية، تحت إشراف مدربين معتمدين دوليًا.</p>
             <p style="font-weight: 600; margin-bottom: 20px;">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
@@ -788,7 +730,6 @@ if page == 'home':
     # أزرار الإجراء
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        # زر التسجيل مع التنقل في نفس الصفحة
         st.markdown("""
         <div style="text-align: center;">
             <button onclick="navigateTo('registration')" style="background-color: #f59e0b; color: #1e293b; padding: 12px 30px; border-radius: 5px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); font-size: 16px;">
@@ -863,7 +804,7 @@ if page == 'home':
 elif page == 'about':
     st.markdown("""
     <div class="page-header">
-        <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
+        <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
             <h1>من نحن</h1>
             <p>الكوتش أكاديمي.. رؤية جديدة في عالم تدريب كرة القدم</p>
         </div>
@@ -922,7 +863,7 @@ elif page == 'about':
 elif page == 'programs':
     st.markdown("""
     <div class="page-header">
-        <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
+        <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
             <h1>البرامج التدريبية</h1>
             <p>مواعيد تدريبية مصممة لكل فئة عمرية وجنسية</p>
         </div>
@@ -998,7 +939,7 @@ elif page == 'programs':
 elif page == 'coaches':
     st.markdown("""
     <div class="page-header">
-        <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
+        <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
             <h1>المدربون</h1>
             <p>فريقنا من المدربين المحترفين ذوي الخبرة والكفاءة</p>
         </div>
@@ -1064,7 +1005,7 @@ elif page == 'coaches':
 elif page == 'registration':
     st.markdown("""
     <div class="page-header">
-        <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
+        <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
             <h1>تسجيل لاعب جديد</h1>
             <p>انضم إلى الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
         </div>
@@ -1114,7 +1055,7 @@ elif page == 'registration':
 elif page == 'faq':
     st.markdown("""
     <div class="page-header">
-        <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
+        <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
             <h1>الأسئلة الشائعة</h1>
             <p>إجابات على أكثر الأسئلة شيوعًا من أولياء الأمور</p>
         </div>
@@ -1146,7 +1087,7 @@ elif page == 'faq':
          "السلامة أولوية لدينا، ونوفر: إشراف مستمر من مدربين مؤهلين، بيئة تدريب آمنة ومجهزة، برنامج إحماء وتبريد مناسب، مدربين حاصلين على شهادات في الإسعافات الأولية.")
     ]
     
-    for i, (question, answer) in enumerate(faqs):
+    for question, answer in faqs:
         with st.expander(question):
             st.markdown(answer)
 
@@ -1154,7 +1095,7 @@ elif page == 'faq':
 elif page == 'contact':
     st.markdown("""
     <div class="page-header">
-        <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
+        <div style="width: 100%; max-width: 1200px; margin: 0 auto;">
             <h1>اتصل بنا</h1>
             <p>تواصل معنا لأي استفسارات أو معلومات إضافية</p>
         </div>
@@ -1230,8 +1171,10 @@ elif page == 'contact':
                 else:
                     st.error("يرجى ملء جميع الحقول")
 
+# إغلاق حاوية المحتوى
+st.markdown('</div>', unsafe_allow_html=True)
+
 # ===== الفوتر =====
-st.markdown("---")
 st.markdown("""
 <div style="background-color: #1e293b; color: white; padding: 50px 0 20px; border-radius: 10px; margin-top: 50px;">
     <div style="width: 90%; max-width: 1200px; margin: 0 auto;">
@@ -1272,14 +1215,4 @@ st.markdown("""
         </div>
     </div>
 </div>
-
-<script>
-// إضافة وظيفة navigateTo للنطاق العام
-window.navigateTo = function(page) {
-    const url = new URL(window.location);
-    url.searchParams.set('page', page);
-    window.history.pushState({}, '', url);
-    window.location.reload();
-};
-</script>
 """, unsafe_allow_html=True)
