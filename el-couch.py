@@ -4,7 +4,9 @@ import os
 from datetime import datetime
 import base64
 
-# إعدادات الصفحة
+# =================================================================
+# 1. إعدادات الصفحة الأساسية (Page Configuration)
+# =================================================================
 st.set_page_config(
     page_title="الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة",
     page_icon="⚽",
@@ -12,10 +14,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ===== CSS الرئيسي =====
+# =================================================================
+# 2. المقطع الأول من CSS (الأنماط الرئيسية)
+# =================================================================
 st.markdown("""
 <style>
-    /* إخفاء شريط Streamlit العلوي فقط */
+    /* إخفاء شريط Streamlit الافتراضي بالكامل */
     header[data-testid="stHeader"] {
         display: none !important;
     }
@@ -40,7 +44,7 @@ st.markdown("""
         display: none !important;
     }
     
-    /* إزالة المسافات */
+    /* إزالة جميع المسافات الداخلية */
     .main .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
@@ -49,12 +53,12 @@ st.markdown("""
         max-width: 100% !important;
     }
     
-    /* خلفية التطبيق */
+    /* الخلفية العامة للتطبيق */
     .stApp {
         background: linear-gradient(135deg, #f0f2f6 0%, #ffffff 100%) !important;
     }
     
-    /* ===== تنسيق عام ===== */
+    /* تنسيق عام للخطوط */
     * {
         margin: 0;
         padding: 0;
@@ -62,7 +66,9 @@ st.markdown("""
         font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* ===== الهيدر العلوي ===== */
+    /* ================================================================= */
+    /* 3. تنسيق الهيدر العلوي المخصص (الخاص بنا) */
+    /* ================================================================= */
     .top-header {
         position: fixed;
         top: 0;
@@ -84,7 +90,7 @@ st.markdown("""
         align-items: center;
     }
     
-    /* ===== اللوجو ===== */
+    /* تنسيق اللوجو */
     .logo-wrapper {
         display: flex;
         align-items: center;
@@ -140,7 +146,9 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* ===== برجر منيو ===== */
+    /* ================================================================= */
+    /* 4. تنسيق زر البرجر منيو (Burger Menu) */
+    /* ================================================================= */
     .burger-menu-btn {
         display: flex;
         flex-direction: column;
@@ -179,7 +187,9 @@ st.markdown("""
         background: #f59e0b;
     }
     
-    /* ===== القائمة الجانبية ===== */
+    /* ================================================================= */
+    /* 5. تنسيق القائمة الجانبية (Side Navigation) */
+    /* ================================================================= */
     .side-navigation {
         position: fixed;
         top: 0;
@@ -229,6 +239,7 @@ st.markdown("""
         transform: translateX(0);
     }
     
+    /* تأثيرات التأخير المتدرجة للروابط */
     .side-navigation.open li:nth-child(1) { transition-delay: 0.05s; }
     .side-navigation.open li:nth-child(2) { transition-delay: 0.1s; }
     .side-navigation.open li:nth-child(3) { transition-delay: 0.15s; }
@@ -257,7 +268,9 @@ st.markdown("""
         transform: translateX(-8px);
     }
     
-    /* طبقة التعتيم */
+    /* ================================================================= */
+    /* 6. طبقة التعتيم (Overlay) */
+    /* ================================================================= */
     .nav-overlay-layer {
         position: fixed;
         top: 0;
@@ -274,12 +287,16 @@ st.markdown("""
         display: block;
     }
     
-    /* مساحة تعويضية */
+    /* ================================================================= */
+    /* 7. مساحة تعويضية للهيدر */
+    /* ================================================================= */
     .header-spacer {
         height: 90px;
     }
     
-    /* ===== حاوية المحتوى ===== */
+    /* ================================================================= */
+    /* 8. حاوية المحتوى الرئيسية */
+    /* ================================================================= */
     .content-container {
         width: 90%;
         max-width: 1200px;
@@ -287,7 +304,9 @@ st.markdown("""
         padding: 25px 15px;
     }
     
-    /* ===== القسم الرئيسي ===== */
+    /* ================================================================= */
+    /* 9. تنسيق القسم الرئيسي (Hero Section) */
+    /* ================================================================= */
     .hero-section {
         background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
         background-size: cover;
@@ -336,6 +355,9 @@ st.markdown("""
         z-index: 1;
     }
     
+    /* ================================================================= */
+    /* 10. تنسيق عناوين الأقسام */
+    /* ================================================================= */
     .section-title {
         font-size: 2.3rem;
         font-weight: 800;
@@ -358,7 +380,9 @@ st.markdown("""
         border-radius: 2px;
     }
     
-    /* بطاقات الإحصائيات */
+    /* ================================================================= */
+    /* 11. بطاقات الإحصائيات */
+    /* ================================================================= */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -396,7 +420,9 @@ st.markdown("""
         font-size: 1.05rem;
     }
     
-    /* بطاقات المميزات */
+    /* ================================================================= */
+    /* 12. بطاقات المميزات */
+    /* ================================================================= */
     .features-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -437,7 +463,9 @@ st.markdown("""
         line-height: 1.65;
     }
     
-    /* زر مخصص */
+    /* ================================================================= */
+    /* 13. زر التسجيل المخصص */
+    /* ================================================================= */
     .register-btn {
         background: linear-gradient(135deg, #f59e0b, #d97706, #f59e0b);
         background-size: 200% 200%;
@@ -464,7 +492,9 @@ st.markdown("""
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
     }
     
-    /* بطاقات البرامج */
+    /* ================================================================= */
+    /* 14. بطاقات البرامج التدريبية */
+    /* ================================================================= */
     .programs-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -528,7 +558,9 @@ st.markdown("""
         font-size: 1rem;
     }
     
-    /* بطاقات المدربين */
+    /* ================================================================= */
+    /* 15. بطاقات المدربين */
+    /* ================================================================= */
     .coaches-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -586,7 +618,9 @@ st.markdown("""
         margin-bottom: 15px;
     }
     
-    /* صفحة من نحن */
+    /* ================================================================= */
+    /* 16. صفحة من نحن (About Page) */
+    /* ================================================================= */
     .about-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -642,7 +676,9 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
     
-    /* نموذج التسجيل */
+    /* ================================================================= */
+    /* 17. نموذج التسجيل */
+    /* ================================================================= */
     .registration-form-container {
         max-width: 750px;
         margin: 0 auto;
@@ -668,7 +704,9 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
     
-    /* الاتصال */
+    /* ================================================================= */
+    /* 18. صفحة الاتصال */
+    /* ================================================================= */
     .contact-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -700,7 +738,9 @@ st.markdown("""
         border-bottom: none;
     }
     
-    /* خريطة */
+    /* ================================================================= */
+    /* 19. خريطة Google Maps */
+    /* ================================================================= */
     .map-container {
         margin-top: 25px;
         border-radius: 18px;
@@ -714,7 +754,9 @@ st.markdown("""
         border: none;
     }
     
-    /* الفوتر */
+    /* ================================================================= */
+    /* 20. الفوتر (Footer) */
+    /* ================================================================= */
     .main-footer {
         background: linear-gradient(135deg, #1e293b, #0f172a, #1e293b);
         background-size: 200% 200%;
@@ -754,7 +796,9 @@ st.markdown("""
         transform: translateX(-6px);
     }
     
-    /* تنسيقات للشاشات الصغيرة */
+    /* ================================================================= */
+    /* 21. تنسيقات للشاشات الصغيرة (Responsive) */
+    /* ================================================================= */
     @media (max-width: 768px) {
         .stats-grid, .features-grid, .programs-grid, .coaches-grid, .contact-wrapper, .about-wrapper, .mission-vision-grid {
             grid-template-columns: 1fr;
@@ -795,7 +839,9 @@ st.markdown("""
     }
 </style>
 
-<!-- HTML هيكل الهيدر والبرجر منيو -->
+<!-- ================================================================= -->
+<!-- 22. هيكل HTML للهيدر والقائمة الجانبية (Burger Menu Structure) -->
+<!-- ================================================================= -->
 <div id="headerStructure" style="display: none;">
     <div class="top-header" id="mainHeader">
         <div class="header-container">
@@ -829,30 +875,34 @@ st.markdown("""
     <div class="nav-overlay-layer" id="navOverlayLayer"></div>
 </div>
 
+<!-- ================================================================= -->
+<!-- 23. كود JavaScript للتحكم في القائمة والتنقل -->
+<!-- ================================================================= -->
 <script>
-// وظيفة التنقل بين الصفحات
+// وظيفة التنقل بين الصفحات (تغير الـ Query Parameter)
 function navigateToPage(pageName) {
     const url = new URL(window.location);
     url.searchParams.set('page', pageName);
     window.location.href = url.toString();
 }
 
-// تهيئة جميع العناصر بعد تحميل الصفحة
+// انتظار تحميل الصفحة بالكامل قبل إضافة العناصر
 document.addEventListener('DOMContentLoaded', function() {
-    // إضافة الهيكل إلى الصفحة
+    // إضافة هيكل الهيدر إلى بداية الصفحة
     const headerHtml = document.getElementById('headerStructure').innerHTML;
     document.body.insertAdjacentHTML('afterbegin', headerHtml);
     
-    // إضافة المسافة العلوية
+    // إضافة المساحة التعويضية للهيدر
     const spacer = document.createElement('div');
     spacer.className = 'header-spacer';
     document.body.insertBefore(spacer, document.body.firstChild);
     
-    // عناصر البرجر منيو
+    // الحصول على عناصر التحكم
     const burgerBtn = document.getElementById('burgerButton');
     const sideMenu = document.getElementById('sideNavMenu');
     const overlayLayer = document.getElementById('navOverlayLayer');
     
+    // فتح/غلق القائمة عند الضغط على زر البرجر
     if (burgerBtn) {
         burgerBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -860,7 +910,8 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.toggle('active');
             if (sideMenu) sideMenu.classList.toggle('open');
             if (overlayLayer) overlayLayer.classList.toggle('show');
-            // منع التمرير في الخلف
+            
+            // منع التمرير في الخلف عندما تكون القائمة مفتوحة
             if (sideMenu.classList.contains('open')) {
                 document.body.style.overflow = 'hidden';
             } else {
@@ -869,6 +920,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // إغلاق القائمة عند الضغط على الطبقة السوداء (الـ Overlay)
     if (overlayLayer) {
         overlayLayer.addEventListener('click', function() {
             this.classList.remove('show');
@@ -878,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // روابط القائمة الجانبية
+    // ربط روابط القائمة الجانبية بوظيفة التنقل
     document.querySelectorAll('.nav-menu-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -887,7 +939,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // إغلاق القائمة عند الضغط على ESC
+    // إغلاق القائمة عند الضغط على زر Escape
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (overlayLayer) overlayLayer.classList.remove('show');
@@ -898,22 +950,27 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// جعل وظيفة التنقل عامة
+// جعل وظيفة التنقل عامة لتستخدمها الأزرار الأخرى في الصفحات
 window.navigateToPage = navigateToPage;
 </script>
 """, unsafe_allow_html=True)
 
-# ===== إدارة حالة الجلسة =====
+# =================================================================
+# 24. إدارة حالة الجلسة (Session State)
+# =================================================================
 if 'page' not in st.session_state:
     st.session_state.page = 'home'
 if 'show_success' not in st.session_state:
     st.session_state.show_success = False
 
-# ===== حفظ البيانات =====
+# =================================================================
+# 25. دوال حفظ البيانات (Save to JSON files)
+# =================================================================
 DATA_FILE = 'registrations.json'
 CONTACT_FILE = 'contacts.json'
 
 def save_registration(data):
+    """حفظ بيانات تسجيل لاعب جديد في ملف JSON"""
     try:
         registrations = []
         if os.path.exists(DATA_FILE):
@@ -928,6 +985,7 @@ def save_registration(data):
         return False
 
 def save_contact(data):
+    """حفظ بيانات رسالة الاتصال في ملف JSON"""
     try:
         contacts = []
         if os.path.exists(CONTACT_FILE):
@@ -941,17 +999,21 @@ def save_contact(data):
     except Exception:
         return False
 
-# ===== الصفحة الحالية =====
+# =================================================================
+# 26. تحديد الصفحة الحالية من Query Parameters
+# =================================================================
 query_params = st.query_params
 if 'page' in query_params:
     st.session_state.page = query_params['page']
 
 page = st.session_state.page
 
-# حاوية المحتوى
+# بداية حاوية المحتوى الرئيسية
 st.markdown('<div class="content-container">', unsafe_allow_html=True)
 
-# ===== الصفحة الرئيسية (الصفحة 1) =====
+# =================================================================
+# 27. الصفحة الرئيسية (Home Page)
+# =================================================================
 if page == 'home':
     st.markdown("""
     <div class="hero-section">
@@ -961,6 +1023,7 @@ if page == 'home':
     </div>
     """, unsafe_allow_html=True)
     
+    # زر التسجيل في المنتصف
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("""
@@ -969,6 +1032,7 @@ if page == 'home':
         </div>
         """, unsafe_allow_html=True)
     
+    # قسم إنجازات الأكاديمية
     st.markdown('<div class="section-title">إنجازات الأكاديمية</div>', unsafe_allow_html=True)
     
     st.markdown("""
@@ -991,6 +1055,7 @@ if page == 'home':
     </div>
     """, unsafe_allow_html=True)
     
+    # قسم لماذا تختار الأكاديمية
     st.markdown('<div class="section-title">لماذا تختار الكوتش أكاديمي؟</div>', unsafe_allow_html=True)
     
     st.markdown("""
@@ -1013,7 +1078,9 @@ if page == 'home':
     </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة من نحن (الصفحة 2) =====
+# =================================================================
+# 28. صفحة من نحن (About Page)
+# =================================================================
 elif page == 'about':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e3a8a); background-size: 200% 200%; border-radius: 28px; padding: 60px 25px; text-align: center; margin-bottom: 50px; animation: pageHeaderGradient 4s ease infinite;">
@@ -1069,7 +1136,9 @@ elif page == 'about':
     </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة البرامج التدريبية (الصفحة 3) =====
+# =================================================================
+# 29. صفحة البرامج التدريبية (Programs Page)
+# =================================================================
 elif page == 'programs':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e3a8a); background-size: 200% 200%; border-radius: 28px; padding: 60px 25px; text-align: center; margin-bottom: 50px; animation: pageHeaderGradient 4s ease infinite;">
@@ -1133,7 +1202,9 @@ elif page == 'programs':
     </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة المدربون (الصفحة 4) =====
+# =================================================================
+# 30. صفحة المدربون (Coaches Page)
+# =================================================================
 elif page == 'coaches':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e3a8a); background-size: 200% 200%; border-radius: 28px; padding: 60px 25px; text-align: center; margin-bottom: 50px; animation: pageHeaderGradient 4s ease infinite;">
@@ -1179,7 +1250,9 @@ elif page == 'coaches':
     </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة التسجيل (الصفحة 5) =====
+# =================================================================
+# 31. صفحة التسجيل (Registration Page)
+# =================================================================
 elif page == 'registration':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e3a8a); background-size: 200% 200%; border-radius: 28px; padding: 60px 25px; text-align: center; margin-bottom: 50px; animation: pageHeaderGradient 4s ease infinite;">
@@ -1235,7 +1308,9 @@ elif page == 'registration':
             else:
                 st.error("⚠️ يرجى ملء جميع الحقول المطلوبة")
 
-# ===== صفحة الأسئلة الشائعة (الصفحة 6) =====
+# =================================================================
+# 32. صفحة الأسئلة الشائعة (FAQ Page)
+# =================================================================
 elif page == 'faq':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e3a8a); background-size: 200% 200%; border-radius: 28px; padding: 60px 25px; text-align: center; margin-bottom: 50px; animation: pageHeaderGradient 4s ease infinite;">
@@ -1286,7 +1361,9 @@ elif page == 'faq':
         with st.expander(f"❓ {q}"):
             st.markdown(f'<p style="color: #334155; line-height: 1.7; font-size: 0.95rem;">{a}</p>', unsafe_allow_html=True)
 
-# ===== صفحة اتصل بنا (الصفحة 7) =====
+# =================================================================
+# 33. صفحة اتصل بنا (Contact Page)
+# =================================================================
 elif page == 'contact':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e3a8a); background-size: 200% 200%; border-radius: 28px; padding: 60px 25px; text-align: center; margin-bottom: 50px; animation: pageHeaderGradient 4s ease infinite;">
@@ -1384,7 +1461,9 @@ elif page == 'contact':
 # إغلاق حاوية المحتوى
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ===== الفوتر =====
+# =================================================================
+# 34. الفوتر (Footer) - الجزء الأخير
+# =================================================================
 st.markdown("""
 <div class="main-footer">
     <div class="footer-grid">
@@ -1438,7 +1517,7 @@ st.markdown("""
 </div>
 
 <script>
-// تأكيد وجود وظيفة navigateToPage في النطاق العام
+// تأكيد وجود وظيفة navigateToPage في النطاق العام مرة أخرى
 window.navigateToPage = function(page) {
     const url = new URL(window.location);
     url.searchParams.set('page', page);
@@ -1446,3 +1525,7 @@ window.navigateToPage = function(page) {
 };
 </script>
 """, unsafe_allow_html=True)
+
+# =================================================================
+# 35. نهاية الكود (End of Code)
+# =================================================================
