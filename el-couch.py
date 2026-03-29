@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ===== CSS كامل =====
+# ===== CSS وجافا سكريبت كامل =====
 st.markdown("""
 <style>
     /* إخفاء كل عناصر Streamlit */
@@ -26,7 +26,7 @@ st.markdown("""
     }
     
     .stApp {
-        background-color: white !important;
+        background-color: #f5f5f5 !important;
     }
     
     /* تنسيق عام */
@@ -37,19 +37,19 @@ st.markdown("""
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* ===== الهيدر ===== */
-    .main-header {
+    /* ===== الهيدر المخصص ===== */
+    .custom-header {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         background: white;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-        z-index: 1000;
-        padding: 10px 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        z-index: 10000;
+        padding: 12px 0;
     }
     
-    .header-inner {
+    .header-container {
         width: 95%;
         max-width: 1200px;
         margin: 0 auto;
@@ -59,22 +59,29 @@ st.markdown("""
     }
     
     /* الشعار */
-    .logo-area {
+    .logo-wrapper {
         display: flex;
         align-items: center;
         gap: 15px;
     }
     
-    .logo-img {
-        width: 60px;
-        height: 60px;
+    .logo-box {
+        width: 55px;
+        height: 55px;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
         border-radius: 15px;
-        object-fit: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
     
-    .logo-text h1 {
+    .logo-box span {
         font-size: 2rem;
+    }
+    
+    .logo-text h1 {
+        font-size: 1.8rem;
         margin: 0;
         color: #1e3a8a;
         font-weight: 800;
@@ -85,13 +92,13 @@ st.markdown("""
     }
     
     .logo-text p {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         color: #666;
         margin: 0;
     }
     
     /* ===== برجر منيو ===== */
-    .burger-btn {
+    .burger-menu-btn {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -101,10 +108,10 @@ st.markdown("""
         border: none;
         cursor: pointer;
         padding: 0;
-        z-index: 1002;
+        z-index: 10002;
     }
     
-    .burger-btn span {
+    .burger-menu-btn span {
         display: block;
         width: 100%;
         height: 3px;
@@ -113,47 +120,47 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    .burger-btn.active span:nth-child(1) {
+    .burger-menu-btn.active span:nth-child(1) {
         transform: rotate(45deg) translate(8px, 8px);
     }
     
-    .burger-btn.active span:nth-child(2) {
+    .burger-menu-btn.active span:nth-child(2) {
         opacity: 0;
     }
     
-    .burger-btn.active span:nth-child(3) {
+    .burger-menu-btn.active span:nth-child(3) {
         transform: rotate(-45deg) translate(8px, -8px);
     }
     
     /* ===== القائمة الجانبية ===== */
-    .side-menu {
+    .side-navigation {
         position: fixed;
         top: 0;
         right: -320px;
         width: 300px;
         height: 100vh;
         background: white;
-        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
-        z-index: 1001;
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.2);
+        z-index: 10001;
         transition: right 0.3s ease;
         padding-top: 80px;
         overflow-y: auto;
     }
     
-    .side-menu.open {
+    .side-navigation.open {
         right: 0;
     }
     
-    .side-menu ul {
+    .side-navigation ul {
         list-style: none;
         padding: 0 20px;
     }
     
-    .side-menu li {
-        margin-bottom: 8px;
+    .side-navigation li {
+        margin-bottom: 5px;
     }
     
-    .side-menu a {
+    .side-navigation a {
         display: flex;
         align-items: center;
         gap: 15px;
@@ -167,42 +174,42 @@ st.markdown("""
         font-size: 16px;
     }
     
-    .side-menu a:hover {
+    .side-navigation a:hover {
         background-color: #eff6ff;
-        color: #2563eb;
+        color: #3b82f6;
     }
     
     /* طبقة التعتيم */
-    .menu-overlay {
+    .nav-overlay-layer {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
         background-color: rgba(0, 0, 0, 0.5);
-        z-index: 999;
+        z-index: 10000;
         display: none;
     }
     
-    .menu-overlay.show {
+    .nav-overlay-layer.show {
         display: block;
     }
     
     /* مساحة تعويضية */
-    .header-spacer {
+    .header-spacing {
         height: 85px;
     }
     
     /* ===== حاوية المحتوى ===== */
-    .content-wrapper {
+    .main-content-area {
         width: 95%;
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px 15px;
     }
     
-    /* ===== القسم الرئيسي ===== */
-    .hero-section {
+    /* ===== باقي التنسيقات ===== */
+    .hero-banner {
         background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
         background-size: cover;
         background-position: center;
@@ -212,23 +219,22 @@ st.markdown("""
         margin-bottom: 50px;
     }
     
-    .hero-section h1 {
+    .hero-banner h1 {
         color: white;
         font-size: 2.8rem;
         margin-bottom: 20px;
         font-weight: 800;
     }
     
-    .hero-section p {
+    .hero-banner p {
         color: #e2e8f0;
         max-width: 700px;
         margin: 0 auto;
         font-size: 1.1rem;
     }
     
-    /* العناوين الرئيسية */
-    .section-title {
-        font-size: 2.2rem;
+    .section-heading {
+        font-size: 2rem;
         font-weight: 800;
         color: #1e293b;
         text-align: center;
@@ -237,7 +243,7 @@ st.markdown("""
         padding-bottom: 15px;
     }
     
-    .section-title:after {
+    .section-heading:after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -250,14 +256,14 @@ st.markdown("""
     }
     
     /* بطاقات الإحصائيات */
-    .stats-grid {
+    .stats-wrapper {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 30px;
         margin-bottom: 60px;
     }
     
-    .stat-card {
+    .stat-item {
         background: white;
         padding: 35px 20px;
         border-radius: 20px;
@@ -267,7 +273,7 @@ st.markdown("""
         border: 1px solid #e2e8f0;
     }
     
-    .stat-card:hover {
+    .stat-item:hover {
         transform: translateY(-10px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
@@ -287,14 +293,14 @@ st.markdown("""
     }
     
     /* بطاقات المميزات */
-    .features-grid {
+    .features-wrapper {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 30px;
         margin-bottom: 60px;
     }
     
-    .feature-card {
+    .feature-item {
         background: #f8fafc;
         padding: 35px 25px;
         border-radius: 20px;
@@ -302,7 +308,7 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    .feature-card:hover {
+    .feature-item:hover {
         transform: translateY(-10px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
@@ -312,21 +318,21 @@ st.markdown("""
         margin-bottom: 20px;
     }
     
-    .feature-card h3 {
+    .feature-item h3 {
         color: #1e3a8a;
         margin-bottom: 15px;
         font-size: 1.4rem;
         font-weight: 700;
     }
     
-    .feature-card p {
+    .feature-item p {
         color: #4b5563;
         font-size: 1rem;
         line-height: 1.6;
     }
     
     /* زر مخصص */
-    .custom-btn {
+    .register-button {
         background-color: #f59e0b;
         color: #1e293b;
         padding: 16px 50px;
@@ -339,14 +345,14 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
     
-    .custom-btn:hover {
+    .register-button:hover {
         background-color: #d97706;
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
     
     /* بطاقات البرامج */
-    .programs-grid {
+    .programs-wrapper {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 30px;
@@ -366,9 +372,9 @@ st.markdown("""
         transform: translateY(-10px);
     }
     
-    .program-img {
+    .program-image {
         height: 160px;
-        background: linear-gradient(135deg, #2563eb, #1e3a8a);
+        background: linear-gradient(135deg, #3b82f6, #1e3a8a);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -376,11 +382,11 @@ st.markdown("""
         color: white;
     }
     
-    .program-body {
+    .program-content {
         padding: 25px;
     }
     
-    .program-body h3 {
+    .program-content h3 {
         color: #1e3a8a;
         margin-bottom: 15px;
         font-size: 1.5rem;
@@ -401,7 +407,7 @@ st.markdown("""
     }
     
     /* بطاقات المدربين */
-    .coaches-grid {
+    .coaches-wrapper {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 30px;
@@ -422,9 +428,9 @@ st.markdown("""
         transform: translateY(-10px);
     }
     
-    .coach-img {
+    .coach-image {
         height: 200px;
-        background: linear-gradient(135deg, #2563eb, #1e3a8a);
+        background: linear-gradient(135deg, #3b82f6, #1e3a8a);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -432,11 +438,11 @@ st.markdown("""
         color: white;
     }
     
-    .coach-body {
+    .coach-info {
         padding: 25px;
     }
     
-    .coach-body h3 {
+    .coach-info h3 {
         color: #1e3a8a;
         margin-bottom: 8px;
         font-size: 1.3rem;
@@ -444,13 +450,13 @@ st.markdown("""
     }
     
     .coach-title {
-        color: #2563eb;
+        color: #3b82f6;
         font-weight: 600;
         margin-bottom: 12px;
     }
     
     /* صفحة من نحن */
-    .about-grid {
+    .about-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 40px;
@@ -458,8 +464,8 @@ st.markdown("""
         align-items: center;
     }
     
-    .about-image {
-        background: linear-gradient(135deg, #2563eb, #1e3a8a);
+    .about-image-box {
+        background: linear-gradient(135deg, #3b82f6, #1e3a8a);
         border-radius: 20px;
         height: 350px;
         display: flex;
@@ -469,7 +475,7 @@ st.markdown("""
         color: white;
     }
     
-    .mission-vision {
+    .mission-vision-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 30px;
@@ -483,7 +489,7 @@ st.markdown("""
     
     .mission-card {
         background: #f0f9ff;
-        border-right: 5px solid #2563eb;
+        border-right: 5px solid #3b82f6;
     }
     
     .vision-card {
@@ -500,7 +506,7 @@ st.markdown("""
         border-radius: 20px;
     }
     
-    .success-msg {
+    .success-message {
         background-color: #10b981;
         color: white;
         padding: 15px;
@@ -510,16 +516,8 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* الأسئلة */
-    .faq-item {
-        margin-bottom: 15px;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-    
     /* الاتصال */
-    .contact-grid {
+    .contact-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 30px;
@@ -539,37 +537,7 @@ st.markdown("""
         border-bottom: 1px solid #e2e8f0;
     }
     
-    /* الفوتر */
-    .footer {
-        background-color: #1e293b;
-        color: white;
-        padding: 40px 0 25px;
-        border-radius: 20px;
-        margin-top: 50px;
-    }
-    
-    .footer-inner {
-        width: 90%;
-        max-width: 1200px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 30px;
-        margin-bottom: 30px;
-    }
-    
-    .footer a {
-        color: #cbd5e1;
-        text-decoration: none;
-        transition: color 0.3s;
-        cursor: pointer;
-    }
-    
-    .footer a:hover {
-        color: #f59e0b;
-    }
-    
-    /* خريطة جوجل */
+    /* خريطة */
     .map-container {
         margin-top: 20px;
         border-radius: 15px;
@@ -582,15 +550,44 @@ st.markdown("""
         border: none;
     }
     
-    /* تنسيقات للشاشات الصغيرة */
+    /* الفوتر */
+    .main-footer {
+        background-color: #1e293b;
+        color: white;
+        padding: 40px 0 25px;
+        border-radius: 20px;
+        margin-top: 50px;
+    }
+    
+    .footer-content {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .footer-link {
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: color 0.3s;
+        cursor: pointer;
+    }
+    
+    .footer-link:hover {
+        color: #f59e0b;
+    }
+    
     @media (max-width: 768px) {
-        .stats-grid, .features-grid, .programs-grid, .coaches-grid, .contact-grid, .about-grid, .mission-vision {
+        .stats-wrapper, .features-wrapper, .programs-wrapper, .coaches-wrapper, .contact-wrapper, .about-wrapper, .mission-vision-wrapper {
             grid-template-columns: 1fr;
         }
-        .hero-section h1 {
+        .hero-banner h1 {
             font-size: 1.8rem;
         }
-        .section-title {
+        .section-heading {
             font-size: 1.6rem;
         }
         .stat-number {
@@ -599,73 +596,80 @@ st.markdown("""
         .logo-text h1 {
             font-size: 1.3rem;
         }
-        .logo-img {
+        .logo-box {
             width: 45px;
             height: 45px;
         }
-        .header-spacer {
+        .logo-box span {
+            font-size: 1.5rem;
+        }
+        .header-spacing {
             height: 75px;
         }
-        .custom-btn {
-            padding: 12px 30px;
-            font-size: 1rem;
-        }
-        .side-menu {
+        .side-navigation {
             width: 280px;
             right: -280px;
         }
     }
 </style>
 
-<!-- HTML وجافا سكريبت للقوائم -->
-<div id="menu-components" style="display: none;">
-    <div class="main-header" id="mainHeader">
-        <div class="header-inner">
-            <div class="logo-area">
-                <div class="logo-img" id="logoImg"></div>
+<!-- HTML هيكل الهيدر والبرجر منيو -->
+<div id="headerStructure" style="display: none;">
+    <div class="custom-header" id="mainHeader">
+        <div class="header-container">
+            <div class="logo-wrapper" id="logoArea">
+                <div class="logo-box" id="logoBox">
+                    <span>⚽</span>
+                </div>
                 <div class="logo-text">
                     <h1>الكوتش <span>أكاديمي</span></h1>
                     <p>أكاديمية كرة القدم المتخصصة</p>
                 </div>
             </div>
-            <button class="burger-btn" id="burgerBtn">
+            <button class="burger-menu-btn" id="burgerButton">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
         </div>
     </div>
-    <div class="side-menu" id="sideMenu">
+    <div class="side-navigation" id="sideNavMenu">
         <ul>
-            <li><a href="#" data-page="home" class="menu-link">🏠 الرئيسية</a></li>
-            <li><a href="#" data-page="about" class="menu-link">ℹ️ من نحن</a></li>
-            <li><a href="#" data-page="programs" class="menu-link">⚽ البرامج التدريبية</a></li>
-            <li><a href="#" data-page="coaches" class="menu-link">👨‍🏫 المدربون</a></li>
-            <li><a href="#" data-page="registration" class="menu-link">📝 تسجيل لاعب جديد</a></li>
-            <li><a href="#" data-page="faq" class="menu-link">❓ الأسئلة الشائعة</a></li>
-            <li><a href="#" data-page="contact" class="menu-link">📞 اتصل بنا</a></li>
+            <li><a href="#" data-nav-page="home" class="nav-menu-link">🏠 الرئيسية</a></li>
+            <li><a href="#" data-nav-page="about" class="nav-menu-link">ℹ️ من نحن</a></li>
+            <li><a href="#" data-nav-page="programs" class="nav-menu-link">⚽ البرامج التدريبية</a></li>
+            <li><a href="#" data-nav-page="coaches" class="nav-menu-link">👨‍🏫 المدربون</a></li>
+            <li><a href="#" data-nav-page="registration" class="nav-menu-link">📝 تسجيل لاعب جديد</a></li>
+            <li><a href="#" data-nav-page="faq" class="nav-menu-link">❓ الأسئلة الشائعة</a></li>
+            <li><a href="#" data-nav-page="contact" class="nav-menu-link">📞 اتصل بنا</a></li>
         </ul>
     </div>
-    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="nav-overlay-layer" id="navOverlayLayer"></div>
 </div>
 
 <script>
-// وظيفة التنقل
-function navigateTo(page) {
+// وظيفة التنقل بين الصفحات
+function changePage(pageName) {
     const url = new URL(window.location);
-    url.searchParams.set('page', page);
+    url.searchParams.set('page', pageName);
     window.location.href = url.toString();
 }
 
-// تهيئة القوائم
+// تهيئة جميع العناصر بعد تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
-    // إضافة الهيدر
-    const headerHtml = document.getElementById('menu-components').innerHTML;
+    // إضافة الهيكل إلى الصفحة
+    const headerHtml = document.getElementById('headerStructure').innerHTML;
     document.body.insertAdjacentHTML('afterbegin', headerHtml);
     
-    const burgerBtn = document.getElementById('burgerBtn');
-    const sideMenu = document.getElementById('sideMenu');
-    const menuOverlay = document.getElementById('menuOverlay');
+    // إضافة المسافة العلوية
+    const spacer = document.createElement('div');
+    spacer.className = 'header-spacing';
+    document.body.insertBefore(spacer, document.body.firstChild);
+    
+    // عناصر البرجر منيو
+    const burgerBtn = document.getElementById('burgerButton');
+    const sideMenu = document.getElementById('sideNavMenu');
+    const overlayLayer = document.getElementById('navOverlayLayer');
     
     if (burgerBtn) {
         burgerBtn.addEventListener('click', function(e) {
@@ -673,52 +677,48 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             this.classList.toggle('active');
             if (sideMenu) sideMenu.classList.toggle('open');
-            if (menuOverlay) menuOverlay.classList.toggle('show');
+            if (overlayLayer) overlayLayer.classList.toggle('show');
         });
     }
     
-    if (menuOverlay) {
-        menuOverlay.addEventListener('click', function() {
-            menuOverlay.classList.remove('show');
+    if (overlayLayer) {
+        overlayLayer.addEventListener('click', function() {
+            this.classList.remove('show');
             if (sideMenu) sideMenu.classList.remove('open');
             if (burgerBtn) burgerBtn.classList.remove('active');
         });
     }
     
-    // روابط القائمة
-    document.querySelectorAll('.menu-link').forEach(link => {
+    // روابط القائمة الجانبية
+    document.querySelectorAll('.nav-menu-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            const page = this.getAttribute('data-page');
-            navigateTo(page);
+            const pageId = this.getAttribute('data-nav-page');
+            changePage(pageId);
         });
     });
     
     // إغلاق القائمة عند الضغط على ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            if (menuOverlay) menuOverlay.classList.remove('show');
+            if (overlayLayer) overlayLayer.classList.remove('show');
             if (sideMenu) sideMenu.classList.remove('open');
             if (burgerBtn) burgerBtn.classList.remove('active');
         }
     });
     
-    // تعيين الصورة
-    const logoImg = document.getElementById('logoImg');
-    if (logoImg) {
-        logoImg.style.background = "linear-gradient(135deg, #2563eb, #1e3a8a)";
-        logoImg.style.display = "flex";
-        logoImg.style.alignItems = "center";
-        logoImg.style.justifyContent = "center";
-        logoImg.style.fontSize = "1.8rem";
-        logoImg.innerHTML = "⚽";
+    // تعيين صورة اللوجو
+    const logoBox = document.getElementById('logoBox');
+    if (logoBox) {
+        logoBox.style.background = "linear-gradient(135deg, #1e3a8a, #3b82f6)";
+        logoBox.style.display = "flex";
+        logoBox.style.alignItems = "center";
+        logoBox.style.justifyContent = "center";
     }
-    
-    // إضافة المسافة
-    const spacer = document.createElement('div');
-    spacer.className = 'header-spacer';
-    document.body.insertBefore(spacer, document.body.firstChild);
 });
+
+// جعل وظيفة changePage عامة
+window.changePage = changePage;
 </script>
 """, unsafe_allow_html=True)
 
@@ -768,43 +768,41 @@ if 'page' in query_params:
 page = st.session_state.page
 
 # حاوية المحتوى
-st.markdown('<div class="content-wrapper">', unsafe_allow_html=True)
+st.markdown('<div class="main-content-area">', unsafe_allow_html=True)
 
 # ===== الصفحة الرئيسية =====
 if page == 'home':
     st.markdown("""
-    <div class="hero-section">
+    <div class="hero-banner">
         <h1>⚽ الكوتش أكاديمي</h1>
         <p>أول أكاديمية متخصصة في مصر تركز على بناء اللاعب الشامل من الناحية الفنية والبدنية والنفسية، تحت إشراف مدربين معتمدين دوليًا.</p>
         <p style="font-weight: 700; margin-top: 20px; color: #f59e0b;">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # زر التسجيل
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("""
         <div style="text-align: center; margin-bottom: 50px;">
-            <button class="custom-btn" onclick="navigateTo('registration')">📝 سجل ابنك الآن</button>
+            <button class="register-button" onclick="changePage('registration')">📝 سجل ابنك الآن</button>
         </div>
         """, unsafe_allow_html=True)
     
-    # إنجازات الأكاديمية
-    st.markdown('<div class="section-title">إنجازات الأكاديمية</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading">إنجازات الأكاديمية</div>', unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="stats-grid">
-        <div class="stat-card">
+    <div class="stats-wrapper">
+        <div class="stat-item">
             <div style="font-size: 3rem; margin-bottom: 15px;">👥</div>
             <span class="stat-number">300+</span>
             <div class="stat-label">لاعب مدرب</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-item">
             <div style="font-size: 3rem; margin-bottom: 15px;">👨‍🏫</div>
             <span class="stat-number">8</span>
             <div class="stat-label">مدرب محترف</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-item">
             <div style="font-size: 3rem; margin-bottom: 15px;">🏆</div>
             <span class="stat-number">100+</span>
             <div class="stat-label">لاعب محترف</div>
@@ -812,22 +810,21 @@ if page == 'home':
     </div>
     """, unsafe_allow_html=True)
     
-    # لماذا تختار الكوتش أكاديمي
-    st.markdown('<div class="section-title">لماذا تختار الكوتش أكاديمي؟</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading">لماذا تختار الكوتش أكاديمي؟</div>', unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="features-grid">
-        <div class="feature-card">
+    <div class="features-wrapper">
+        <div class="feature-item">
             <div class="feature-icon">🧠</div>
             <h3>منهجية التدريب الذهني</h3>
             <p>نركز على تطوير الذكاء الكروي والقدرة على اتخاذ القرارات السريعة والصحيحة داخل الملعب.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-item">
             <div class="feature-icon">🛡️</div>
             <h3>بيئة آمنة محفزة</h3>
             <p>نوفر بيئة تدريب آمنة تحترم الفروق الفردية وتشجع على الإبداع والتميز.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-item">
             <div class="feature-icon">🤝</div>
             <h3>شراكات مع الأندية</h3>
             <p>لدينا شراكات مع أندية محلية لتمكين الموهوبين من الانضمام للمنتخبات والأندية الكبرى.</p>
@@ -838,15 +835,15 @@ if page == 'home':
 # ===== صفحة من نحن =====
 elif page == 'about':
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
         <h1 style="color: white; font-size: 2.5rem; margin-bottom: 10px;">من نحن</h1>
         <p style="color: #e2e8f0;">الكوتش أكاديمي.. رؤية جديدة في عالم تدريب كرة القدم</p>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="about-grid">
-        <div class="about-image">⚽</div>
+    <div class="about-wrapper">
+        <div class="about-image-box">⚽</div>
         <div>
             <h2 style="color: #1e3a8a; font-size: 1.8rem; margin-bottom: 20px;">تأسيس الأكاديمية</h2>
             <p style="color: #1e293b; font-size: 1rem;">تأسست الأكاديمية عام 2020 على يد:</p>
@@ -860,7 +857,7 @@ elif page == 'about':
         </div>
     </div>
     
-    <div class="mission-vision">
+    <div class="mission-vision-wrapper">
         <div class="mission-card">
             <h3 style="color: #1e3a8a; font-size: 1.5rem;">🎯 رسالتنا</h3>
             <p style="color: #1e293b;">تطوير جيل جديد من اللاعبين المبدعين القادرين على التألق محليًا ودوليًا، من خلال تقديم تدريب عصري يعتمد على أحدث الأساليب العلمية والتكنولوجية في عالم كرة القدم.</p>
@@ -887,17 +884,17 @@ elif page == 'about':
 # ===== صفحة البرامج التدريبية =====
 elif page == 'programs':
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
         <h1 style="color: white; font-size: 2.5rem; margin-bottom: 10px;">البرامج التدريبية</h1>
         <p style="color: #e2e8f0;">مواعيد تدريبية مصممة لكل فئة عمرية وجنسية</p>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="programs-grid">
+    <div class="programs-wrapper">
         <div class="program-card">
-            <div class="program-img">📅 السبت</div>
-            <div class="program-body">
+            <div class="program-image">📅 السبت</div>
+            <div class="program-content">
                 <h3>مواعيد تدريب السبت</h3>
                 <div class="schedule-box">
                     <div class="schedule-item"><strong>٥:٠٠ - ٦:٠٠ م</strong> → بنات</div>
@@ -908,8 +905,8 @@ elif page == 'programs':
             </div>
         </div>
         <div class="program-card">
-            <div class="program-img">✅ الخميس</div>
-            <div class="program-body">
+            <div class="program-image">✅ الخميس</div>
+            <div class="program-content">
                 <h3>مواعيد تدريب الخميس</h3>
                 <div class="schedule-box">
                     <div class="schedule-item"><strong>٤:٣٠ - ٦:٠٠ م</strong> → بنات</div>
@@ -922,8 +919,8 @@ elif page == 'programs':
     </div>
     
     <div class="program-card" style="margin-top: 20px;">
-        <div class="program-img">⚽ معلومات عامة</div>
-        <div class="program-body">
+        <div class="program-image">⚽ معلومات عامة</div>
+        <div class="program-content">
             <h3>معلومات هامة عن البرامج</h3>
             <div class="schedule-box">
                 <h4 style="color: #1e3a8a; margin-bottom: 10px;">🎯 أهداف التدريب:</h4>
@@ -948,41 +945,41 @@ elif page == 'programs':
 # ===== صفحة المدربون =====
 elif page == 'coaches':
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
         <h1 style="color: white; font-size: 2.5rem; margin-bottom: 10px;">المدربون</h1>
         <p style="color: #e2e8f0;">فريقنا من المدربين المحترفين ذوي الخبرة والكفاءة</p>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="coaches-grid">
+    <div class="coaches-wrapper">
         <div class="coach-card">
-            <div class="coach-img">👨‍🏫</div>
-            <div class="coach-body">
+            <div class="coach-image">👨‍🏫</div>
+            <div class="coach-info">
                 <h3>كابتن/ميخائيل كميل رؤف</h3>
                 <div class="coach-title">مدرب معتمد</div>
                 <div class="coach-desc">بكالريوس تربية رياضية - رخصة CAF - دبلومة إعداد بدني - دبلومة إصابات الملاعب</div>
             </div>
         </div>
         <div class="coach-card">
-            <div class="coach-img">🧤</div>
-            <div class="coach-body">
+            <div class="coach-image">🧤</div>
+            <div class="coach-info">
                 <h3>كابتن أحمد علي</h3>
                 <div class="coach-title">مدرب حراس مرمى</div>
                 <div class="coach-desc">مدرب معتمد من CAF - خبرة 15 عامًا في تدريب الحراس</div>
             </div>
         </div>
         <div class="coach-card">
-            <div class="coach-img">🏃</div>
-            <div class="coach-body">
+            <div class="coach-image">🏃</div>
+            <div class="coach-info">
                 <h3>د. خالد السيد</h3>
                 <div class="coach-title">مدرب لياقة بدنية</div>
                 <div class="coach-desc">دكتوراه في علوم الرياضة - مختص في تطوير قدرات الناشئين</div>
             </div>
         </div>
         <div class="coach-card">
-            <div class="coach-img">⚽</div>
-            <div class="coach-body">
+            <div class="coach-image">⚽</div>
+            <div class="coach-info">
                 <h3>كابتن محمد جابر</h3>
                 <div class="coach-title">مدرب مهارات فنية</div>
                 <div class="coach-desc">مدرب معتمد من CAF - خبرة 12 عامًا في المهارات الفنية</div>
@@ -994,17 +991,17 @@ elif page == 'coaches':
 # ===== صفحة التسجيل =====
 elif page == 'registration':
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
         <h1 style="color: white; font-size: 2.5rem; margin-bottom: 10px;">تسجيل لاعب جديد</h1>
         <p style="color: #e2e8f0;">انضم إلى الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
     </div>
     """, unsafe_allow_html=True)
     
     if st.session_state.show_success:
-        st.markdown('<div class="success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="success-message">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>', unsafe_allow_html=True)
         st.session_state.show_success = False
     
-    with st.form("reg_form"):
+    with st.form("registration_form"):
         st.markdown("### 📋 معلومات اللاعب")
         player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="محمد أحمد محمود")
         age_group = st.selectbox("الفئة العمرية المطلوبة *", 
@@ -1045,42 +1042,23 @@ elif page == 'registration':
 # ===== صفحة الأسئلة الشائعة =====
 elif page == 'faq':
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
         <h1 style="color: white; font-size: 2.5rem; margin-bottom: 10px;">الأسئلة الشائعة</h1>
         <p style="color: #e2e8f0;">إجابات على أكثر الأسئلة شيوعًا من أولياء الأمور</p>
     </div>
     """, unsafe_allow_html=True)
     
     faqs = [
-        ("ما الذي يميز الكوتش أكاديمي عن غيرها؟", 
-         "الكوتش أكاديمي تتبنى منهجية تدريب متكاملة تركز على: التدريب الذهني وتطوير الذكاء الكروي، متابعة فردية لكل لاعب مع خطة تطوير شخصية، استخدام التكنولوجيا في تحليل الأداء، شراكات مع أندية محلية لدعم الموهوبين."),
-        
-        ("ما هي مدة التدريب وأوقاته؟", 
-         "الموسم التدريبي يمتد لمدة 10 أشهر، من سبتمبر إلى يونيو. التدريبات في الفترة المسائية حسب الجدول المحدد لكل فئة عمرية، بما يتناسب مع أوقات المدارس."),
-        
-        ("ما هي تكلفة الاشتراك وآلية الدفع؟", 
-         "تختلف التكلفة حسب الفئة العمرية وعدد أيام التدريب. نقدم خصومات للأشقاء، نظام تقسيط شهري، ومنح جزئية للمتميزين. يرجى التواصل معنا لمعرفة التفاصيل الدقيقة."),
-        
-        ("ما هي متطلبات الانضمام للأكاديمية؟", 
-         "للانضمام للأكاديمية نحتاج إلى: إكمال نموذج التسجيل عبر الموقع، أن يكون اللاعب في الفئة العمرية المحددة، الرغبة الحقيقية في التعلم والتطوير، الالتزام بمواعيد التدريب."),
-        
-        ("هل هناك تدريبات خاصة للمبتدئين؟", 
-         "نعم، لدينا برامج خاصة للمبتدئين تركز على: تعلم أساسيات كرة القدم، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس، تعزيز حب الرياضة واللعب الجماعي."),
-        
-        ("كيف يمكن متابعة تطور اللاعب؟", 
-         "نوفر نظام متابعة شامل يشمل: تقييم دوري للمهارات الفنية، متابعة التطور البدني، تقرير عن المشاركة والالتزام، لقاءات دورية مع أولياء الأمور."),
-        
-        ("ماذا عن السلامة والإصابات خلال التدريب؟", 
-         "السلامة أولوية لدينا، ونوفر: إشراف مستمر من مدربين مؤهلين، بيئة تدريب آمنة ومجهزة، برنامج إحماء وتبريد مناسب، مدربين حاصلين على شهادات في الإسعافات الأولية."),
-        
-        ("هل يمكن للاعب الانتقال بين الفئات العمرية؟", 
-         "نعم، يمكن للاعب الانتقال بين الفئات بناءً على: تطور مهاراته وقدراته، توصية المدرب المسؤول، موافقة ولي الأمر، التقييم الدوري للأداء."),
-        
-        ("ما هي اللغات المستخدمة في التدريب؟", 
-         "التدريب يتم باللغة العربية مع استخدام مصطلحات إنجليزية في بعض التمارين المتخصصة، مما يساعد اللاعبين على فهم المصطلحات العالمية."),
-        
-        ("هل هناك فريق نسائي؟", 
-         "نعم، لدينا تدريبات مخصصة للبنات في أيام السبت والخميس، مع مدربات متخصصات وبيئة مناسبة."),
+        ("ما الذي يميز الكوتش أكاديمي عن غيرها؟", "الكوتش أكاديمي تتبنى منهجية تدريب متكاملة تركز على: التدريب الذهني وتطوير الذكاء الكروي، متابعة فردية لكل لاعب مع خطة تطوير شخصية، استخدام التكنولوجيا في تحليل الأداء، شراكات مع أندية محلية لدعم الموهوبين."),
+        ("ما هي مدة التدريب وأوقاته؟", "الموسم التدريبي يمتد لمدة 10 أشهر، من سبتمبر إلى يونيو. التدريبات في الفترة المسائية حسب الجدول المحدد لكل فئة عمرية، بما يتناسب مع أوقات المدارس."),
+        ("ما هي تكلفة الاشتراك وآلية الدفع؟", "تختلف التكلفة حسب الفئة العمرية وعدد أيام التدريب. نقدم خصومات للأشقاء، نظام تقسيط شهري، ومنح جزئية للمتميزين. يرجى التواصل معنا لمعرفة التفاصيل الدقيقة."),
+        ("ما هي متطلبات الانضمام للأكاديمية؟", "للانضمام للأكاديمية نحتاج إلى: إكمال نموذج التسجيل عبر الموقع، أن يكون اللاعب في الفئة العمرية المحددة، الرغبة الحقيقية في التعلم والتطوير، الالتزام بمواعيد التدريب."),
+        ("هل هناك تدريبات خاصة للمبتدئين؟", "نعم، لدينا برامج خاصة للمبتدئين تركز على: تعلم أساسيات كرة القدم، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس، تعزيز حب الرياضة واللعب الجماعي."),
+        ("كيف يمكن متابعة تطور اللاعب؟", "نوفر نظام متابعة شامل يشمل: تقييم دوري للمهارات الفنية، متابعة التطور البدني، تقرير عن المشاركة والالتزام، لقاءات دورية مع أولياء الأمور."),
+        ("ماذا عن السلامة والإصابات خلال التدريب؟", "السلامة أولوية لدينا، ونوفر: إشراف مستمر من مدربين مؤهلين، بيئة تدريب آمنة ومجهزة، برنامج إحماء وتبريد مناسب، مدربين حاصلين على شهادات في الإسعافات الأولية."),
+        ("هل يمكن للاعب الانتقال بين الفئات العمرية؟", "نعم، يمكن للاعب الانتقال بين الفئات بناءً على: تطور مهاراته وقدراته، توصية المدرب المسؤول، موافقة ولي الأمر، التقييم الدوري للأداء."),
+        ("ما هي اللغات المستخدمة في التدريب؟", "التدريب يتم باللغة العربية مع استخدام مصطلحات إنجليزية في بعض التمارين المتخصصة، مما يساعد اللاعبين على فهم المصطلحات العالمية."),
+        ("هل هناك فريق نسائي؟", "نعم، لدينا تدريبات مخصصة للبنات في أيام السبت والخميس، مع مدربات متخصصات وبيئة مناسبة."),
     ]
     
     for q, a in faqs:
@@ -1090,7 +1068,7 @@ elif page == 'faq':
 # ===== صفحة اتصل بنا =====
 elif page == 'contact':
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
         <h1 style="color: white; font-size: 2.5rem; margin-bottom: 10px;">اتصل بنا</h1>
         <p style="color: #e2e8f0;">تواصل معنا لأي استفسارات أو معلومات إضافية</p>
     </div>
@@ -1134,7 +1112,7 @@ elif page == 'contact':
             </div>
         </div>
         
-        <div class="map-container" style="margin-top: 20px;">
+        <div class="map-container">
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d113686.258448786!2d31.156289!3d27.186696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1438a5f5c5b5b5b5%3A0x5b5b5b5b5b5b5b5b!2z2YXZg9mF2YrYp9mG2Ykg2KfZhNiq2YbYqSDYp9mE2YXYqtmG2Kkg2KfZhNir2YTYp9mG2Ykg2KfZhNi52YjYp9mG!5e0!3m2!1sar!2seg!4v1700000000000!5m2!1sar!2seg" 
                     allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
@@ -1177,11 +1155,11 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # ===== الفوتر =====
 st.markdown("""
-<div class="footer">
-    <div class="footer-inner">
+<div class="main-footer">
+    <div class="footer-content">
         <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #2563eb, #1e3a8a); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">⚽</div>
+                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">⚽</div>
                 <h3 style="color: white; margin: 0;">الكوتش أكاديمي</h3>
             </div>
             <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6;">تأسست عام 2020 على ملاعب مدرسة السلام المتطورة. أول أكاديمية في مصر تركز على تطوير اللاعب الشامل من الناحية الفنية والبدنية والنفسية، تحت إشراف مدربين معتمدين دوليًا.</p>
@@ -1189,13 +1167,13 @@ st.markdown("""
         <div>
             <h4 style="color: white; margin-bottom: 15px;">روابط سريعة</h4>
             <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('home'); return false;" style="color: #cbd5e1; text-decoration: none;">← الرئيسية</a></li>
-                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('about'); return false;" style="color: #cbd5e1; text-decoration: none;">← من نحن</a></li>
-                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('programs'); return false;" style="color: #cbd5e1; text-decoration: none;">← البرامج التدريبية</a></li>
-                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('coaches'); return false;" style="color: #cbd5e1; text-decoration: none;">← المدربون</a></li>
-                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('registration'); return false;" style="color: #cbd5e1; text-decoration: none;">← تسجيل لاعب جديد</a></li>
-                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('faq'); return false;" style="color: #cbd5e1; text-decoration: none;">← الأسئلة الشائعة</a></li>
-                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('contact'); return false;" style="color: #cbd5e1; text-decoration: none;">← اتصل بنا</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="changePage('home'); return false;" class="footer-link">← الرئيسية</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="changePage('about'); return false;" class="footer-link">← من نحن</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="changePage('programs'); return false;" class="footer-link">← البرامج التدريبية</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="changePage('coaches'); return false;" class="footer-link">← المدربون</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="changePage('registration'); return false;" class="footer-link">← تسجيل لاعب جديد</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="changePage('faq'); return false;" class="footer-link">← الأسئلة الشائعة</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="changePage('contact'); return false;" class="footer-link">← اتصل بنا</a></li>
             </ul>
         </div>
         <div>
@@ -1229,39 +1207,11 @@ st.markdown("""
 </div>
 
 <script>
-// تأكيد وجود وظيفة navigateTo في النطاق العام
-window.navigateTo = function(page) {
+// تأكيد وجود وظيفة changePage في النطاق العام
+window.changePage = function(page) {
     const url = new URL(window.location);
     url.searchParams.set('page', page);
     window.location.href = url.toString();
 };
-
-// إضافة مستمعي الأحداث لروابط الفوتر بعد تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-    // روابط الفوتر
-    const footerLinks = document.querySelectorAll('.footer a');
-    footerLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const href = this.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                const page = this.textContent.trim().replace('←', '').trim();
-                const pageMap = {
-                    'الرئيسية': 'home',
-                    'من نحن': 'about',
-                    'البرامج التدريبية': 'programs',
-                    'المدربون': 'coaches',
-                    'تسجيل لاعب جديد': 'registration',
-                    'الأسئلة الشائعة': 'faq',
-                    'اتصل بنا': 'contact'
-                };
-                const pageId = pageMap[page];
-                if (pageId) {
-                    navigateTo(pageId);
-                }
-            }
-        });
-    });
-});
 </script>
 """, unsafe_allow_html=True)
