@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ===== CSS كامل مع JavaScript =====
+# ===== CSS كامل =====
 st.markdown("""
 <style>
     /* إخفاء كل عناصر Streamlit */
@@ -129,8 +129,8 @@ st.markdown("""
     .side-menu {
         position: fixed;
         top: 0;
-        right: -300px;
-        width: 280px;
+        right: -320px;
+        width: 300px;
         height: 100vh;
         background: white;
         box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
@@ -569,6 +569,19 @@ st.markdown("""
         color: #f59e0b;
     }
     
+    /* خريطة جوجل */
+    .map-container {
+        margin-top: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .map-container iframe {
+        width: 100%;
+        height: 250px;
+        border: none;
+    }
+    
     /* تنسيقات للشاشات الصغيرة */
     @media (max-width: 768px) {
         .stats-grid, .features-grid, .programs-grid, .coaches-grid, .contact-grid, .about-grid, .mission-vision {
@@ -597,19 +610,59 @@ st.markdown("""
             padding: 12px 30px;
             font-size: 1rem;
         }
+        .side-menu {
+            width: 280px;
+            right: -280px;
+        }
     }
 </style>
 
+<!-- HTML وجافا سكريبت للقوائم -->
+<div id="menu-components" style="display: none;">
+    <div class="main-header" id="mainHeader">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-img" id="logoImg"></div>
+                <div class="logo-text">
+                    <h1>الكوتش <span>أكاديمي</span></h1>
+                    <p>أكاديمية كرة القدم المتخصصة</p>
+                </div>
+            </div>
+            <button class="burger-btn" id="burgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </div>
+    <div class="side-menu" id="sideMenu">
+        <ul>
+            <li><a href="#" data-page="home" class="menu-link">🏠 الرئيسية</a></li>
+            <li><a href="#" data-page="about" class="menu-link">ℹ️ من نحن</a></li>
+            <li><a href="#" data-page="programs" class="menu-link">⚽ البرامج التدريبية</a></li>
+            <li><a href="#" data-page="coaches" class="menu-link">👨‍🏫 المدربون</a></li>
+            <li><a href="#" data-page="registration" class="menu-link">📝 تسجيل لاعب جديد</a></li>
+            <li><a href="#" data-page="faq" class="menu-link">❓ الأسئلة الشائعة</a></li>
+            <li><a href="#" data-page="contact" class="menu-link">📞 اتصل بنا</a></li>
+        </ul>
+    </div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+</div>
+
 <script>
-// وظيفة التنقل بين الصفحات
-function goToPage(page) {
+// وظيفة التنقل
+function navigateTo(page) {
     const url = new URL(window.location);
     url.searchParams.set('page', page);
     window.location.href = url.toString();
 }
 
-// برجر منيو
+// تهيئة القوائم
 document.addEventListener('DOMContentLoaded', function() {
+    // إضافة الهيدر
+    const headerHtml = document.getElementById('menu-components').innerHTML;
+    document.body.insertAdjacentHTML('afterbegin', headerHtml);
+    
     const burgerBtn = document.getElementById('burgerBtn');
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
@@ -626,11 +679,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (menuOverlay) {
         menuOverlay.addEventListener('click', function() {
-            this.classList.remove('show');
+            menuOverlay.classList.remove('show');
             if (sideMenu) sideMenu.classList.remove('open');
             if (burgerBtn) burgerBtn.classList.remove('active');
         });
     }
+    
+    // روابط القائمة
+    document.querySelectorAll('.menu-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.getAttribute('data-page');
+            navigateTo(page);
+        });
+    });
     
     // إغلاق القائمة عند الضغط على ESC
     document.addEventListener('keydown', function(e) {
@@ -640,57 +702,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (burgerBtn) burgerBtn.classList.remove('active');
         }
     });
+    
+    // تعيين الصورة
+    const logoImg = document.getElementById('logoImg');
+    if (logoImg) {
+        logoImg.style.background = "linear-gradient(135deg, #2563eb, #1e3a8a)";
+        logoImg.style.display = "flex";
+        logoImg.style.alignItems = "center";
+        logoImg.style.justifyContent = "center";
+        logoImg.style.fontSize = "1.8rem";
+        logoImg.innerHTML = "⚽";
+    }
+    
+    // إضافة المسافة
+    const spacer = document.createElement('div');
+    spacer.className = 'header-spacer';
+    document.body.insertBefore(spacer, document.body.firstChild);
 });
 </script>
 """, unsafe_allow_html=True)
-
-# ===== التحقق من وجود صورة الشعار =====
-logo_exists = os.path.exists('logo.jpg')
-
-# ===== الهيدر =====
-if logo_exists:
-    with open('logo.jpg', 'rb') as f:
-        img_data = base64.b64encode(f.read()).decode()
-    logo_html = f'<img src="data:image/jpeg;base64,{img_data}" class="logo-img">'
-else:
-    logo_html = '<div class="logo-img" style="background: linear-gradient(135deg, #2563eb, #1e3a8a); display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">⚽</div>'
-
-header_html = f'''
-<div class="main-header">
-    <div class="header-inner">
-        <div class="logo-area">
-            {logo_html}
-            <div class="logo-text">
-                <h1>الكوتش <span>أكاديمي</span></h1>
-                <p>أكاديمية كرة القدم المتخصصة</p>
-            </div>
-        </div>
-        <button class="burger-btn" id="burgerBtn">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-    </div>
-</div>
-
-<div class="side-menu" id="sideMenu">
-    <ul>
-        <li><a onclick="goToPage('home')">🏠 الرئيسية</a></li>
-        <li><a onclick="goToPage('about')">ℹ️ من نحن</a></li>
-        <li><a onclick="goToPage('programs')">⚽ البرامج التدريبية</a></li>
-        <li><a onclick="goToPage('coaches')">👨‍🏫 المدربون</a></li>
-        <li><a onclick="goToPage('registration')">📝 تسجيل لاعب جديد</a></li>
-        <li><a onclick="goToPage('faq')">❓ الأسئلة الشائعة</a></li>
-        <li><a onclick="goToPage('contact')">📞 اتصل بنا</a></li>
-    </ul>
-</div>
-
-<div class="menu-overlay" id="menuOverlay"></div>
-
-<div class="header-spacer"></div>
-'''
-
-st.markdown(header_html, unsafe_allow_html=True)
 
 # ===== إدارة حالة الجلسة =====
 if 'page' not in st.session_state:
@@ -740,7 +770,7 @@ page = st.session_state.page
 # حاوية المحتوى
 st.markdown('<div class="content-wrapper">', unsafe_allow_html=True)
 
-# ===== الصفحة الرئيسية (الصفحة 1) =====
+# ===== الصفحة الرئيسية =====
 if page == 'home':
     st.markdown("""
     <div class="hero-section">
@@ -755,7 +785,7 @@ if page == 'home':
     with col2:
         st.markdown("""
         <div style="text-align: center; margin-bottom: 50px;">
-            <button class="custom-btn" onclick="goToPage('registration')">📝 سجل ابنك الآن</button>
+            <button class="custom-btn" onclick="navigateTo('registration')">📝 سجل ابنك الآن</button>
         </div>
         """, unsafe_allow_html=True)
     
@@ -805,7 +835,7 @@ if page == 'home':
     </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة من نحن (الصفحة 2) =====
+# ===== صفحة من نحن =====
 elif page == 'about':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
@@ -833,16 +863,28 @@ elif page == 'about':
     <div class="mission-vision">
         <div class="mission-card">
             <h3 style="color: #1e3a8a; font-size: 1.5rem;">🎯 رسالتنا</h3>
-            <p style="color: #1e293b;">تطوير جيل جديد من اللاعبين المبدعين القادرين على التألق محليًا ودوليًا، من خلال تقديم تدريب عصري يعتمد على أحدث الأساليب العلمية.</p>
+            <p style="color: #1e293b;">تطوير جيل جديد من اللاعبين المبدعين القادرين على التألق محليًا ودوليًا، من خلال تقديم تدريب عصري يعتمد على أحدث الأساليب العلمية والتكنولوجية في عالم كرة القدم.</p>
+            <ul style="margin-right: 20px; margin-top: 15px;">
+                <li>تطوير المهارات الفنية الأساسية والمتقدمة</li>
+                <li>بناء اللياقة البدنية المخصصة لكل لاعب</li>
+                <li>تعزيز الذكاء الكروي والقدرات الذهنية</li>
+                <li>غرس القيم الرياضية والسلوك القيادي</li>
+            </ul>
         </div>
         <div class="vision-card">
             <h3 style="color: #1e3a8a; font-size: 1.5rem;">👁️ أهدافنا</h3>
             <p style="color: #1e293b;">أن نكون الوجهة الأولى لأي موهبة كروية في مصر والوطن العربي، والجسر الذي يعبر من خلاله اللاعبون الموهوبون إلى العالمية.</p>
+            <ul style="margin-right: 20px; margin-top: 15px;">
+                <li>صناعة لاعبين مؤهلين للدوريات العالمية</li>
+                <li>تطوير منهج تدريبي يُدرس في المعاهد الرياضية</li>
+                <li>المساهمة في تطوير كرة القدم العربية</li>
+                <li>بناء قاعدة بيانات للمواهب الكروية</li>
+            </ul>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة البرامج التدريبية (الصفحة 3) =====
+# ===== صفحة البرامج التدريبية =====
 elif page == 'programs':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
@@ -878,9 +920,32 @@ elif page == 'programs':
             </div>
         </div>
     </div>
+    
+    <div class="program-card" style="margin-top: 20px;">
+        <div class="program-img">⚽ معلومات عامة</div>
+        <div class="program-body">
+            <h3>معلومات هامة عن البرامج</h3>
+            <div class="schedule-box">
+                <h4 style="color: #1e3a8a; margin-bottom: 10px;">🎯 أهداف التدريب:</h4>
+                <ul style="margin-right: 20px; margin-bottom: 15px;">
+                    <li>تنمية المهارات الفنية الأساسية</li>
+                    <li>تطوير القدرات البدنية</li>
+                    <li>تعزيز العمل الجماعي</li>
+                    <li>بناء الشخصية الرياضية</li>
+                </ul>
+                <h4 style="color: #1e3a8a; margin-bottom: 10px;">💼 ما يقدمه النادي:</h4>
+                <ul style="margin-right: 20px;">
+                    <li>ملابس التدريب</li>
+                    <li>مسابقات دورية</li>
+                    <li>تقييمات شهرية</li>
+                    <li>تقارير تطور الأداء</li>
+                </ul>
+            </div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة المدربون (الصفحة 4) =====
+# ===== صفحة المدربون =====
 elif page == 'coaches':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
@@ -896,7 +961,7 @@ elif page == 'coaches':
             <div class="coach-body">
                 <h3>كابتن/ميخائيل كميل رؤف</h3>
                 <div class="coach-title">مدرب معتمد</div>
-                <div class="coach-desc">بكالريوس تربية رياضية - رخصة CAF - دبلومة إعداد بدني</div>
+                <div class="coach-desc">بكالريوس تربية رياضية - رخصة CAF - دبلومة إعداد بدني - دبلومة إصابات الملاعب</div>
             </div>
         </div>
         <div class="coach-card">
@@ -904,7 +969,7 @@ elif page == 'coaches':
             <div class="coach-body">
                 <h3>كابتن أحمد علي</h3>
                 <div class="coach-title">مدرب حراس مرمى</div>
-                <div class="coach-desc">مدرب معتمد من CAF - خبرة 15 عامًا</div>
+                <div class="coach-desc">مدرب معتمد من CAF - خبرة 15 عامًا في تدريب الحراس</div>
             </div>
         </div>
         <div class="coach-card">
@@ -912,7 +977,7 @@ elif page == 'coaches':
             <div class="coach-body">
                 <h3>د. خالد السيد</h3>
                 <div class="coach-title">مدرب لياقة بدنية</div>
-                <div class="coach-desc">دكتوراه في علوم الرياضة - مختص في تطوير الناشئين</div>
+                <div class="coach-desc">دكتوراه في علوم الرياضة - مختص في تطوير قدرات الناشئين</div>
             </div>
         </div>
         <div class="coach-card">
@@ -920,13 +985,13 @@ elif page == 'coaches':
             <div class="coach-body">
                 <h3>كابتن محمد جابر</h3>
                 <div class="coach-title">مدرب مهارات فنية</div>
-                <div class="coach-desc">مدرب معتمد من CAF - خبرة 12 عامًا</div>
+                <div class="coach-desc">مدرب معتمد من CAF - خبرة 12 عامًا في المهارات الفنية</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# ===== صفحة التسجيل (الصفحة 5) =====
+# ===== صفحة التسجيل =====
 elif page == 'registration':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
@@ -941,28 +1006,43 @@ elif page == 'registration':
     
     with st.form("reg_form"):
         st.markdown("### 📋 معلومات اللاعب")
-        player_name = st.text_input("اسم اللاعب الثلاثي *")
-        age_group = st.selectbox("الفئة العمرية المطلوبة *", ["", "بنات", "١ ابتدائي - ٥ ابتدائي", "٦ ابتدائي - ٢ إعدادي"])
+        player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="محمد أحمد محمود")
+        age_group = st.selectbox("الفئة العمرية المطلوبة *", 
+                                 ["", "بنات", "١ ابتدائي - ٥ ابتدائي", "٦ ابتدائي - ٢ إعدادي"])
+        birth_date = st.date_input("تاريخ الميلاد", None)
         
         st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
-        parent_name = st.text_input("اسم ولي الأمر *")
+        parent_name = st.text_input("اسم ولي الأمر *", placeholder="أحمد محمود")
         parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
-        notes = st.text_area("ملاحظات إضافية (اختياري)", height=80)
+        parent_whatsapp = st.text_input("رقم الواتساب", placeholder="01XXXXXXXXX")
+        
+        st.markdown("### 📍 معلومات إضافية")
+        address = st.text_area("العنوان", height=60, placeholder="المدينة - المنطقة")
+        notes = st.text_area("ملاحظات إضافية (اختياري)", height=80, placeholder="أي معلومات إضافية تود إضافتها...")
         
         submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
         
         if submitted:
             if player_name and age_group and parent_name and parent_phone:
-                data = {'playerName': player_name, 'ageGroup': age_group, 'parentName': parent_name, 'parentPhone': parent_phone, 'notes': notes}
+                data = {
+                    'playerName': player_name,
+                    'ageGroup': age_group,
+                    'birthDate': str(birth_date) if birth_date else "",
+                    'parentName': parent_name,
+                    'parentPhone': parent_phone,
+                    'parentWhatsapp': parent_whatsapp,
+                    'address': address,
+                    'notes': notes
+                }
                 if save_registration(data):
                     st.session_state.show_success = True
                     st.rerun()
                 else:
-                    st.error("❌ حدث خطأ، يرجى المحاولة مرة أخرى")
+                    st.error("❌ حدث خطأ في حفظ البيانات، يرجى المحاولة مرة أخرى")
             else:
                 st.error("⚠️ يرجى ملء جميع الحقول المطلوبة")
 
-# ===== صفحة الأسئلة الشائعة (الصفحة 6) =====
+# ===== صفحة الأسئلة الشائعة =====
 elif page == 'faq':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
@@ -972,20 +1052,42 @@ elif page == 'faq':
     """, unsafe_allow_html=True)
     
     faqs = [
-        ("ما الذي يميز الكوتش أكاديمي عن غيرها؟", "الكوتش أكاديمي تتبنى منهجية تدريب متكاملة تركز على: التدريب الذهني وتطوير الذكاء الكروي، متابعة فردية لكل لاعب مع خطة تطوير شخصية، استخدام التكنولوجيا في تحليل الأداء، شراكات مع أندية محلية لدعم الموهوبين."),
-        ("ما هي مدة التدريب وأوقاته؟", "الموسم التدريبي يمتد لمدة 10 أشهر، من سبتمبر إلى يونيو. التدريبات في الفترة المسائية حسب الجدول المحدد لكل فئة عمرية، بما يتناسب مع أوقات المدارس."),
-        ("ما هي تكلفة الاشتراك وآلية الدفع؟", "تختلف التكلفة حسب الفئة العمرية وعدد أيام التدريب. نقدم خصومات للأشقاء، نظام تقسيط شهري، ومنح جزئية للمتميزين. يرجى التواصل معنا لمعرفة التفاصيل الدقيقة."),
-        ("ما هي متطلبات الانضمام للأكاديمية؟", "للانضمام للأكاديمية نحتاج إلى: إكمال نموذج التسجيل عبر الموقع، أن يكون اللاعب في الفئة العمرية المحددة، الرغبة الحقيقية في التعلم والتطوير، الالتزام بمواعيد التدريب."),
-        ("هل هناك تدريبات خاصة للمبتدئين؟", "نعم، لدينا برامج خاصة للمبتدئين تركز على: تعلم أساسيات كرة القدم، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس، تعزيز حب الرياضة واللعب الجماعي."),
-        ("كيف يمكن متابعة تطور اللاعب؟", "نوفر نظام متابعة شامل يشمل: تقييم دوري للمهارات الفنية، متابعة التطور البدني، تقرير عن المشاركة والالتزام، لقاءات دورية مع أولياء الأمور."),
-        ("ماذا عن السلامة والإصابات خلال التدريب؟", "السلامة أولوية لدينا، ونوفر: إشراف مستمر من مدربين مؤهلين، بيئة تدريب آمنة ومجهزة، برنامج إحماء وتبريد مناسب، مدربين حاصلين على شهادات في الإسعافات الأولية.")
+        ("ما الذي يميز الكوتش أكاديمي عن غيرها؟", 
+         "الكوتش أكاديمي تتبنى منهجية تدريب متكاملة تركز على: التدريب الذهني وتطوير الذكاء الكروي، متابعة فردية لكل لاعب مع خطة تطوير شخصية، استخدام التكنولوجيا في تحليل الأداء، شراكات مع أندية محلية لدعم الموهوبين."),
+        
+        ("ما هي مدة التدريب وأوقاته؟", 
+         "الموسم التدريبي يمتد لمدة 10 أشهر، من سبتمبر إلى يونيو. التدريبات في الفترة المسائية حسب الجدول المحدد لكل فئة عمرية، بما يتناسب مع أوقات المدارس."),
+        
+        ("ما هي تكلفة الاشتراك وآلية الدفع؟", 
+         "تختلف التكلفة حسب الفئة العمرية وعدد أيام التدريب. نقدم خصومات للأشقاء، نظام تقسيط شهري، ومنح جزئية للمتميزين. يرجى التواصل معنا لمعرفة التفاصيل الدقيقة."),
+        
+        ("ما هي متطلبات الانضمام للأكاديمية؟", 
+         "للانضمام للأكاديمية نحتاج إلى: إكمال نموذج التسجيل عبر الموقع، أن يكون اللاعب في الفئة العمرية المحددة، الرغبة الحقيقية في التعلم والتطوير، الالتزام بمواعيد التدريب."),
+        
+        ("هل هناك تدريبات خاصة للمبتدئين؟", 
+         "نعم، لدينا برامج خاصة للمبتدئين تركز على: تعلم أساسيات كرة القدم، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس، تعزيز حب الرياضة واللعب الجماعي."),
+        
+        ("كيف يمكن متابعة تطور اللاعب؟", 
+         "نوفر نظام متابعة شامل يشمل: تقييم دوري للمهارات الفنية، متابعة التطور البدني، تقرير عن المشاركة والالتزام، لقاءات دورية مع أولياء الأمور."),
+        
+        ("ماذا عن السلامة والإصابات خلال التدريب؟", 
+         "السلامة أولوية لدينا، ونوفر: إشراف مستمر من مدربين مؤهلين، بيئة تدريب آمنة ومجهزة، برنامج إحماء وتبريد مناسب، مدربين حاصلين على شهادات في الإسعافات الأولية."),
+        
+        ("هل يمكن للاعب الانتقال بين الفئات العمرية؟", 
+         "نعم، يمكن للاعب الانتقال بين الفئات بناءً على: تطور مهاراته وقدراته، توصية المدرب المسؤول، موافقة ولي الأمر، التقييم الدوري للأداء."),
+        
+        ("ما هي اللغات المستخدمة في التدريب؟", 
+         "التدريب يتم باللغة العربية مع استخدام مصطلحات إنجليزية في بعض التمارين المتخصصة، مما يساعد اللاعبين على فهم المصطلحات العالمية."),
+        
+        ("هل هناك فريق نسائي؟", 
+         "نعم، لدينا تدريبات مخصصة للبنات في أيام السبت والخميس، مع مدربات متخصصات وبيئة مناسبة."),
     ]
     
     for q, a in faqs:
         with st.expander(f"❓ {q}"):
-            st.markdown(f'<p style="color: #1e293b;">{a}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: #1e293b; line-height: 1.6;">{a}</p>', unsafe_allow_html=True)
 
-# ===== صفحة اتصل بنا (الصفحة 7) =====
+# ===== صفحة اتصل بنا =====
 elif page == 'contact':
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 20px; padding: 50px 20px; text-align: center; margin-bottom: 40px;">
@@ -1002,39 +1104,73 @@ elif page == 'contact':
             <h3 style="color: #1e3a8a; margin-bottom: 25px;">📞 معلومات الاتصال</h3>
             <div class="contact-item">
                 <div style="font-size: 1.5rem;">📱</div>
-                <div><a href="tel:01069238878" style="text-decoration: none; color: #1e293b;">01069238878</a></div>
+                <div><a href="tel:01069238878" style="text-decoration: none; color: #1e293b; font-size: 1.1rem;">01069238878</a></div>
             </div>
             <div class="contact-item">
                 <div style="font-size: 1.5rem;">💬</div>
-                <div><a href="https://wa.me/201285197778" target="_blank" style="text-decoration: none; color: #25D366;">01285197778 (واتساب)</a></div>
+                <div><a href="https://wa.me/201285197778" target="_blank" style="text-decoration: none; color: #25D366; font-size: 1.1rem;">01285197778 (واتساب)</a></div>
             </div>
             <div class="contact-item">
                 <div style="font-size: 1.5rem;">📍</div>
-                <div style="color: #1e293b;">أسيوط - مصر - على ملاعب مدرسة السلام المتطورة</div>
+                <div style="color: #1e293b;">
+                    <strong>العنوان:</strong> أسيوط - مصر<br>
+                    على ملاعب مدرسة السلام المتطورة
+                </div>
             </div>
             <div class="contact-item">
                 <div style="font-size: 1.5rem;">⏰</div>
-                <div style="color: #1e293b;">السبت - الخميس: 4:00م - 9:00م<br>الجمعة: إجازة</div>
+                <div style="color: #1e293b;">
+                    <strong>أوقات العمل:</strong><br>
+                    السبت - الخميس: 4:00م - 9:00م<br>
+                    الجمعة: إجازة
+                </div>
             </div>
+            <div class="contact-item">
+                <div style="font-size: 1.5rem;">📧</div>
+                <div style="color: #1e293b;">
+                    <strong>البريد الإلكتروني:</strong><br>
+                    info@elcoach-academy.com
+                </div>
+            </div>
+        </div>
+        
+        <div class="map-container" style="margin-top: 20px;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d113686.258448786!2d31.156289!3d27.186696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1438a5f5c5b5b5b5%3A0x5b5b5b5b5b5b5b5b!2z2YXZg9mF2YrYp9mG2Ykg2KfZhNiq2YbYqSDYp9mE2YXYqtmG2Kkg2KfZhNir2YTYp9mG2Ykg2KfZhNi52YjYp9mG!5e0!3m2!1sar!2seg!4v1700000000000!5m2!1sar!2seg" 
+                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown('<div class="contact-card"><h3 style="color: #1e3a8a; margin-bottom: 25px;">✉️ أرسل رسالة</h3></div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="contact-card">
+            <h3 style="color: #1e3a8a; margin-bottom: 25px;">✉️ أرسل رسالة</h3>
+        </div>
+        """, unsafe_allow_html=True)
         
         with st.form("contact_form"):
-            c_name = st.text_input("الاسم")
-            c_phone = st.text_input("رقم الهاتف", placeholder="010XXXXXXXX")
-            c_subject = st.selectbox("الموضوع", ["", "استفسار عام", "معلومات عن البرامج", "التسجيل", "أخرى"])
-            c_msg = st.text_area("الرسالة", height=100)
-            if st.form_submit_button("📨 إرسال الرسالة", use_container_width=True):
+            c_name = st.text_input("الاسم *")
+            c_phone = st.text_input("رقم الهاتف *", placeholder="010XXXXXXXX")
+            c_email = st.text_input("البريد الإلكتروني", placeholder="example@email.com")
+            c_subject = st.selectbox("الموضوع *", ["", "استفسار عام", "معلومات عن البرامج", "التسجيل", "شكوى أو اقتراح", "أخرى"])
+            c_msg = st.text_area("الرسالة *", height=120, placeholder="اكتب رسالتك هنا...")
+            
+            submitted = st.form_submit_button("📨 إرسال الرسالة", use_container_width=True)
+            
+            if submitted:
                 if c_name and c_phone and c_subject and c_msg:
-                    if save_contact({'name': c_name, 'phone': c_phone, 'subject': c_subject, 'message': c_msg}):
-                        st.success("✅ شكراً لتواصلك! تم إرسال رسالتك بنجاح.")
+                    data = {
+                        'name': c_name,
+                        'phone': c_phone,
+                        'email': c_email,
+                        'subject': c_subject,
+                        'message': c_msg
+                    }
+                    if save_contact(data):
+                        st.success("✅ شكراً لتواصلك! تم إرسال رسالتك بنجاح وسنرد عليك خلال 24 ساعة.")
                     else:
-                        st.error("❌ حدث خطأ")
+                        st.error("❌ حدث خطأ في حفظ البيانات، يرجى المحاولة مرة أخرى")
                 else:
-                    st.error("⚠️ يرجى ملء جميع الحقول")
+                    st.error("⚠️ يرجى ملء جميع الحقول المطلوبة")
 
 # إغلاق حاوية المحتوى
 st.markdown('</div>', unsafe_allow_html=True)
@@ -1045,33 +1181,87 @@ st.markdown("""
     <div class="footer-inner">
         <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #2563eb, #1e3a8a); border-radius: 12px; display: flex; align-items: center; justify-content: center;">⚽</div>
-                <h3 style="color: white;">الكوتش أكاديمي</h3>
+                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #2563eb, #1e3a8a); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">⚽</div>
+                <h3 style="color: white; margin: 0;">الكوتش أكاديمي</h3>
             </div>
-            <p style="color: #cbd5e1; font-size: 0.85rem;">تأسست عام 2020 على ملاعب مدرسة السلام المتطورة. أول أكاديمية في مصر تركز على تطوير اللاعب الشامل.</p>
+            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6;">تأسست عام 2020 على ملاعب مدرسة السلام المتطورة. أول أكاديمية في مصر تركز على تطوير اللاعب الشامل من الناحية الفنية والبدنية والنفسية، تحت إشراف مدربين معتمدين دوليًا.</p>
         </div>
         <div>
             <h4 style="color: white; margin-bottom: 15px;">روابط سريعة</h4>
             <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 8px;"><a onclick="goToPage('home')">← الرئيسية</a></li>
-                <li style="margin-bottom: 8px;"><a onclick="goToPage('about')">← من نحن</a></li>
-                <li style="margin-bottom: 8px;"><a onclick="goToPage('programs')">← البرامج التدريبية</a></li>
-                <li style="margin-bottom: 8px;"><a onclick="goToPage('coaches')">← المدربون</a></li>
-                <li style="margin-bottom: 8px;"><a onclick="goToPage('faq')">← الأسئلة الشائعة</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('home'); return false;" style="color: #cbd5e1; text-decoration: none;">← الرئيسية</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('about'); return false;" style="color: #cbd5e1; text-decoration: none;">← من نحن</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('programs'); return false;" style="color: #cbd5e1; text-decoration: none;">← البرامج التدريبية</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('coaches'); return false;" style="color: #cbd5e1; text-decoration: none;">← المدربون</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('registration'); return false;" style="color: #cbd5e1; text-decoration: none;">← تسجيل لاعب جديد</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('faq'); return false;" style="color: #cbd5e1; text-decoration: none;">← الأسئلة الشائعة</a></li>
+                <li style="margin-bottom: 10px;"><a href="#" onclick="navigateTo('contact'); return false;" style="color: #cbd5e1; text-decoration: none;">← اتصل بنا</a></li>
             </ul>
         </div>
         <div>
             <h4 style="color: white; margin-bottom: 15px;">معلومات الاتصال</h4>
             <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 10px;">📍 أسيوط - ملاعب مدرسة السلام</li>
-                <li style="margin-bottom: 10px;"><a href="tel:01069238878">📞 01069238878</a></li>
-                <li style="margin-bottom: 10px;"><a href="https://wa.me/201285197778" target="_blank">💬 01285197778</a></li>
+                <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                    <span>📍</span>
+                    <span style="color: #cbd5e1;">أسيوط - مصر<br>ملاعب مدرسة السلام المتطورة</span>
+                </li>
+                <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                    <span>📞</span>
+                    <a href="tel:01069238878" style="color: #cbd5e1; text-decoration: none;">01069238878</a>
+                </li>
+                <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                    <span>💬</span>
+                    <a href="https://wa.me/201285197778" target="_blank" style="color: #25D366; text-decoration: none;">01285197778</a>
+                </li>
+                <li style="margin-bottom: 12px; display: flex; gap: 10px;">
+                    <span>⏰</span>
+                    <span style="color: #cbd5e1;">السبت - الخميس: 4م - 9م</span>
+                </li>
             </ul>
         </div>
     </div>
     <div style="text-align: center; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
         <p style="color: #94a3b8;">© 2024 الكوتش أكاديمي - جميع الحقوق محفوظة</p>
+        <p style="color: #94a3b8; margin-top: 8px; font-size: 0.8rem;">أكاديمية كرة القدم المتخصصة | صناعة أبطال المستقبل</p>
         <p style="color: #94a3b8; margin-top: 5px; font-size: 0.75rem;">تأسست عام 2020 على يد: كابتن ميخا، كابتن اندرو، كابتن مينا</p>
+        <p style="color: #94a3b8; margin-top: 5px; font-size: 0.7rem;">بدعم من الأب الروحي للأكاديمية: مستر / مؤنس منير</p>
     </div>
 </div>
+
+<script>
+// تأكيد وجود وظيفة navigateTo في النطاق العام
+window.navigateTo = function(page) {
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.location.href = url.toString();
+};
+
+// إضافة مستمعي الأحداث لروابط الفوتر بعد تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    // روابط الفوتر
+    const footerLinks = document.querySelectorAll('.footer a');
+    footerLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const page = this.textContent.trim().replace('←', '').trim();
+                const pageMap = {
+                    'الرئيسية': 'home',
+                    'من نحن': 'about',
+                    'البرامج التدريبية': 'programs',
+                    'المدربون': 'coaches',
+                    'تسجيل لاعب جديد': 'registration',
+                    'الأسئلة الشائعة': 'faq',
+                    'اتصل بنا': 'contact'
+                };
+                const pageId = pageMap[page];
+                if (pageId) {
+                    navigateTo(pageId);
+                }
+            }
+        });
+    });
+});
+</script>
 """, unsafe_allow_html=True)
