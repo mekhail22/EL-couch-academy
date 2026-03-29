@@ -62,10 +62,6 @@ st.markdown("""
         font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    body {
-        direction: rtl;
-    }
-    
     /* ===== الهيدر العلوي ===== */
     .top-header {
         position: fixed;
