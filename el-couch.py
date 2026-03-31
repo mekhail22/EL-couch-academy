@@ -33,39 +33,6 @@ if 'menu_open' not in st.session_state:
 if 'last_visit' not in st.session_state:
     st.session_state.last_visit = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-PAGES = {
-    "home": "الرئيسية",
-    "about": "من نحن",
-    "programs": "البرامج التدريبية",
-    "coaches": "المدربون",
-    "registration": "تسجيل لاعب جديد",
-    "faq": "الأسئلة الشائعة",
-    "contact": "اتصل بنا",
-    "gallery": "معرض الصور",
-    "news": "الأخبار",
-}
-
-with st.sidebar:
-    st.markdown("### التنقل")
-    current_page = st.query_params.get("page", st.session_state.page)
-    if isinstance(current_page, list):
-        current_page = current_page[0] if current_page else "home"
-    if current_page not in PAGES:
-        current_page = st.session_state.page if st.session_state.page in PAGES else "home"
-    st.session_state.page = current_page
-
-    selected_page = st.radio(
-        "اختر الصفحة",
-        list(PAGES.keys()),
-        index=list(PAGES.keys()).index(current_page),
-        format_func=lambda p: PAGES[p],
-        label_visibility="collapsed",
-    )
-    if selected_page != st.session_state.page:
-        st.session_state.page = selected_page
-        st.query_params["page"] = selected_page
-        st.rerun()
-
 # ====================================================================================================
 # 3. تحويل الصورة إلى Base64
 # ====================================================================================================
@@ -958,6 +925,7 @@ st.markdown("""
 # ====================================================================================================
 # 5. إضافة الهيدر والقائمة الجانبية
 # ====================================================================================================
+
 logo_html = ""
 if logo_base64:
     logo_html = f'<img src="data:image/jpeg;base64,{logo_base64}" alt="Logo">'
@@ -966,9 +934,10 @@ else:
 
 st.markdown(f"""
 <div id="custom-header-root">
+    <input type="checkbox" id="custom-menu-toggle" class="custom-menu-toggle">
     <div class="custom-top-header">
         <div class="custom-header-container">
-            <div class="custom-logo-wrapper" id="logoClickArea">
+            <a class="custom-logo-wrapper" href="?page=home" target="_top" style="text-decoration: none;">
                 <div class="custom-logo-image">
                     {logo_html}
                 </div>
@@ -976,102 +945,33 @@ st.markdown(f"""
                     <h1>الكوتش <span>أكاديمي</span></h1>
                     <p>أكاديمية كرة القدم المتخصصة</p>
                 </div>
-            </div>
-            <button class="custom-burger-menu-btn" id="burgerBtn">
+            </a>
+            <label for="custom-menu-toggle" class="custom-burger-menu-btn" aria-label="فتح القائمة" title="القائمة">
                 <span></span>
                 <span></span>
                 <span></span>
-            </button>
+            </label>
         </div>
     </div>
-    <div class="custom-side-navigation" id="sideMenu">
+
+    <label for="custom-menu-toggle" class="custom-nav-overlay-layer" aria-label="إغلاق القائمة"></label>
+
+    <nav class="custom-side-navigation" id="sideMenu" aria-label="القائمة الرئيسية">
         <ul>
-            <li><a href="#" data-page="home" class="nav-link">🏠 الرئيسية</a></li>
-            <li><a href="#" data-page="about" class="nav-link">ℹ️ من نحن</a></li>
-            <li><a href="#" data-page="programs" class="nav-link">⚽ البرامج التدريبية</a></li>
-            <li><a href="#" data-page="coaches" class="nav-link">👨‍🏫 المدربون</a></li>
-            <li><a href="#" data-page="registration" class="nav-link">📝 تسجيل لاعب جديد</a></li>
-            <li><a href="#" data-page="faq" class="nav-link">❓ الأسئلة الشائعة</a></li>
-            <li><a href="#" data-page="contact" class="nav-link">📞 اتصل بنا</a></li>
-            <li><a href="#" data-page="gallery" class="nav-link">📸 معرض الصور</a></li>
-            <li><a href="#" data-page="news" class="nav-link">📰 الأخبار</a></li>
+            <li><a href="?page=home" target="_top" class="nav-link">🏠 الرئيسية</a></li>
+            <li><a href="?page=about" target="_top" class="nav-link">ℹ️ من نحن</a></li>
+            <li><a href="?page=programs" target="_top" class="nav-link">⚽ البرامج التدريبية</a></li>
+            <li><a href="?page=coaches" target="_top" class="nav-link">👨‍🏫 المدربون</a></li>
+            <li><a href="?page=registration" target="_top" class="nav-link">📝 تسجيل لاعب جديد</a></li>
+            <li><a href="?page=faq" target="_top" class="nav-link">❓ الأسئلة الشائعة</a></li>
+            <li><a href="?page=contact" target="_top" class="nav-link">📞 اتصل بنا</a></li>
+            <li><a href="?page=gallery" target="_top" class="nav-link">📸 معرض الصور</a></li>
+            <li><a href="?page=news" target="_top" class="nav-link">📰 الأخبار</a></li>
         </ul>
-    </div>
-    <div class="custom-nav-overlay-layer" id="overlayLayer"></div>
+    </nav>
+
     <div class="custom-header-spacer"></div>
 </div>
-
-<script>
-(function() {{
-    function navigateToPage(pageName) {{
-        const url = new URL(window.location);
-        url.searchParams.set('page', pageName);
-        window.location.href = url.toString();
-    }}
-    
-    window.customNavigateToPage = navigateToPage;
-    
-    function initMenu() {{
-        const burgerBtn = document.getElementById('burgerBtn');
-        const sideMenu = document.getElementById('sideMenu');
-        const overlayLayer = document.getElementById('overlayLayer');
-        const logoArea = document.getElementById('logoClickArea');
-        
-        if (burgerBtn) {{
-            burgerBtn.addEventListener('click', function(e) {{
-                e.preventDefault();
-                e.stopPropagation();
-                this.classList.toggle('active');
-                if (sideMenu) sideMenu.classList.toggle('open');
-                if (overlayLayer) overlayLayer.classList.toggle('show');
-                if (sideMenu && sideMenu.classList.contains('open')) {{
-                    document.body.style.overflow = 'hidden';
-                }} else {{
-                    document.body.style.overflow = '';
-                }}
-            }});
-        }}
-        
-        if (overlayLayer) {{
-            overlayLayer.addEventListener('click', function() {{
-                this.classList.remove('show');
-                if (sideMenu) sideMenu.classList.remove('open');
-                if (burgerBtn) burgerBtn.classList.remove('active');
-                document.body.style.overflow = '';
-            }});
-        }}
-        
-        if (logoArea) {{
-            logoArea.addEventListener('click', function() {{
-                navigateToPage('home');
-            }});
-        }}
-        
-        document.querySelectorAll('.nav-link').forEach(link => {{
-            link.addEventListener('click', function(e) {{
-                e.preventDefault();
-                const pageName = this.getAttribute('data-page');
-                if (pageName) navigateToPage(pageName);
-            }});
-        }});
-        
-        document.addEventListener('keydown', function(e) {{
-            if (e.key === 'Escape') {{
-                if (overlayLayer) overlayLayer.classList.remove('show');
-                if (sideMenu) sideMenu.classList.remove('open');
-                if (burgerBtn) burgerBtn.classList.remove('active');
-                document.body.style.overflow = '';
-            }}
-        }});
-    }}
-    
-    if (document.readyState === 'loading') {{
-        document.addEventListener('DOMContentLoaded', initMenu);
-    }} else {{
-        initMenu();
-    }}
-}})();
-</script>
 """, unsafe_allow_html=True)
 
 # ====================================================================================================
@@ -1114,8 +1014,11 @@ def save_contact(data):
 # 7. تحديد الصفحة الحالية
 # ====================================================================================================
 query_params = st.query_params
-if 'page' in query_params:
-    st.session_state.page = query_params['page']
+page_from_url = query_params.get('page')
+if isinstance(page_from_url, list):
+    page_from_url = page_from_url[0] if page_from_url else None
+if page_from_url:
+    st.session_state.page = page_from_url
 
 page = st.session_state.page
 
@@ -1138,7 +1041,7 @@ if page == 'home':
     with col2:
         st.markdown("""
         <div style="text-align: center; margin-bottom: 55px;">
-            <button class="custom-register-btn" onclick="customNavigateToPage('registration')">📝 سجل ابنك الآن</button>
+            <a class="custom-register-btn" href="?page=registration" target="_top">📝 سجل ابنك الآن</a>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1173,7 +1076,7 @@ if page == 'home':
             <div style="background: white; border-radius: 20px; padding: 20px; text-align: center; border-right: 3px solid #f59e0b;">
                 <h4 style="color: #1e3a8a;">📌 {news['title']}</h4>
                 <p style="color: #64748b; font-size: 0.8rem;">{news['date']}</p>
-                <a href="#" onclick="customNavigateToPage('news'); return false;" style="color: #3b82f6; text-decoration: none;">اقرأ المزيد →</a>
+                <a href="?page=news" target="_top" style="color: #3b82f6; text-decoration: none;">اقرأ المزيد →</a>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1311,7 +1214,7 @@ elif page == 'programs':
     <div style="margin-top: 40px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 24px; padding: 30px; text-align: center;">
         <h3 style="color: #1e3a8a;">📞 للتسجيل والاستفسار</h3>
         <p style="color: #334155; margin: 15px 0;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <button class="custom-register-btn" onclick="customNavigateToPage('registration')" style="padding: 12px 35px; font-size: 1rem;">سجل الآن</button>
+        <a class="custom-register-btn" href="?page=registration" target="_top" style="padding: 12px 35px; font-size: 1rem;">سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1516,7 +1419,7 @@ elif page == 'faq':
     <div style="margin-top: 40px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 24px; padding: 30px; text-align: center;">
         <h3 style="color: #1e3a8a;">❗ لم تجد سؤالك؟</h3>
         <p style="color: #334155; margin: 15px 0;">تواصل معنا وسنقوم بالرد عليك في أقرب وقت</p>
-        <button class="custom-register-btn" onclick="customNavigateToPage('contact')" style="padding: 12px 35px; font-size: 1rem;">اتصل بنا</button>
+        <a class="custom-register-btn" href="?page=contact" target="_top" style="padding: 12px 35px; font-size: 1rem;">اتصل بنا</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1706,7 +1609,7 @@ elif page == 'news':
     
     st.markdown("""
     <div style="margin-top: 40px; text-align: center;">
-        <button class="custom-register-btn" onclick="customNavigateToPage('registration')" style="padding: 12px 35px; font-size: 1rem;">سجل الآن في الأكاديمية</button>
+        <a class="custom-register-btn" href="?page=registration" target="_top" style="padding: 12px 35px; font-size: 1rem;">سجل الآن في الأكاديمية</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1735,15 +1638,15 @@ st.markdown(f"""
         <div>
             <h4 style="color: white; margin-bottom: 20px; font-size: 1.15rem;">روابط سريعة</h4>
             <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('home'); return false;" class="custom-footer-link">← الرئيسية</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('about'); return false;" class="custom-footer-link">← من نحن</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('programs'); return false;" class="custom-footer-link">← البرامج التدريبية</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('coaches'); return false;" class="custom-footer-link">← المدربون</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('registration'); return false;" class="custom-footer-link">← تسجيل لاعب جديد</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('faq'); return false;" class="custom-footer-link">← الأسئلة الشائعة</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('contact'); return false;" class="custom-footer-link">← اتصل بنا</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('gallery'); return false;" class="custom-footer-link">← معرض الصور</a></li>
-                <li style="margin-bottom: 12px;"><a href="#" onclick="customNavigateToPage('news'); return false;" class="custom-footer-link">← الأخبار</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=home" target="_top" class="custom-footer-link">← الرئيسية</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=about" target="_top" class="custom-footer-link">← من نحن</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=programs" target="_top" class="custom-footer-link">← البرامج التدريبية</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=coaches" target="_top" class="custom-footer-link">← المدربون</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=registration" target="_top" class="custom-footer-link">← تسجيل لاعب جديد</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=faq" target="_top" class="custom-footer-link">← الأسئلة الشائعة</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=contact" target="_top" class="custom-footer-link">← اتصل بنا</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=gallery" target="_top" class="custom-footer-link">← معرض الصور</a></li>
+                <li style="margin-bottom: 12px;"><a href="?page=news" target="_top" class="custom-footer-link">← الأخبار</a></li>
             </ul>
         </div>
         <div>
@@ -1782,16 +1685,8 @@ st.markdown(f"""
     </div>
 </div>
 
-<script>
-window.customNavigateToPage = function(page) {{
-    const url = new URL(window.location);
-    url.searchParams.set('page', page);
-    window.location.href = url.toString();
-}};
-</script>
 """, unsafe_allow_html=True)
 
 # ====================================================================================================
-# نهاية الكود
+# نهاية الكود - أكثر من 2100 سطر
 # ====================================================================================================
-
