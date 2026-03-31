@@ -926,54 +926,88 @@ st.markdown("""
 # 5. إضافة الهيدر والقائمة الجانبية
 # ====================================================================================================
 
-logo_html = ""
-if logo_base64:
-    logo_html = f'<img src="data:image/jpeg;base64,{logo_base64}" alt="Logo">'
-else:
-    logo_html = '<span>⚽</span>'
+PAGES = [
+    ("home", "🏠 الرئيسية"),
+    ("about", "ℹ️ من نحن"),
+    ("programs", "⚽ البرامج التدريبية"),
+    ("coaches", "👨‍🏫 المدربون"),
+    ("registration", "📝 تسجيل لاعب جديد"),
+    ("faq", "❓ الأسئلة الشائعة"),
+    ("contact", "📞 اتصل بنا"),
+    ("gallery", "📸 معرض الصور"),
+    ("news", "📰 الأخبار"),
+]
 
-st.markdown(f"""
-<div id="custom-header-root">
-    <input type="checkbox" id="custom-menu-toggle" class="custom-menu-toggle">
-    <div class="custom-top-header">
-        <div class="custom-header-container">
-            <a class="custom-logo-wrapper" href="?page=home" target="_top" style="text-decoration: none;">
-                <div class="custom-logo-image">
-                    {logo_html}
-                </div>
-                <div class="custom-logo-text">
-                    <h1>الكوتش <span>أكاديمي</span></h1>
-                    <p>أكاديمية كرة القدم المتخصصة</p>
-                </div>
-            </a>
-            <label for="custom-menu-toggle" class="custom-burger-menu-btn" aria-label="فتح القائمة" title="القائمة">
-                <span></span>
-                <span></span>
-                <span></span>
-            </label>
+def set_page(page_name: str):
+    if page_name not in {p[0] for p in PAGES}:
+        page_name = "home"
+    st.session_state.page = page_name
+    try:
+        st.query_params["page"] = page_name
+    except Exception:
+        pass
+    st.session_state.menu_open = False
+    st.rerun()
+
+# لو فيه page في الرابط، خده كصفحة حالية
+try:
+    incoming_page = st.query_params.get("page", "home")
+    if isinstance(incoming_page, list):
+        incoming_page = incoming_page[0] if incoming_page else "home"
+    if incoming_page in {p[0] for p in PAGES}:
+        st.session_state.page = incoming_page
+except Exception:
+    pass
+
+# هيدر Streamlit أصلي بدون HTML/JS، حتى ما يطلعش كـ raw text
+header_col1, header_col2, header_col3 = st.columns([1.15, 5.7, 1.15], vertical_alignment="center")
+
+with header_col1:
+    logo_path = "logo.jpg"
+    if os.path.exists(logo_path):
+        st.image(logo_path, width=58)
+    else:
+        st.markdown("### ⚽")
+
+with header_col2:
+    st.markdown("""
+        <div style="padding-top: 0.15rem;">
+            <div style="font-size: 1.55rem; font-weight: 800; color: #1e3a8a; line-height: 1.1;">
+                الكوتش <span style="color: #f59e0b;">أكاديمي</span>
+            </div>
+            <div style="font-size: 0.88rem; color: #64748b; font-weight: 600;">
+                أكاديمية كرة القدم المتخصصة
+            </div>
         </div>
-    </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    <label for="custom-menu-toggle" class="custom-nav-overlay-layer" aria-label="إغلاق القائمة"></label>
+with header_col3:
+    burger_label = "☰ القائمة" if not st.session_state.menu_open else "✕ إغلاق"
+    if st.button(burger_label, key="burger_toggle_button", use_container_width=True):
+        st.session_state.menu_open = not st.session_state.menu_open
+        st.rerun()
 
-    <nav class="custom-side-navigation" id="sideMenu" aria-label="القائمة الرئيسية">
-        <ul>
-            <li><a href="?page=home" target="_top" class="nav-link">🏠 الرئيسية</a></li>
-            <li><a href="?page=about" target="_top" class="nav-link">ℹ️ من نحن</a></li>
-            <li><a href="?page=programs" target="_top" class="nav-link">⚽ البرامج التدريبية</a></li>
-            <li><a href="?page=coaches" target="_top" class="nav-link">👨‍🏫 المدربون</a></li>
-            <li><a href="?page=registration" target="_top" class="nav-link">📝 تسجيل لاعب جديد</a></li>
-            <li><a href="?page=faq" target="_top" class="nav-link">❓ الأسئلة الشائعة</a></li>
-            <li><a href="?page=contact" target="_top" class="nav-link">📞 اتصل بنا</a></li>
-            <li><a href="?page=gallery" target="_top" class="nav-link">📸 معرض الصور</a></li>
-            <li><a href="?page=news" target="_top" class="nav-link">📰 الأخبار</a></li>
-        </ul>
-    </nav>
+if st.session_state.menu_open:
+    with st.container(border=True):
+        st.markdown("**القائمة الرئيسية**")
+        menu_cols = st.columns(3)
+        for idx, (page_key, label) in enumerate(PAGES):
+            with menu_cols[idx % 3]:
+                if st.button(label, key=f"menu_nav_{page_key}", use_container_width=True):
+                    set_page(page_key)
 
-    <div class="custom-header-spacer"></div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown("---")
+        if st.button("إغلاق القائمة", key="menu_close_button", use_container_width=True):
+            st.session_state.menu_open = False
+            st.rerun()
 
+st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+# ====================================================================================================
+# 6. دوال حفظ البيانات
+# ====================================================================================================
 # ====================================================================================================
 # 6. دوال حفظ البيانات
 # ====================================================================================================
