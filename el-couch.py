@@ -932,8 +932,8 @@ if logo_base64:
 else:
     logo_html = '<span>⚽</span>'
 
-# تخزين HTML للهيدر في متغير ثم طباعته بعد استبدال LOGO_HTML
-header_html = f"""
+# استخدام triple quotes مع format واستخدام {{ و }} للهروب من الأقواس
+header_html = """
 <style>
     #custom-header-root {{
         position: relative;
