@@ -932,8 +932,8 @@ if logo_base64:
 else:
     logo_html = '<span>⚽</span>'
 
-# استخدام triple quotes مع format واستخدام {{ و }} للهروب من الأقواس
-header_html = """
+st.markdown(
+    f"""
 <style>
     #custom-header-root {{
         position: relative;
@@ -1258,7 +1258,7 @@ header_html = """
         <div class="custom-header-container">
             <a href="?page=home" target="_top" class="custom-logo-wrapper" aria-label="الذهاب إلى الرئيسية">
                 <div class="custom-logo-image">
-                    {logo_html}
+                    {LOGO_HTML}
                 </div>
                 <div class="custom-logo-text">
                     <h1>الكوتش <span>أكاديمي</span></h1>
@@ -1277,7 +1277,7 @@ header_html = """
         <div class="custom-side-navigation-header">
             <div class="custom-side-nav-brand">
                 <div class="custom-side-nav-logo">
-                    {logo_html}
+                    {LOGO_HTML}
                 </div>
                 <div>
                     <h2>الكوتش أكاديمي</h2>
@@ -1299,9 +1299,8 @@ header_html = """
 
     <div class="custom-header-spacer"></div>
 </div>
-""".format(logo_html=logo_html)
-
-st.markdown(header_html, unsafe_allow_html=True)
+    """
+).replace("{LOGO_HTML}", logo_html)
 
 # ====================================================================================================
 # 6. دوال حفظ البيانات
@@ -1822,7 +1821,7 @@ elif page == 'contact':
         
         <div class="custom-map-container">
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d113686.258448786!2d31.156289!3d27.186696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1438a5f5c5b5b5b5%3A0x5b5b5b5b5b5b5b5b!2z2YXZg9mF2YrYp9mG2Ykg2KfZhNiq2YbYqSDYp9mE2YXYqtmG2Kkg2KfZhNir2YTYp9mG2Ykg2KfZhNi52YjYp9mG!5e0!3m2!1sar!2seg!4v1700000000000!5m2!1sar!2seg" 
-                allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         """, unsafe_allow_html=True)
     
