@@ -1258,7 +1258,7 @@ st.markdown(
         <div class="custom-header-container">
             <a href="?page=home" target="_top" class="custom-logo-wrapper" aria-label="الذهاب إلى الرئيسية">
                 <div class="custom-logo-image">
-                    {logo_html}
+                    {LOGO_HTML}
                 </div>
                 <div class="custom-logo-text">
                     <h1>الكوتش <span>أكاديمي</span></h1>
@@ -1277,7 +1277,7 @@ st.markdown(
         <div class="custom-side-navigation-header">
             <div class="custom-side-nav-brand">
                 <div class="custom-side-nav-logo">
-                    {logo_html}
+                    {LOGO_HTML}
                 </div>
                 <div>
                     <h2>الكوتش أكاديمي</h2>
@@ -1300,7 +1300,7 @@ st.markdown(
     <div class="custom-header-spacer"></div>
 </div>
     """
-
+).replace("{LOGO_HTML}", logo_html)
 
 # ====================================================================================================
 # 6. دوال حفظ البيانات
