@@ -166,133 +166,162 @@ st.markdown("""
     }
     
     /* ---------------------------------------------------------------------------------------------- */
-    /* زر البرجر منيو */
-    /* ---------------------------------------------------------------------------------------------- */
-    .custom-burger-menu-btn {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 40px;
-        height: 28px;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        z-index: 10002;
-        transition: all 0.3s ease;
-    }
-    
-    .custom-burger-menu-btn span {
-        display: block;
-        width: 100%;
-        height: 3px;
-        background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
-    
-    .custom-burger-menu-btn.active span:nth-child(1) {
-        transform: rotate(45deg) translate(10px, 10px);
-        background: #f59e0b;
-    }
-    
-    .custom-burger-menu-btn.active span:nth-child(2) {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    
-    .custom-burger-menu-btn.active span:nth-child(3) {
-        transform: rotate(-45deg) translate(10px, -10px);
-        background: #f59e0b;
-    }
-    
-    /* ---------------------------------------------------------------------------------------------- */
     /* القائمة الجانبية */
     /* ---------------------------------------------------------------------------------------------- */
+    .custom-menu-toggle { display: none; }
+    
+    .custom-nav-overlay-layer {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(15, 23, 42, 0.58);
+        z-index: 10001;
+        display: none;
+        backdrop-filter: blur(4px);
+    }
+    
+    #custom-menu-toggle:checked ~ .custom-nav-overlay-layer { display: block; }
+    
     .custom-side-navigation {
         position: fixed;
-        top: 0;
-        right: -380px;
-        width: 340px;
-        height: 100vh;
-        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-        box-shadow: -10px 0 40px rgba(0, 0, 0, 0.2);
-        z-index: 10001;
-        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        padding-top: 100px;
+        top: 84px;
+        right: 18px;
+        width: 390px;
+        max-width: calc(100vw - 36px);
+        height: calc(100vh - 100px);
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: -12px 0 42px rgba(15, 23, 42, 0.20);
+        z-index: 10002;
+        transform: translateX(120%);
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 18px 14px 16px;
         overflow-y: auto;
+        border-radius: 28px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
     }
+    
+    #custom-menu-toggle:checked ~ .custom-side-navigation { transform: translateX(0); }
     
     .custom-side-navigation::-webkit-scrollbar { width: 6px; }
     .custom-side-navigation::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
     .custom-side-navigation::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
     
-    .custom-side-navigation.open { right: 0; }
-    .custom-side-navigation ul { list-style: none; padding: 0 20px; }
-    
-    .custom-side-navigation li {
-        margin-bottom: 10px;
-        opacity: 0;
-        transform: translateX(40px);
-        transition: all 0.4s ease;
+    .custom-side-navigation-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 10px 16px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #e2e8f0;
     }
     
-    .custom-side-navigation.open li {
-        opacity: 1;
-        transform: translateX(0);
+    .custom-side-nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
     }
     
-    .custom-side-navigation.open li:nth-child(1) { transition-delay: 0.05s; }
-    .custom-side-navigation.open li:nth-child(2) { transition-delay: 0.1s; }
-    .custom-side-navigation.open li:nth-child(3) { transition-delay: 0.15s; }
-    .custom-side-navigation.open li:nth-child(4) { transition-delay: 0.2s; }
-    .custom-side-navigation.open li:nth-child(5) { transition-delay: 0.25s; }
-    .custom-side-navigation.open li:nth-child(6) { transition-delay: 0.3s; }
-    .custom-side-navigation.open li:nth-child(7) { transition-delay: 0.35s; }
-    .custom-side-navigation.open li:nth-child(8) { transition-delay: 0.4s; }
-    .custom-side-navigation.open li:nth-child(9) { transition-delay: 0.45s; }
+    .custom-side-nav-logo {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+        box-shadow: 0 8px 18px rgba(59, 130, 246, 0.18);
+    }
+    
+    .custom-side-nav-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .custom-side-nav-logo span {
+        color: white;
+        font-size: 1.8rem;
+    }
+    
+    .custom-side-nav-brand h2 {
+        margin: 0;
+        font-size: 1.22rem;
+        color: #1e3a8a;
+        font-weight: 800;
+        line-height: 1.15;
+    }
+    
+    .custom-side-nav-brand p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+    
+    .custom-close-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: #e2e8f0;
+        color: #0f172a;
+        font-size: 2rem;
+        line-height: 1;
+        text-decoration: none;
+        user-select: none;
+        flex-shrink: 0;
+    }
     
     .custom-side-navigation a {
         display: flex;
         align-items: center;
-        gap: 18px;
-        padding: 15px 22px;
+        gap: 16px;
+        padding: 15px 18px;
         color: #1e293b;
         text-decoration: none;
-        font-weight: 600;
-        border-radius: 16px;
-        transition: all 0.3s ease;
+        font-weight: 700;
+        border-radius: 18px;
+        transition: all 0.25s ease;
         cursor: pointer;
         font-size: 16px;
+        margin: 8px 4px;
     }
     
     .custom-side-navigation a:hover {
         background: linear-gradient(135deg, #eff6ff, #dbeafe);
-        color: #3b82f6;
-        transform: translateX(-8px);
+        color: #1d4ed8;
+        transform: translateX(-6px);
     }
     
-    /* ---------------------------------------------------------------------------------------------- */
-    /* طبقة التعتيم */
-    /* ---------------------------------------------------------------------------------------------- */
-    .custom-nav-overlay-layer {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.6);
-        z-index: 10000;
-        display: none;
-        backdrop-filter: blur(4px);
+    .custom-header-spacer { height: 100px; }
+    
+    .custom-menu-open-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+        font-weight: 800;
+        border-radius: 999px;
+        padding: 13px 22px;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.18);
+        user-select: none;
+        transition: all 0.25s ease;
+        white-space: nowrap;
     }
     
-    .custom-nav-overlay-layer.show { display: block; }
-    
-    /* ---------------------------------------------------------------------------------------------- */
-    /* مساحة تعويضية للهيدر */
-    /* ---------------------------------------------------------------------------------------------- */
-    .custom-header-spacer { height: 90px; }
+    .custom-menu-open-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(59, 130, 246, 0.25);
+    }
     
     /* ---------------------------------------------------------------------------------------------- */
     /* حاوية المحتوى الرئيسية */
@@ -485,6 +514,24 @@ st.markdown("""
     .custom-register-btn:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+    
+    a.custom-register-btn,
+    a.custom-register-btn:visited,
+    a.custom-register-btn:hover,
+    a.custom-register-btn:active {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none !important;
+        color: white !important;
+    }
+    
+    .custom-primary-links {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
     }
     
     /* ---------------------------------------------------------------------------------------------- */
@@ -933,325 +980,6 @@ else:
     logo_html = '<span>⚽</span>'
 
 header_html = f'''
-<style>
-    #custom-header-root {{
-        position: relative;
-        z-index: 1000;
-    }}
-
-    .custom-top-header {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.12);
-        z-index: 10000;
-        padding: 16px 0;
-        border-bottom: 2px solid #e2e8f0;
-    }}
-
-    .custom-header-container {{
-        width: 92%;
-        max-width: 1250px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-    }}
-
-    .custom-logo-wrapper {{
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        text-decoration: none;
-        color: inherit;
-        cursor: pointer;
-        min-width: 0;
-    }}
-
-    .custom-logo-image {{
-        width: 62px;
-        height: 62px;
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-        flex-shrink: 0;
-    }}
-
-    .custom-logo-image img {{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }}
-
-    .custom-logo-image span {{
-        font-size: 2.2rem;
-        color: white;
-    }}
-
-    .custom-logo-wrapper:hover .custom-logo-image {{
-        transform: scale(1.05) rotate(3deg);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-    }}
-
-    .custom-logo-text h1 {{
-        font-size: 1.85rem;
-        margin: 0;
-        color: #1e3a8a;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-        line-height: 1.1;
-    }}
-
-    .custom-logo-text span {{
-        color: #f59e0b;
-    }}
-
-    .custom-logo-text p {{
-        font-size: 0.78rem;
-        color: #64748b;
-        margin: 4px 0 0;
-        font-weight: 600;
-    }}
-
-    .custom-menu-open-btn {{
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-        color: white;
-        font-weight: 800;
-        border-radius: 999px;
-        padding: 13px 22px;
-        cursor: pointer;
-        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.18);
-        user-select: none;
-        transition: all 0.25s ease;
-        white-space: nowrap;
-    }}
-
-    .custom-menu-open-btn:hover {{
-        transform: translateY(-1px);
-        box-shadow: 0 12px 28px rgba(59, 130, 246, 0.25);
-    }}
-
-    .custom-menu-toggle {{
-        display: none;
-    }}
-
-    .custom-nav-overlay-layer {{
-        position: fixed;
-        inset: 0;
-        background-color: rgba(15, 23, 42, 0.58);
-        z-index: 10001;
-        display: none;
-        backdrop-filter: blur(4px);
-    }}
-
-    #custom-menu-toggle:checked ~ .custom-nav-overlay-layer {{
-        display: block;
-    }}
-
-    .custom-side-navigation {{
-        position: fixed;
-        top: 84px;
-        right: 18px;
-        width: 390px;
-        max-width: calc(100vw - 36px);
-        height: calc(100vh - 100px);
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        box-shadow: -12px 0 42px rgba(15, 23, 42, 0.20);
-        z-index: 10002;
-        transform: translateX(120%);
-        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 18px 14px 16px;
-        overflow-y: auto;
-        border-radius: 28px;
-        border: 1px solid rgba(226, 232, 240, 0.9);
-    }}
-
-    #custom-menu-toggle:checked ~ .custom-side-navigation {{
-        transform: translateX(0);
-    }}
-
-    .custom-side-navigation::-webkit-scrollbar {{
-        width: 6px;
-    }}
-    .custom-side-navigation::-webkit-scrollbar-track {{
-        background: #e2e8f0;
-        border-radius: 10px;
-    }}
-    .custom-side-navigation::-webkit-scrollbar-thumb {{
-        background: #3b82f6;
-        border-radius: 10px;
-    }}
-
-    .custom-side-navigation-header {{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 8px 10px 16px;
-        margin-bottom: 8px;
-        border-bottom: 1px solid #e2e8f0;
-    }}
-
-    .custom-side-nav-brand {{
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-width: 0;
-    }}
-
-    .custom-side-nav-logo {{
-        width: 54px;
-        height: 54px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        flex-shrink: 0;
-        box-shadow: 0 8px 18px rgba(59, 130, 246, 0.18);
-    }}
-
-    .custom-side-nav-logo img {{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }}
-
-    .custom-side-nav-logo span {{
-        color: white;
-        font-size: 1.8rem;
-    }}
-
-    .custom-side-nav-brand h2 {{
-        margin: 0;
-        font-size: 1.22rem;
-        color: #1e3a8a;
-        font-weight: 800;
-        line-height: 1.15;
-    }}
-
-    .custom-side-nav-brand p {{
-        margin: 4px 0 0;
-        color: #64748b;
-        font-size: 0.78rem;
-        font-weight: 600;
-    }}
-
-    .custom-close-btn {{
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        border: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        background: #e2e8f0;
-        color: #0f172a;
-        font-size: 2rem;
-        line-height: 1;
-        text-decoration: none;
-        user-select: none;
-        flex-shrink: 0;
-    }}
-
-    .custom-side-navigation a {{
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 15px 18px;
-        color: #1e293b;
-        text-decoration: none;
-        font-weight: 700;
-        border-radius: 18px;
-        transition: all 0.25s ease;
-        cursor: pointer;
-        font-size: 16px;
-        margin: 8px 4px;
-    }}
-
-    .custom-side-navigation a:hover {{
-        background: linear-gradient(135deg, #eff6ff, #dbeafe);
-        color: #1d4ed8;
-        transform: translateX(-6px);
-    }}
-
-    .custom-header-spacer {{
-        height: 100px;
-    }}
-
-    .custom-content-container {{
-        width: 90%;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 25px 15px;
-    }}
-
-    a.custom-register-btn,
-    a.custom-register-btn:visited,
-    a.custom-register-btn:hover,
-    a.custom-register-btn:active {{
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none !important;
-        color: white !important;
-    }}
-
-    .custom-primary-links {{
-        display: flex;
-        justify-content: center;
-        gap: 14px;
-        flex-wrap: wrap;
-    }}
-
-    @media (max-width: 768px) {{
-        .custom-top-header {{
-            padding: 12px 0;
-        }}
-        .custom-header-container {{
-            width: 94%;
-        }}
-        .custom-logo-image {{
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-        }}
-        .custom-logo-text h1 {{
-            font-size: 1.25rem;
-        }}
-        .custom-logo-text p {{
-            font-size: 0.68rem;
-        }}
-        .custom-menu-open-btn {{
-            padding: 11px 16px;
-            font-size: 0.92rem;
-        }}
-        .custom-side-navigation {{
-            top: 72px;
-            right: 10px;
-            width: min(92vw, 400px);
-            height: calc(100vh - 84px);
-            border-radius: 24px;
-        }}
-        .custom-header-spacer {{
-            height: 86px;
-        }}
-    }}
-</style>
-
 <div id="custom-header-root">
     <div class="custom-top-header">
         <div class="custom-header-container">
@@ -1640,6 +1368,9 @@ elif page in ('coaches', 'captains'):
     </div>
     """, unsafe_allow_html=True)
 
+# ====================================================================================================
+# 12. صفحة التسجيل
+# ====================================================================================================
 elif page == 'registration':
     st.markdown("""
     <div class="custom-page-header">
@@ -1692,6 +1423,10 @@ elif page == 'registration':
                 st.error("⚠️ يرجى الموافقة على سياسات وشروط الأكاديمية")
             else:
                 st.error("⚠️ يرجى ملء جميع الحقول المطلوبة")
+
+# ====================================================================================================
+# 13. صفحة الأسئلة الشائعة
+# ====================================================================================================
 elif page == 'faq':
     st.markdown("""
     <div class="custom-page-header">
@@ -1730,24 +1465,6 @@ elif page == 'faq':
         
         ("هل يوجد تدريبات مخصصة للبنات؟", 
          "نعم، لدينا برامج تدريبية مخصصة للبنات في أيام السبت والخميس، مع مدربات متخصصات ومؤهلات، وبيئة مناسبة ومحترمة تلبي احتياجات الفتيات الرياضية والنفسية، مع مراعاة الخصوصية الكاملة."),
-        
-        ("كم عدد اللاعبين في المجموعة التدريبية الواحدة؟", 
-         "نحرص على أن يكون عدد اللاعبين في المجموعة التدريبية الواحدة مناسبًا لضمان الجودة، حيث لا يتجاوز عدد اللاعبين 20 لاعبًا لكل مدرب، مما يسمح بمتابعة فردية فعالة لكل لاعب."),
-        
-        ("هل توجد مسابقات دورية داخل الأكاديمية؟", 
-         "نعم، نقوم بتنظيم مسابقات دورية داخلية بين فرق الأكاديمية بشكل شهري، بالإضافة إلى مشاركات خارجية مع أندية وأكاديميات أخرى، مما يتيح للاعبين فرصة اكتساب الخبرات الميدانية والتطبيق العملي."),
-        
-        ("كيف يمكنني التواصل مع إدارة الأكاديمية؟", 
-         "يمكنك التواصل معنا عبر: (1) الاتصال على الرقم 01069238878، (2) الواتساب على 01285197778، (3) البريد الإلكتروني info@elcoach-academy.com، (4) زيارة الأكاديمية في مواعيد التدريب."),
-        
-        ("هل توجد وسائل نقل للاعبين؟", 
-         "حالياً، لا نوفر خدمات نقل للاعبين، ولكن يمكن لأولياء الأمور توصيل أبنائهم إلى ملاعب التدريب. نعمل حالياً على توفير هذه الخدمة في المستقبل القريب."),
-        
-        ("ما هي شروط الانسحاب واسترداد الرسوم؟", 
-         "يتم استرداد الرسوم وفقًا للسياسة التالية: استرداد كامل خلال أول أسبوعين من بداية الموسم، استرداد 50% خلال الشهر الأول، لا يوجد استرداد بعد انقضاء الشهر الأول من الموسم."),
-        
-        ("هل يوجد عروض خاصة للأشقاء؟", 
-         "نعم، نقدم خصم 15% للشقيق الثاني، وخصم 25% للشقيق الثالث، وخصم 30% لأكثر من ثلاثة أشقاء."),
     ]
     
     for q, a in faqs:
@@ -1927,11 +1644,6 @@ elif page == 'news':
         {"title": "بدء التسجيل للموسم الجديد 2025", "date": "2025-01-15", "content": "يعلن الكوتش أكاديمي عن بدء التسجيل للموسم الجديد 2025. خصومات خاصة للمسجلين المبكرين حتى نهاية فبراير. للتسجيل يرجى زيارة صفحة التسجيل أو الاتصال بنا.", "author": "إدارة الأكاديمية"},
         {"title": "فوز فريق الأكاديمية ببطولة أسيوط", "date": "2025-01-10", "content": "حقق فريق تحت 12 سنة فوزًا مستحقًا في بطولة أسيوط الرمضانية بعد تفوقه على 8 فرق. تألق لاعبو الأكاديمية وأظهروا مستويات متميزة طوال البطولة.", "author": "كابتن ميخا"},
         {"title": "محاضرة تدريبية للمدربين", "date": "2025-01-05", "content": "أقيمت محاضرة تدريبية للمدربين حول أحدث أساليب التدريب الحديثة بحضور خبراء من الاتحاد المصري لكرة القدم. تناولت المحاضرة تطوير المهارات الفردية والخططية.", "author": "إدارة التدريب"},
-        {"title": "افتتاح فرع جديد للأكاديمية", "date": "2024-12-20", "content": "يعلن الكوتش أكاديمي عن افتتاح فرع جديد في مدينة نصر خلال الأشهر القادمة. سيتم الإعلان عن التفاصيل قريبًا.", "author": "الإدارة التنفيذية"},
-        {"title": "تخريج دفعة جديدة من اللاعبين", "date": "2024-12-15", "content": "احتفلت الأكاديمية بتخريج دفعة جديدة من اللاعبين المتميزين الذين انضموا لأندية كبرى. شهد الحفل تكريم اللاعبين المتميزين وتوزيع الشهادات.", "author": "إدارة الأكاديمية"},
-        {"title": "مشاركة مميزة في بطولة الجمهورية", "date": "2024-12-10", "content": "شارك فريق الأكاديمية في بطولة الجمهورية للناشئين وحقق نتائج متميزة. أشاد المنظمون بمستوى لاعبي الأكاديمية.", "author": "كابتن أحمد علي"},
-        {"title": "دورة تدريبية لحراس المرمى", "date": "2024-12-05", "content": "انطلقت دورة تدريبية متخصصة لحراس المرمى تحت إشراف كابتن أحمد علي، تشمل التدريبات النظرية والتطبيقية.", "author": "إدارة التدريب"},
-        {"title": "اتفاقية تعاون مع نادي الزمالك", "date": "2024-11-28", "content": "وقع الكوتش أكاديمي اتفاقية تعاون مع نادي الزمالك لاكتشاف المواهب وتأهيلها للانضمام لقطاع الناشئين بالنادي.", "author": "الإدارة التنفيذية"},
     ]
 
     for news in news_items:
@@ -1945,18 +1657,15 @@ elif page == 'news':
             <p style="color: #334155; line-height: 1.6;">{news['content']}</p>
         </div>
         """, unsafe_allow_html=True)
-        with st.expander("اقرأ المزيد"):
-            st.write(news["content"])
-            st.caption(f"الكاتب: {news['author']} | التاريخ: {news['date']}")
 
     st.markdown("""
     <div style="margin-top: 40px; text-align: center;">
         <a class="custom-register-btn" href="?page=registration" target="_top" style="padding: 12px 35px; font-size: 1rem;">سجل الآن في الأكاديمية</a>
     </div>
     """, unsafe_allow_html=True)
+
 # إغلاق حاوية المحتوى
 st.markdown('</div>', unsafe_allow_html=True)
-
 
 # ====================================================================================================
 # 17. الفوتر
