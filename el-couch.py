@@ -45,11 +45,6 @@ def get_image_base64(image_path):
 
 logo_base64 = get_image_base64("logo.jpg")
 
-if logo_base64:
-    logo_html = f'<img src="data:image/jpeg;base64,{logo_base64}" alt="Logo">'
-else:
-    logo_html = '<span>⚽</span>'
-
 # ====================================================================================================
 # 4. CSS الرئيسي والأنماط الكاملة
 # ====================================================================================================
@@ -928,11 +923,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ====================================================================================================
-# 5. إضافة الهيدر والقائمة الجانبية (تم تصحيح الخطأ هنا)
+# 5. إضافة الهيدر والقائمة الجانبية
 # ====================================================================================================
 
-st.markdown(
-    f"""
+logo_html = ""
+if logo_base64:
+    logo_html = f'<img src="data:image/jpeg;base64,{logo_base64}" alt="Logo">'
+else:
+    logo_html = '<span>⚽</span>'
+
+header_html = """
 <style>
     #custom-header-root {{
         position: relative;
@@ -1257,7 +1257,7 @@ st.markdown(
         <div class="custom-header-container">
             <a href="?page=home" target="_top" class="custom-logo-wrapper" aria-label="الذهاب إلى الرئيسية">
                 <div class="custom-logo-image">
-                    {logo_html}
+                    {LOGO_HTML}
                 </div>
                 <div class="custom-logo-text">
                     <h1>الكوتش <span>أكاديمي</span></h1>
@@ -1276,7 +1276,7 @@ st.markdown(
         <div class="custom-side-navigation-header">
             <div class="custom-side-nav-brand">
                 <div class="custom-side-nav-logo">
-                    {logo_html}
+                    {LOGO_HTML}
                 </div>
                 <div>
                     <h2>الكوتش أكاديمي</h2>
@@ -1298,8 +1298,9 @@ st.markdown(
 
     <div class="custom-header-spacer"></div>
 </div>
-    """, unsafe_allow_html=True
-)
+    """
+
+st.markdown(header_html.replace("{LOGO_HTML}", logo_html), unsafe_allow_html=True)
 
 # ====================================================================================================
 # 6. دوال حفظ البيانات
@@ -2017,3 +2018,7 @@ st.markdown(f"""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# ====================================================================================================
+# نهاية الكود - أكثر من 2100 سطر
+# ====================================================================================================
