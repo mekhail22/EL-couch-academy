@@ -932,8 +932,7 @@ if logo_base64:
 else:
     logo_html = '<span>⚽</span>'
 
-st.markdown(
-    f"""
+header_html = f'''
 <style>
     #custom-header-root {{
         position: relative;
@@ -1299,9 +1298,9 @@ st.markdown(
 
     <div class="custom-header-spacer"></div>
 </div>
-    """,
-    unsafe_allow_html=True
-)
+'''
+
+st.markdown(header_html, unsafe_allow_html=True)
 
 # ====================================================================================================
 # 6. دوال حفظ البيانات
@@ -2021,5 +2020,5 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ====================================================================================================
-# نهاية الكود - أكثر من 2100 سطر
+# نهاية الكود
 # ====================================================================================================
