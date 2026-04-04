@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import base64
+import html
 import requests
 from datetime import datetime
 
@@ -1250,13 +1251,18 @@ elif page == "contact":
                     )
                 else:
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    safe_name = html.escape(contact_name)
+                    safe_phone = html.escape(contact_phone)
+                    safe_email = html.escape(contact_email) if contact_email else 'غير محدد'
+                    safe_inquiry = html.escape(inquiry_type)
+                    safe_message = html.escape(contact_message)
                     telegram_text = (
                         f"<b>📬 رسالة جديدة - الكوتش أكاديمي</b>\n\n"
-                        f"<b>الاسم:</b> {contact_name}\n"
-                        f"<b>الهاتف:</b> {contact_phone}\n"
-                        f"<b>الإيميل:</b> {contact_email or 'غير محدد'}\n"
-                        f"<b>نوع الاستفسار:</b> {inquiry_type}\n"
-                        f"<b>الرسالة:</b>\n{contact_message}\n\n"
+                        f"<b>الاسم:</b> {safe_name}\n"
+                        f"<b>الهاتف:</b> {safe_phone}\n"
+                        f"<b>الإيميل:</b> {safe_email}\n"
+                        f"<b>نوع الاستفسار:</b> {safe_inquiry}\n"
+                        f"<b>الرسالة:</b>\n{safe_message}\n\n"
                         f"<b>وقت الإرسال:</b> {timestamp}"
                     )
                     success, msg = send_telegram_message(telegram_text)
