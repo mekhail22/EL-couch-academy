@@ -733,7 +733,7 @@ else:
 header_html = f"""
 <div class="ec-header">
     <div class="ec-header-inner">
-        <a href="?page=home" target="_top" class="ec-logo-wrap">
+        <a href="?page=home" onclick="window.parent.location.href='?page=home';return false;" class="ec-logo-wrap">
             <div class="ec-logo-img">{logo_html}</div>
             <div class="ec-logo-txt">
                 <h1>الكوتش <span>أكاديمي</span></h1>
@@ -759,14 +759,14 @@ header_html = f"""
         </div>
         <label for="ec-menu-chk" class="ec-close-btn">&times;</label>
     </div>
-    <a href="?page=home" target="_top">🏠 الرئيسية</a>
-    <a href="?page=about" target="_top">ℹ️ من نحن</a>
-    <a href="?page=programs" target="_top">⚽ البرامج التدريبية</a>
-    <a href="?page=captains" target="_top">👨‍🏫 صفحة الكباتن</a>
-    <a href="?page=registration" target="_top">📝 سجل لاعب جديد</a>
-    <a href="?page=faq" target="_top">❓ الأسئلة الشائعة</a>
-    <a href="?page=contact" target="_top">📞 اتصل بنا</a>
-    <a href="?page=news" target="_top">📰 الأخبار</a>
+    <a href="?page=home" onclick="window.parent.location.href='?page=home';return false;">🏠 الرئيسية</a>
+    <a href="?page=about" onclick="window.parent.location.href='?page=about';return false;">ℹ️ من نحن</a>
+    <a href="?page=programs" onclick="window.parent.location.href='?page=programs';return false;">⚽ البرامج التدريبية</a>
+    <a href="?page=captains" onclick="window.parent.location.href='?page=captains';return false;">👨‍🏫 صفحة الكباتن</a>
+    <a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;">📝 سجل لاعب جديد</a>
+    <a href="?page=faq" onclick="window.parent.location.href='?page=faq';return false;">❓ الأسئلة الشائعة</a>
+    <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;">📞 اتصل بنا</a>
+    <a href="?page=news" onclick="window.parent.location.href='?page=news';return false;">📰 الأخبار</a>
 </nav>
 
 <div class="ec-spacer"></div>
@@ -803,8 +803,8 @@ if page == "home":
         </p>
         <p class="ec-hero-slogan">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
         <div class="ec-hero-btns">
-            <a href="?page=registration" target="_top" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
-            <a href="?page=contact" target="_top" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
+            <a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
+            <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -993,7 +993,7 @@ elif page == "programs":
     <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
         <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
         <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <a class="ec-btn ec-btn-gold" href="?page=registration" target="_top" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
+        <a class="ec-btn ec-btn-gold" href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1377,11 +1377,11 @@ st.markdown(f"""
         <div>
             <h4>روابط سريعة</h4>
             <ul>
-                <li><a href="?page=home" target="_top">🏠 الرئيسية</a></li>
-                <li><a href="?page=about" target="_top">ℹ️ من نحن</a></li>
-                <li><a href="?page=programs" target="_top">⚽ البرامج التدريبية</a></li>
-                <li><a href="?page=captains" target="_top">👨‍🏫 الكباتن</a></li>
-                <li><a href="?page=registration" target="_top">📝 سجل لاعب جديد</a></li>
+                <li><a href="?page=home" onclick="window.parent.location.href='?page=home';return false;">🏠 الرئيسية</a></li>
+                <li><a href="?page=about" onclick="window.parent.location.href='?page=about';return false;">ℹ️ من نحن</a></li>
+                <li><a href="?page=programs" onclick="window.parent.location.href='?page=programs';return false;">⚽ البرامج التدريبية</a></li>
+                <li><a href="?page=captains" onclick="window.parent.location.href='?page=captains';return false;">👨‍🏫 الكباتن</a></li>
+                <li><a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;">📝 سجل لاعب جديد</a></li>
             </ul>
         </div>
         <div>
@@ -1389,7 +1389,7 @@ st.markdown(f"""
             <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
             <p>🕐 السبت والخميس - الفترة المسائية</p>
             <p style="margin-top:12px;">
-                <a href="?page=contact" target="_top" style="color:#f59e0b; font-weight:700;">📞 اتصل بنا</a>
+                <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;" style="color:#f59e0b; font-weight:700;">📞 اتصل بنا</a>
             </p>
         </div>
     </div>
