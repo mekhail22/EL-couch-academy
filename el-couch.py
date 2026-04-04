@@ -733,7 +733,7 @@ else:
 header_html = f"""
 <div class="ec-header">
     <div class="ec-header-inner">
-        <a href="?page=home" onclick="window.parent.location.href='?page=home';return false;" class="ec-logo-wrap">
+        <a onclick="document.querySelector('[data-nav=home]')?.click();" class="ec-logo-wrap" style="cursor:pointer;">
             <div class="ec-logo-img">{logo_html}</div>
             <div class="ec-logo-txt">
                 <h1>الكوتش <span>أكاديمي</span></h1>
@@ -759,14 +759,14 @@ header_html = f"""
         </div>
         <label for="ec-menu-chk" class="ec-close-btn">&times;</label>
     </div>
-    <a href="?page=home" onclick="window.parent.location.href='?page=home';return false;">🏠 الرئيسية</a>
-    <a href="?page=about" onclick="window.parent.location.href='?page=about';return false;">ℹ️ من نحن</a>
-    <a href="?page=programs" onclick="window.parent.location.href='?page=programs';return false;">⚽ البرامج التدريبية</a>
-    <a href="?page=captains" onclick="window.parent.location.href='?page=captains';return false;">👨‍🏫 صفحة الكباتن</a>
-    <a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;">📝 سجل لاعب جديد</a>
-    <a href="?page=faq" onclick="window.parent.location.href='?page=faq';return false;">❓ الأسئلة الشائعة</a>
-    <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;">📞 اتصل بنا</a>
-    <a href="?page=news" onclick="window.parent.location.href='?page=news';return false;">📰 الأخبار</a>
+    <a onclick="document.querySelector('[data-nav=home]')?.click(); document.getElementById('ec-menu-chk').checked = false;">🏠 الرئيسية</a>
+    <a onclick="document.querySelector('[data-nav=about]')?.click(); document.getElementById('ec-menu-chk').checked = false;">ℹ️ من نحن</a>
+    <a onclick="document.querySelector('[data-nav=programs]')?.click(); document.getElementById('ec-menu-chk').checked = false;">⚽ البرامج التدريبية</a>
+    <a onclick="document.querySelector('[data-nav=captains]')?.click(); document.getElementById('ec-menu-chk').checked = false;">👨‍🏫 صفحة الكباتن</a>
+    <a onclick="document.querySelector('[data-nav=registration]')?.click(); document.getElementById('ec-menu-chk').checked = false;">📝 سجل لاعب جديد</a>
+    <a onclick="document.querySelector('[data-nav=faq]')?.click(); document.getElementById('ec-menu-chk').checked = false;">❓ الأسئلة الشائعة</a>
+    <a onclick="document.querySelector('[data-nav=contact]')?.click(); document.getElementById('ec-menu-chk').checked = false;">📞 اتصل بنا</a>
+    <a onclick="document.querySelector('[data-nav=news]')?.click(); document.getElementById('ec-menu-chk').checked = false;">📰 الأخبار</a>
 </nav>
 
 <div class="ec-spacer"></div>
@@ -803,8 +803,8 @@ if page == "home":
         </p>
         <p class="ec-hero-slogan">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
         <div class="ec-hero-btns">
-            <a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
-            <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
+            <button onclick="document.querySelector('[data-nav=registration]')?.click(); return false;" class="ec-btn ec-btn-gold">📝 سجل الآن</button>
+            <button onclick="document.querySelector('[data-nav=contact]')?.click(); return false;" class="ec-btn ec-btn-outline">📞 اتصل بنا</button>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -993,9 +993,12 @@ elif page == "programs":
     <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
         <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
         <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <a class="ec-btn ec-btn-gold" href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
+    
+    if st.button("📝 سجل الآن", key="register_btn_programs", use_container_width=True):
+        st.session_state.page = "registration"
+        st.rerun()
 
 # ====================================================================================================
 # CAPTAINS PAGE
@@ -1281,10 +1284,10 @@ elif page == "contact":
                 </div>
             </div>
             <div class="ec-contact-item">
-                <div class="ec-icon">📞</div>
+                <div class="ec-icon">💬</div>
                 <div>
-                    <strong style="color:#1e293b;">الهاتف</strong><br>
-                    <span style="color:#64748b;">تواصل معنا عبر الموقع</span>
+                    <strong style="color:#1e293b;">واتساب</strong><br>
+                    <a href="https://wa.me/201285197778" target="_blank" style="color:#25d366; font-weight:600; text-decoration:none;">+20 12 85197778</a>
                 </div>
             </div>
             <div class="ec-contact-item">
@@ -1301,6 +1304,11 @@ elif page == "contact":
                     <span style="color:#64748b;">أرسل رسالتك عبر النموذج وسنرد عليك</span>
                 </div>
             </div>
+        </div>
+        
+        <div class="ec-contact-card" style="margin-top: 20px;">
+            <h3 style="color:#1e3a8a; margin:0 0 18px; font-size:1.2rem; font-weight:800;">🗺️ موقعنا على الخريطة</h3>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3391.818889743226!2d31.012626!3d26.785667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x144a89e5c5f5f5f5%3A0x5f5f5f5f5f5f5f5f!2z2LnYp9iq2LHZiNmA2KjYr9in2LQg2LDZg9mA2K7YrdiM2K_YqNit!5e0!3m2!1sar!2seg!4v1640000000000" width="100%" height="350" style="border:0; border-radius:12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1376,12 +1384,12 @@ st.markdown(f"""
         </div>
         <div>
             <h4>روابط سريعة</h4>
-            <ul>
-                <li><a href="?page=home" onclick="window.parent.location.href='?page=home';return false;">🏠 الرئيسية</a></li>
-                <li><a href="?page=about" onclick="window.parent.location.href='?page=about';return false;">ℹ️ من نحن</a></li>
-                <li><a href="?page=programs" onclick="window.parent.location.href='?page=programs';return false;">⚽ البرامج التدريبية</a></li>
-                <li><a href="?page=captains" onclick="window.parent.location.href='?page=captains';return false;">👨‍🏫 الكباتن</a></li>
-                <li><a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;">📝 سجل لاعب جديد</a></li>
+            <ul id="footer-nav">
+                <li><a onclick="document.querySelector('[data-nav=home]')?.click()">🏠 الرئيسية</a></li>
+                <li><a onclick="document.querySelector('[data-nav=about]')?.click()">ℹ️ من نحن</a></li>
+                <li><a onclick="document.querySelector('[data-nav=programs]')?.click()">⚽ البرامج التدريبية</a></li>
+                <li><a onclick="document.querySelector('[data-nav=captains]')?.click()">👨‍🏫 الكباتن</a></li>
+                <li><a onclick="document.querySelector('[data-nav=registration]')?.click()">📝 سجل لاعب جديد</a></li>
             </ul>
         </div>
         <div>
@@ -1389,7 +1397,7 @@ st.markdown(f"""
             <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
             <p>🕐 السبت والخميس - الفترة المسائية</p>
             <p style="margin-top:12px;">
-                <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;" style="color:#f59e0b; font-weight:700;">📞 اتصل بنا</a>
+                <a onclick="document.querySelector('[data-nav=contact]')?.click()" style="color:#f59e0b; font-weight:700; cursor:pointer;">📞 اتصل بنا</a>
             </p>
         </div>
     </div>
@@ -1397,4 +1405,99 @@ st.markdown(f"""
         جميع الحقوق محفوظة &copy; {current_year} الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة
     </div>
 </div>
+""", unsafe_allow_html=True)
+
+# Hidden navigation buttons for page switching
+col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
+
+nav_buttons = {
+    col1: ("nav_home", "home"),
+    col2: ("nav_about", "about"),
+    col3: ("nav_programs", "programs"),
+    col4: ("nav_captains", "captains"),
+    col5: ("nav_registration", "registration"),
+    col6: ("nav_faq", "faq"),
+    col7: ("nav_contact", "contact"),
+    col8: ("nav_news", "news"),
+}
+
+for col, (key, page_name) in nav_buttons.items():
+    with col:
+        if st.button("x", key=key, help=page_name):
+            st.session_state.page = page_name
+            st.rerun()
+
+# Hide the buttons and implement navigation via JavaScript
+st.markdown("""
+<style>
+/* Hide the hidden navigation buttons */
+[data-testid="column"] button { display: none !important; }
+
+/* Make navigation links clickable */
+.ec-sidenav a, .ec-logo-wrap, .ec-footer a {
+    cursor: pointer;
+}
+</style>
+
+<script>
+// Navigation handler function
+function navigateTo(page) {
+    // Find the button with the corresponding key
+    const buttons = {
+        'home': 'nav_home',
+        'about': 'nav_about',
+        'programs': 'nav_programs',
+        'captains': 'nav_captains',
+        'registration': 'nav_registration',
+        'faq': 'nav_faq',
+        'contact': 'nav_contact',
+        'news': 'nav_news'
+    };
+    
+    if (buttons[page]) {
+        const button = document.querySelector(`button[aria-label="${buttons[page]}"]`) || 
+                      Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes(page));
+        if (button) {
+            button.click();
+            // Close menu if open
+            const menuCheckbox = document.getElementById('ec-menu-chk');
+            if (menuCheckbox) menuCheckbox.checked = false;
+        }
+    }
+}
+
+// Setup navigation links
+setTimeout(() => {
+    // Update all navigation link onclick handlers
+    document.querySelectorAll('.ec-sidenav a, .ec-logo-wrap').forEach(link => {
+        const onclickAttr = link.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes("document.querySelector('[data-nav")) {
+            // Extract page name from the onclick attribute
+            const pageMatch = onclickAttr.match(/data-nav=([a-z]+)/);
+            if (pageMatch) {
+                const page = pageMatch[1];
+                link.onclick = () => {
+                    navigateTo(page);
+                    return false;
+                };
+            }
+        }
+    });
+    
+    // Handle footer links
+    document.querySelectorAll('.ec-footer a').forEach(link => {
+        const onclickAttr = link.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes("document.querySelector('[data-nav")) {
+            const pageMatch = onclickAttr.match(/data-nav=([a-z]+)/);
+            if (pageMatch) {
+                const page = pageMatch[1];
+                link.onclick = () => {
+                    navigateTo(page);
+                    return false;
+                };
+            }
+        }
+    });
+}, 500);
+</script>
 """, unsafe_allow_html=True)
