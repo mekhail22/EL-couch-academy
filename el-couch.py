@@ -1165,6 +1165,7 @@ elif page == "registration":
         col1, col2 = st.columns(2)
         with col1:
             parent_name = st.text_input("اسم ولي الأمر *", placeholder="مثال: أحمد محمود")
+            parent_email = st.text_input("البريد الإلكتروني *", placeholder="example@email.com")
         with col2:
             parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
 
@@ -1173,16 +1174,33 @@ elif page == "registration":
         submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
         if submitted:
-            if not player_name or not age_group or not parent_name or not parent_phone:
+            if not player_name or not age_group or not parent_name or not parent_phone or not parent_email:
                 st.markdown(
                     '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
                     unsafe_allow_html=True,
                 )
             else:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                row = [player_name, age_group, position, parent_name, parent_phone, notes, timestamp]
+                row = [player_name, age_group, position, parent_name, parent_email, parent_phone, notes, timestamp]
                 success, msg = save_to_google_sheets(row)
+                
                 if success:
+                    # إرسال البيانات إلى التلجرام
+                    telegram_text = (
+                        f"<b>⚽ طلب تسجيل لاعب جديد - الكوتش أكاديمي</b>\n\n"
+                        f"<b>معلومات اللاعب:</b>\n"
+                        f"• <b>الاسم:</b> {player_name}\n"
+                        f"• <b>الفئة العمرية:</b> {age_group}\n"
+                        f"• <b>المركز المفضل:</b> {position or 'لم يتم التحديد'}\n\n"
+                        f"<b>معلومات ولي الأمر:</b>\n"
+                        f"• <b>الاسم:</b> {parent_name}\n"
+                        f"• <b>الهاتف:</b> {parent_phone}\n"
+                        f"• <b>الايميل:</b> {parent_email}\n\n"
+                        f"<b>ملاحظات:</b> {notes or 'بدون ملاحظات'}\n\n"
+                        f"<b>وقت التسجيل:</b> {timestamp}"
+                    )
+                    telegram_success, _ = send_telegram_message(telegram_text)
+                    
                     st.session_state.show_success = True
                     st.session_state.registration_submitted = True
                     st.rerun()
@@ -1325,7 +1343,7 @@ elif page == "contact":
                 <div class="ec-icon">📞</div>
                 <div>
                     <strong style="color:#1e293b;">الهاتف</strong><br>
-                    <span style="color:#64748b;">+20 12 85197778</span>
+                    <span style="color:#64748b;"><a href="tel:+201285197778" style="color:#64748b; text-decoration:none;">+20 12 851 97778</a></span>
                 </div>
             </div>
             <div class="ec-contact-item">
@@ -1348,7 +1366,7 @@ elif page == "contact":
         # WhatsApp button
         st.markdown("""
         <div style="margin-top: 20px; text-align: center;">
-            <a href="https://wa.me/201285197778" target="_blank" class="ec-whatsapp-btn">
+            <a href="https://wa.me/201285197778?text=مرحباً%20بالكوتش%20أكاديمي" target="_blank" class="ec-whatsapp-btn">
                 💬 تواصل معنا عبر واتساب
             </a>
         </div>
