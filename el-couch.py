@@ -15,23 +15,12 @@ def save_to_google_sheets(data_row):
         from google.oauth2.service_account import Credentials
         import json
 
-        # محاولة الحصول على البيانات من البيئة أو من ملف
-        service_account_info = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
-        spreadsheet_id = os.environ.get("GOOGLE_SPREADSHEET_ID", "")
-        
-        # إذا لم توجد في البيئة، حاول من ملف config.json
-        if not service_account_info or not spreadsheet_id:
-            try:
-                if os.path.exists("config.json"):
-                    with open("config.json", "r", encoding="utf-8") as f:
-                        config = json.load(f)
-                        service_account_info = json.dumps(config.get("google_service_account", {}))
-                        spreadsheet_id = config.get("spreadsheet_id", "")
-            except Exception:
-                pass
-
-        if not service_account_info or not spreadsheet_id:
-            return False, "❌ لم يتم تكوين جوجل شيتس.\n\nالحل:\n1. أنشئ ملف config.json\n2. أو ضع متغيرات البيئة (GOOGLE_SERVICE_ACCOUNT_KEY و GOOGLE_SPREADSHEET_ID)"
+        # قراءة البيانات من Streamlit Secrets
+        try:
+            service_account_info = json.dumps(st.secrets["google"]["service_account"])
+            spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
+        except KeyError:
+            return False, "❌ لم يتم العثور على بيانات جوجل في Secrets.\n\nأضف البيانات إلى .streamlit/secrets.toml"
 
         creds_dict = json.loads(service_account_info)
         scopes = [
@@ -45,7 +34,7 @@ def save_to_google_sheets(data_row):
         sheet.append_row(data_row, value_input_option="USER_ENTERED")
         return True, "✅ تم التسجيل بنجاح!"
     except json.JSONDecodeError:
-        return False, "❌ خطأ: البيانات في config.json غير صحيحة. تأكد من صيغة JSON"
+        return False, "❌ خطأ: صيغة البيانات غير صحيحة في Secrets"
     except Exception as e:
         return False, f"❌ خطأ: {str(e)}"
 
@@ -56,24 +45,12 @@ def save_to_google_sheets(data_row):
 def send_telegram_message(text):
     """Send a message to a Telegram chat using Bot API."""
     try:
-        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-        chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
-        
-        # إذا لم توجد في البيئة، حاول من ملف config.json
-        if not bot_token or not chat_id:
-            try:
-                if os.path.exists("config.json"):
-                    import json
-                    with open("config.json", "r", encoding="utf-8") as f:
-                        config = json.load(f)
-                        telegram_config = config.get("telegram", {})
-                        bot_token = telegram_config.get("bot_token", "")
-                        chat_id = telegram_config.get("chat_id", "")
-            except Exception:
-                pass
-
-        if not bot_token or not chat_id:
-            return False, "❌ لم يتم تكوين بوت التلجرام.\n\nالحل:\n1. أنشئ ملف config.json\n2. أو ضع متغيرات البيئة (TELEGRAM_BOT_TOKEN و TELEGRAM_CHAT_ID)"
+        # قراءة البيانات من Streamlit Secrets
+        try:
+            bot_token = st.secrets["telegram"]["bot_token"]
+            chat_id = st.secrets["telegram"]["chat_id"]
+        except KeyError:
+            return False, "❌ لم يتم العثور على بيانات التلجرام في Secrets.\n\nأضف البيانات إلى .streamlit/secrets.toml"
 
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
