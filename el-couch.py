@@ -75,8 +75,6 @@ if "show_success" not in st.session_state:
     st.session_state.show_success = False
 if "show_contact_success" not in st.session_state:
     st.session_state.show_contact_success = False
-if "menu_open" not in st.session_state:
-    st.session_state.menu_open = False
 if "registration_submitted" not in st.session_state:
     st.session_state.registration_submitted = False
 
@@ -96,6 +94,7 @@ logo_base64 = get_image_base64("logo.jpg")
 # Main CSS
 # ====================================================================================================
 st.markdown("""
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 /* ---- Hide Streamlit defaults ---- */
@@ -168,7 +167,7 @@ div[data-testid="stDecoration"] { display: none !important; }
     font-size: 0.75rem; color: #64748b; margin: 3px 0 0; font-weight: 600;
 }
 
-/* ---- Menu Toggle (Pure CSS) ---- */
+/* ---- Menu Toggle ---- */
 .ec-menu-toggle { display: none; }
 .ec-menu-btn {
     display: inline-flex; align-items: center; gap: 10px;
@@ -722,6 +721,7 @@ div[data-testid="stDecoration"] { display: none !important; }
     .ec-lead-captain { margin: 0 auto 30px; }
     .ec-info-banner .ec-banner-stats { gap: 16px; }
 }
+</style>
 """, unsafe_allow_html=True)
 
 # ====================================================================================================
@@ -736,7 +736,7 @@ else:
 header_html = f"""
 <div class="ec-header">
     <div class="ec-header-inner">
-        <a href="?page=home" onclick="navigateTo(event, 'home')" class="ec-logo-wrap">
+        <a href="#" onclick="navigateTo(event, 'home')" class="ec-logo-wrap">
             {logo_html}
             <div class="ec-logo-txt">
                 <h1>الكوتش أكاديمي <span>⚽</span></h1>
@@ -762,14 +762,14 @@ header_html = f"""
         </div>
         <label for="ec-menu-toggle" class="ec-close-btn" onclick="document.getElementById('ec-menu-toggle').checked=false">×</label>
     </div>
-    <a href="?page=home" onclick="navigateTo(event, 'home')">🏠 الرئيسية</a>
-    <a href="?page=about" onclick="navigateTo(event, 'about')">ℹ️ من نحن</a>
-    <a href="?page=programs" onclick="navigateTo(event, 'programs')">⚽ البرامج التدريبية</a>
-    <a href="?page=captains" onclick="navigateTo(event, 'captains')">👨‍🏫 صفحة الكباتن</a>
-    <a href="?page=registration" onclick="navigateTo(event, 'registration')">📝 سجل لاعب جديد</a>
-    <a href="?page=faq" onclick="navigateTo(event, 'faq')">❓ الأسئلة الشائعة</a>
-    <a href="?page=contact" onclick="navigateTo(event, 'contact')">📞 اتصل بنا</a>
-    <a href="?page=news" onclick="navigateTo(event, 'news')">📰 الأخبار</a>
+    <a href="#" onclick="navigateTo(event, 'home')">🏠 الرئيسية</a>
+    <a href="#" onclick="navigateTo(event, 'about')">ℹ️ من نحن</a>
+    <a href="#" onclick="navigateTo(event, 'programs')">⚽ البرامج التدريبية</a>
+    <a href="#" onclick="navigateTo(event, 'captains')">👨‍🏫 صفحة الكباتن</a>
+    <a href="#" onclick="navigateTo(event, 'registration')">📝 سجل لاعب جديد</a>
+    <a href="#" onclick="navigateTo(event, 'faq')">❓ الأسئلة الشائعة</a>
+    <a href="#" onclick="navigateTo(event, 'contact')">📞 اتصل بنا</a>
+    <a href="#" onclick="navigateTo(event, 'news')">📰 الأخبار</a>
 </nav>
 
 <script>
@@ -777,14 +777,12 @@ function navigateTo(e, page) {{
     e.preventDefault();
     const url = new URL(window.location.href);
     url.searchParams.set('page', page);
-    window.location.href = url.toString();
+    window.history.pushState({{}}, '', url.toString());
+    window.location.reload();
 }}
-// Close menu when clicking outside on mobile
 document.addEventListener('click', function(e) {{
     const menu = document.getElementById('ec-menu-toggle');
-    const btn = document.querySelector('.ec-menu-btn');
-    if (menu && !menu.checked) return;
-    if (menu && !e.target.closest('.ec-sidenav') && !e.target.closest('.ec-menu-btn')) {{
+    if (menu && menu.checked && !e.target.closest('.ec-sidenav') && !e.target.closest('.ec-menu-btn')) {{
         menu.checked = false;
     }}
 }});
@@ -795,9 +793,10 @@ st.markdown(header_html, unsafe_allow_html=True)
 # ====================================================================================================
 # Page Routing
 # ====================================================================================================
-query_page = st.query_params.get("page", "")
+query_params = st.query_params
+query_page = query_params.get("page", "home")
 if isinstance(query_page, list):
-    query_page = query_page[0] if query_page else ""
+    query_page = query_page[0] if query_page else "home"
 if query_page:
     st.session_state.page = query_page
 page = st.session_state.page
@@ -817,8 +816,8 @@ if page == "home":
         <p class="ec-hero-desc">أول أكاديمية متخصصة تركز على بناء اللاعب الشامل من الناحية الفنية والبدنية والنفسية والذهنية، تحت إشراف مدربين معتمدين دوليًا.</p>
         <p class="ec-hero-slogan">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
         <div class="ec-hero-btns">
-            <a href="?page=registration" onclick="navigateTo(event, 'registration')" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
-            <a href="?page=contact" onclick="navigateTo(event, 'contact')" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
+            <a href="#" onclick="navigateTo(event, 'registration'); return false;" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
+            <a href="#" onclick="navigateTo(event, 'contact'); return false;" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1007,7 +1006,7 @@ elif page == "programs":
     <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
         <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
         <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <a class="ec-btn ec-btn-gold" href="?page=registration" onclick="navigateTo(event, 'registration')" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
+        <a class="ec-btn ec-btn-gold" href="#" onclick="navigateTo(event, 'registration'); return false;" style="padding:12px 35px; font-size:1rem; display:inline-block;">سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1330,11 +1329,11 @@ st.markdown(f"""
         <div>
             <h4>روابط سريعة</h4>
             <ul>
-                <li><a href="?page=home" onclick="navigateTo(event, 'home')">🏠 الرئيسية</a></li>
-                <li><a href="?page=about" onclick="navigateTo(event, 'about')">ℹ️ من نحن</a></li>
-                <li><a href="?page=programs" onclick="navigateTo(event, 'programs')">⚽ البرامج التدريبية</a></li>
-                <li><a href="?page=captains" onclick="navigateTo(event, 'captains')">👨‍🏫 الكباتن</a></li>
-                <li><a href="?page=registration" onclick="navigateTo(event, 'registration')">📝 سجل لاعب جديد</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'home'); return false;">🏠 الرئيسية</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'about'); return false;">ℹ️ من نحن</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'programs'); return false;">⚽ البرامج التدريبية</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'captains'); return false;">👨‍🏫 الكباتن</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'registration'); return false;">📝 سجل لاعب جديد</a></li>
             </ul>
         </div>
         <div>
@@ -1342,7 +1341,7 @@ st.markdown(f"""
             <ul>
                 <li>📍 ملاعب مدرسة السلام المتطورة - أسيوط</li>
                 <li>🕐 السبت والخميس - الفترة المسائية</li>
-                <li><a href="?page=contact" onclick="navigateTo(event, 'contact')">📞 اتصل بنا</a></li>
+                <li><a href="#" onclick="navigateTo(event, 'contact'); return false;">📞 اتصل بنا</a></li>
             </ul>
         </div>
     </div>
