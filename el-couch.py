@@ -4,7 +4,6 @@ import base64
 import requests
 from datetime import datetime
 
-
 # ====================================================================================================
 # Google Sheets Integration
 # ====================================================================================================
@@ -14,13 +13,13 @@ def save_to_google_sheets(data_row):
         import gspread
         from google.oauth2.service_account import Credentials
         import json
-
+        
         service_account_info = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
         spreadsheet_id = os.environ.get("GOOGLE_SPREADSHEET_ID", "")
-
+        
         if not service_account_info or not spreadsheet_id:
             return False, "لم يتم تكوين بيانات Google Sheets. يرجى التواصل مع الإدارة."
-
+        
         creds_dict = json.loads(service_account_info)
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
@@ -29,12 +28,11 @@ def save_to_google_sheets(data_row):
         credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
         gc = gspread.authorize(credentials)
         sheet = gc.open_by_key(spreadsheet_id).sheet1
-
+        
         sheet.append_row(data_row, value_input_option="USER_ENTERED")
         return True, "تم التسجيل بنجاح!"
     except Exception as e:
         return False, f"حدث خطأ أثناء الحفظ: {str(e)}"
-
 
 # ====================================================================================================
 # Telegram Integration
@@ -44,19 +42,19 @@ def send_telegram_message(text):
     try:
         bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
         chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
-
+        
         if not bot_token or not chat_id:
             return False, "لم يتم تكوين بيانات Telegram. يرجى التواصل مع الإدارة."
-
+        
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
         resp = requests.post(url, json=payload, timeout=10)
+        
         if resp.status_code == 200:
             return True, "تم الإرسال بنجاح!"
         return False, f"فشل الإرسال: {resp.text}"
     except Exception as e:
         return False, f"حدث خطأ أثناء الإرسال: {str(e)}"
-
 
 # ====================================================================================================
 # Page Config
@@ -98,7 +96,6 @@ logo_base64 = get_image_base64("logo.jpg")
 # Main CSS
 # ====================================================================================================
 st.markdown("""
-<style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 /* ---- Hide Streamlit defaults ---- */
@@ -447,7 +444,7 @@ div[data-testid="stDecoration"] { display: none !important; }
 .ec-mission-card h3, .ec-vision-card h3 {
     color: #1e3a8a; font-size: 1.5rem; margin: 0 0 14px; font-weight: 800;
 }
-.ec-mission-card p, .ec-vision-card p {
+.ec-mission-card p, .ec-vision-card p { 
     color: #334155; line-height: 1.7; margin: 0 0 14px; font-size: 0.95rem;
 }
 .ec-mission-card ul, .ec-vision-card ul {
@@ -599,6 +596,14 @@ div[data-testid="stDecoration"] { display: none !important; }
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
+.ec-contact-item a {
+    color: #3b82f6 !important; text-decoration: none !important; font-weight: 600;
+}
+.ec-contact-item a:hover { color: #1d4ed8 !important; }
+.ec-whatsapp-link {
+    color: #25D366 !important; font-weight: 700 !important; font-size: 1.1rem !important;
+}
+.ec-whatsapp-link:hover { color: #128C7E !important; }
 
 /* ---- News Cards ---- */
 .ec-news-card {
@@ -717,37 +722,35 @@ div[data-testid="stDecoration"] { display: none !important; }
     .ec-lead-captain { margin: 0 auto 30px; }
     .ec-info-banner .ec-banner-stats { gap: 16px; }
 }
-</style>
 """, unsafe_allow_html=True)
 
-
 # ====================================================================================================
-# Header + Side Navigation
+# Header + Side Navigation (مع جافاسكريبت للتنقل في نفس التاب)
 # ====================================================================================================
 logo_html = ""
 if logo_base64:
-    logo_html = f'<img src="data:image/jpeg;base64,{logo_base64}" alt="Logo">'
+    logo_html = f'<div class="ec-logo-img"><img src="data:image/jpeg;base64,{logo_base64}" alt="logo"></div>'
 else:
-    logo_html = '<span>⚽</span>'
+    logo_html = '<div class="ec-logo-img"><span>⚽</span></div>'
 
 header_html = f"""
 <div class="ec-header">
     <div class="ec-header-inner">
-        <a href="?page=home" class="ec-logo-wrap">
-            <div class="ec-logo-img">{logo_html}</div>
+        <a href="?page=home" onclick="navigateTo(event, 'home')" class="ec-logo-wrap">
+            {logo_html}
             <div class="ec-logo-txt">
-                <h1>الكوتش <span>أكاديمي</span></h1>
+                <h1>الكوتش أكاديمي <span>⚽</span></h1>
                 <p>أكاديمية كرة القدم المتخصصة</p>
             </div>
         </a>
-        <label for="ec-menu-chk" class="ec-menu-btn">☰ القائمة</label>
+        <input type="checkbox" id="ec-menu-toggle" class="ec-menu-toggle">
+        <label for="ec-menu-toggle" class="ec-menu-btn" onclick="event.preventDefault(); document.getElementById('ec-menu-toggle').checked=true;">
+            ☰ القائمة
+        </label>
     </div>
 </div>
 
-<input type="checkbox" id="ec-menu-chk" class="ec-menu-toggle" />
-
-<label for="ec-menu-chk" class="ec-overlay"></label>
-
+<div class="ec-overlay" onclick="document.getElementById('ec-menu-toggle').checked=false"></div>
 <nav class="ec-sidenav">
     <div class="ec-sidenav-header">
         <div class="ec-sidenav-brand">
@@ -757,21 +760,36 @@ header_html = f"""
                 <p>القائمة الرئيسية</p>
             </div>
         </div>
-        <label for="ec-menu-chk" class="ec-close-btn">&times;</label>
+        <label for="ec-menu-toggle" class="ec-close-btn" onclick="document.getElementById('ec-menu-toggle').checked=false">×</label>
     </div>
-    <a href="?page=home">🏠 الرئيسية</a>
-    <a href="?page=about">ℹ️ من نحن</a>
-    <a href="?page=programs">⚽ البرامج التدريبية</a>
-    <a href="?page=captains">👨‍🏫 صفحة الكباتن</a>
-    <a href="?page=registration">📝 سجل لاعب جديد</a>
-    <a href="?page=faq">❓ الأسئلة الشائعة</a>
-    <a href="?page=contact">📞 اتصل بنا</a>
-    <a href="?page=news">📰 الأخبار</a>
+    <a href="?page=home" onclick="navigateTo(event, 'home')">🏠 الرئيسية</a>
+    <a href="?page=about" onclick="navigateTo(event, 'about')">ℹ️ من نحن</a>
+    <a href="?page=programs" onclick="navigateTo(event, 'programs')">⚽ البرامج التدريبية</a>
+    <a href="?page=captains" onclick="navigateTo(event, 'captains')">👨‍🏫 صفحة الكباتن</a>
+    <a href="?page=registration" onclick="navigateTo(event, 'registration')">📝 سجل لاعب جديد</a>
+    <a href="?page=faq" onclick="navigateTo(event, 'faq')">❓ الأسئلة الشائعة</a>
+    <a href="?page=contact" onclick="navigateTo(event, 'contact')">📞 اتصل بنا</a>
+    <a href="?page=news" onclick="navigateTo(event, 'news')">📰 الأخبار</a>
 </nav>
 
-<div class="ec-spacer"></div>
+<script>
+function navigateTo(e, page) {{
+    e.preventDefault();
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    window.location.href = url.toString();
+}}
+// Close menu when clicking outside on mobile
+document.addEventListener('click', function(e) {{
+    const menu = document.getElementById('ec-menu-toggle');
+    const btn = document.querySelector('.ec-menu-btn');
+    if (menu && !menu.checked) return;
+    if (menu && !e.target.closest('.ec-sidenav') && !e.target.closest('.ec-menu-btn')) {{
+        menu.checked = false;
+    }}
+}});
+</script>
 """
-
 st.markdown(header_html, unsafe_allow_html=True)
 
 # ====================================================================================================
@@ -782,13 +800,12 @@ if isinstance(query_page, list):
     query_page = query_page[0] if query_page else ""
 if query_page:
     st.session_state.page = query_page
-
 page = st.session_state.page
 if page == "coaches":
     page = "captains"
-st.session_state.page = page
+    st.session_state.page = page
 
-st.markdown('<div class="ec-container">', unsafe_allow_html=True)
+st.markdown('<div class="ec-spacer"></div>', unsafe_allow_html=True)
 
 # ====================================================================================================
 # HOME PAGE
@@ -796,19 +813,16 @@ st.markdown('<div class="ec-container">', unsafe_allow_html=True)
 if page == "home":
     st.markdown("""
     <div class="ec-hero">
-        <h1>⚽ الكوتش <span>أكاديمي</span></h1>
-        <p class="ec-hero-desc">
-            أول أكاديمية متخصصة تركز على بناء اللاعب الشامل من الناحية الفنية والبدنية والنفسية والذهنية،
-            تحت إشراف مدربين معتمدين دوليًا.
-        </p>
+        <h1>⚽ الكوتش أكاديمي</h1>
+        <p class="ec-hero-desc">أول أكاديمية متخصصة تركز على بناء اللاعب الشامل من الناحية الفنية والبدنية والنفسية والذهنية، تحت إشراف مدربين معتمدين دوليًا.</p>
         <p class="ec-hero-slogan">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
         <div class="ec-hero-btns">
-            <a href="?page=registration" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
-            <a href="?page=contact" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
+            <a href="?page=registration" onclick="navigateTo(event, 'registration')" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
+            <a href="?page=contact" onclick="navigateTo(event, 'contact')" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+    
     st.markdown('<div class="ec-section-title">إنجازات الأكاديمية</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="ec-stats">
@@ -861,7 +875,7 @@ elif page == "about":
         <p>الكوتش أكاديمي.. رؤية جديدة في عالم تدريب كرة القدم</p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     st.markdown("""
     <div class="ec-about-grid">
         <div class="ec-about-visual">⚽</div>
@@ -931,7 +945,7 @@ elif page == "programs":
         <p>مواعيد تدريبية مصممة لكل فئة عمرية</p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     st.markdown("""
     <div class="ec-programs-grid">
         <div class="ec-program-card">
@@ -993,7 +1007,7 @@ elif page == "programs":
     <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
         <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
         <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <a class="ec-btn ec-btn-gold" href="?page=registration" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
+        <a class="ec-btn ec-btn-gold" href="?page=registration" onclick="navigateTo(event, 'registration')" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1007,7 +1021,7 @@ elif page in ("coaches", "captains"):
         <p>فريقنا من الكباتن والمدربين ذوي الخبرة والكفاءة</p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     st.markdown("""
     <div class="ec-lead-captain">
         <div class="ec-lead-avatar">👨‍🏫</div>
@@ -1015,11 +1029,11 @@ elif page in ("coaches", "captains"):
             <h3>كابتن / ميخائيل كميل رؤف</h3>
             <div class="ec-title-badge">المدير الفني - مؤسس الأكاديمية</div>
             <div class="ec-qualifications">
-                🎓 بكالوريوس تربية رياضية<br>
-                📜 رخصة تدريب CAF لمراحل البراعم<br>
-                📜 دبلومة الإعداد البدني المتقدم<br>
-                📜 دبلومة إصابات الملاعب والعلاج الطبيعي<br>
-                🏫 مدرس تربية رياضية بمدارس السلام الخاصة<br>
+                🎓 بكالوريوس تربية رياضية <br>
+                📜 رخصة تدريب CAF لمراحل البراعم <br>
+                📜 دبلومة الإعداد البدني المتقدم <br>
+                📜 دبلومة إصابات الملاعب والعلاج الطبيعي <br>
+                🏫 مدرس تربية رياضية بمدارس السلام الخاصة <br>
                 ⭐ خبرة أكثر من 10 سنوات في تدريب الناشئين
             </div>
         </div>
@@ -1034,9 +1048,9 @@ elif page in ("coaches", "captains"):
                 <h3>كابتن أحمد علي</h3>
                 <div class="ec-coach-title">مدرب حراس مرمى - معتمد CAF</div>
                 <div class="ec-coach-desc">
-                    🎓 بكالوريوس تربية رياضية<br>
-                    📜 رخصة تدريب حراس مرمى CAF<br>
-                    📜 خبرة 15 عامًا في تدريب حراس المرمى<br>
+                    🎓 بكالوريوس تربية رياضية <br>
+                    📜 رخصة تدريب حراس مرمى CAF <br>
+                    📜 خبرة 15 عامًا في تدريب حراس المرمى <br>
                     📜 عمل مع عدة أندية في الدوري المصري
                 </div>
             </div>
@@ -1047,9 +1061,9 @@ elif page in ("coaches", "captains"):
                 <h3>د. خالد السيد</h3>
                 <div class="ec-coach-title">مدرب لياقة بدنية - دكتوراه</div>
                 <div class="ec-coach-desc">
-                    🎓 دكتوراه في علوم الرياضة<br>
-                    📜 أستاذ مساعد بكلية التربية الرياضية<br>
-                    📜 مختص في تطوير قدرات الناشئين<br>
+                    🎓 دكتوراه في علوم الرياضة <br>
+                    📜 أستاذ مساعد بكلية التربية الرياضية <br>
+                    📜 مختص في تطوير قدرات الناشئين <br>
                     📜 مدرب لياقة معتمد من الاتحاد المصري
                 </div>
             </div>
@@ -1060,9 +1074,9 @@ elif page in ("coaches", "captains"):
                 <h3>كابتن محمد جابر</h3>
                 <div class="ec-coach-title">مدرب مهارات فنية - معتمد CAF</div>
                 <div class="ec-coach-desc">
-                    🎓 بكالوريوس تربية رياضية<br>
-                    📜 رخصة تدريب مهارات CAF<br>
-                    📜 خبرة 12 عامًا في تدريب المهارات الفنية<br>
+                    🎓 بكالوريوس تربية رياضية <br>
+                    📜 رخصة تدريب مهارات CAF <br>
+                    📜 خبرة 12 عامًا في تدريب المهارات الفنية <br>
                     📜 دورات متقدمة في تدريب الناشئين
                 </div>
             </div>
@@ -1092,12 +1106,9 @@ elif page == "registration":
         <p>انضم إلى الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     if st.session_state.show_success:
-        st.markdown(
-            '<div class="ec-success-msg">تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="ec-success-msg">تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>', unsafe_allow_html=True)
         st.session_state.show_success = False
 
     with st.form("registration_form"):
@@ -1107,12 +1118,7 @@ elif page == "registration":
             player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود")
             age_group = st.selectbox(
                 "الفئة العمرية *",
-                [
-                    "",
-                    "🏃‍♀️ بنات (جميع الأعمار)",
-                    "🏃 بنين (الصف الأول - الخامس الابتدائي)",
-                    "🏃 بنين (الصف السادس - الثاني الإعدادي)",
-                ],
+                ["", "🏃‍♀️ بنات (جميع الأعمار)", "🏃 بنين (الصف الأول - الخامس الابتدائي)", "🏃 بنين (الصف السادس - الثاني الإعدادي)"],
             )
         with col2:
             position = st.selectbox(
@@ -1133,10 +1139,7 @@ elif page == "registration":
 
         if submitted:
             if not player_name or not age_group or not parent_name or not parent_phone:
-                st.markdown(
-                    '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
-                    unsafe_allow_html=True,
-                )
+                st.markdown('<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>', unsafe_allow_html=True)
             else:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 row = [player_name, age_group, position, parent_name, parent_phone, notes, timestamp]
@@ -1146,10 +1149,7 @@ elif page == "registration":
                     st.session_state.registration_submitted = True
                     st.rerun()
                 else:
-                    st.markdown(
-                        f'<div class="ec-error-msg">❌ {msg}</div>',
-                        unsafe_allow_html=True,
-                    )
+                    st.markdown(f'<div class="ec-error-msg">❌ {msg}</div>', unsafe_allow_html=True)
 
 # ====================================================================================================
 # FAQ PAGE
@@ -1161,55 +1161,28 @@ elif page == "faq":
         <p>إجابات على أكثر الأسئلة شيوعًا من أولياء الأمور واللاعبين</p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     faqs = [
-        (
-            "ما هو سن القبول في الأكاديمية؟",
-            "نستقبل اللاعبين والبنات من سن الصف الأول الابتدائي وحتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفة لكل مرحلة لضمان تدريب مناسب لكل سن.",
-        ),
-        (
-            "ما هي مدة البرنامج التدريبي؟",
-            "الموسم التدريبي يمتد لمدة 10 أشهر تقريبًا، من بداية سبتمبر إلى نهاية يونيو. التدريبات تقام أيام السبت والخميس في الفترة المسائية حسب الجدول المحدد لكل فئة.",
-        ),
-        (
-            "هل يوجد تدريب للبنات؟",
-            "نعم، لدينا برامج تدريبية مخصصة للبنات في أيام السبت والخميس مع مدربات متخصصات ومؤهلات، وبيئة مناسبة تلبي احتياجاتهن الرياضية والنفسية مع مراعاة الخصوصية الكاملة.",
-        ),
-        (
-            "هل يوجد تدريب للمبتدئين؟",
-            "بالتأكيد! لدينا برامج خاصة للمبتدئين تركز على تعلم أساسيات كرة القدم من الصفر، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس وحب الرياضة، وتدريبات ترفيهية محفزة للتعلم.",
-        ),
-        (
-            "كيف يتم تقييم اللاعبين؟",
-            "نوفر نظام تقييم شامل يشمل: تقييم فني دوري للمهارات، متابعة التطور البدني، تقارير شهرية عن الأداء، لقاءات دورية مع أولياء الأمور، فيديوهات تحليل أداء للمتميزين، وشهادات تقدير للمتفوقين.",
-        ),
-        (
-            "أين تقام التدريبات؟",
-            "تقام جميع التدريبات على ملاعب مدرسة السلام المتطورة في أسيوط، وهي ملاعب مجهزة بأحدث المعدات وتوفر بيئة آمنة ومناسبة للتدريب.",
-        ),
-        (
-            "ما هي سياسة الرسوم والدفع؟",
-            "تختلف الرسوم حسب الفئة العمرية وعدد أيام التدريب. نقدم: نظام تقسيط شهري مرن، خصومات خاصة للأشقاء، منح جزئية للمتميزين ماديًا أو فنيًا، وخصم للتسجيل المبكر. يرجى التواصل معنا لمعرفة التفاصيل.",
-        ),
-        (
-            "هل توجد خصومات؟",
-            "نعم! نقدم خصومات متعددة: خصم للأشقاء المسجلين معًا، خصم التسجيل المبكر قبل بداية الموسم، ومنح جزئية للمتميزين فنيًا أو المحتاجين ماديًا. تواصل معنا لمعرفة المزيد.",
-        ),
+        ("ما هو سن القبول في الأكاديمية؟", "نستقبل اللاعبين والبنات من سن الصف الأول الابتدائي وحتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفة لكل مرحلة لضمان تدريب مناسب لكل سن."),
+        ("ما هي مدة البرنامج التدريبي؟", "الموسم التدريبي يمتد لمدة 10 أشهر تقريبًا، من بداية سبتمبر إلى نهاية يونيو. التدريبات تقام أيام السبت والخميس في الفترة المسائية حسب الجدول المحدد لكل فئة."),
+        ("هل يوجد تدريب للبنات؟", "نعم، لدينا برامج تدريبية مخصصة للبنات في أيام السبت والخميس مع مدربات متخصصات ومؤهلات، وبيئة مناسبة تلبي احتياجاتهن الرياضية والنفسية مع مراعاة الخصوصية الكاملة."),
+        ("هل يوجد تدريب للمبتدئين؟", "بالتأكيد! لدينا برامج خاصة للمبتدئين تركز على تعلم أساسيات كرة القدم من الصفر، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس وحب الرياضة، وتدريبات ترفيهية محفزة للتعلم."),
+        ("كيف يتم تقييم اللاعبين؟", "نوفر نظام تقييم شامل يشمل: تقييم فني دوري للمهارات، متابعة التطور البدني، تقارير شهرية عن الأداء، لقاءات دورية مع أولياء الأمور، فيديوهات تحليل أداء للمتميزين، وشهادات تقدير للمتفوقين."),
+        ("أين تقام التدريبات؟", "تقام جميع التدريبات على ملاعب مدرسة السلام المتطورة في أسيوط، وهي ملاعب مجهزة بأحدث المعدات وتوفر بيئة آمنة ومناسبة للتدريب."),
+        ("ما هي سياسة الرسوم والدفع؟", "تختلف الرسوم حسب الفئة العمرية وعدد أيام التدريب. نقدم: نظام تقسيط شهري مرن، خصومات خاصة للأشقاء، منح جزئية للمتميزين ماديًا أو فنيًا، وخصم للتسجيل المبكر. يرجى التواصل معنا لمعرفة التفاصيل."),
+        ("هل توجد خصومات؟", "نعم! نقدم خصومات متعددة: خصم للأشقاء المسجلين معًا، خصم التسجيل المبكر قبل بداية الموسم، ومنح جزئية للمتميزين فنيًا أو المحتاجين ماديًا. تواصل معنا لمعرفة المزيد."),
     ]
 
     for question, answer in faqs:
-        st.markdown(
-            f"""
+        st.markdown(f"""
         <div class="ec-faq-card">
             <h4>❓ {question}</h4>
             <p>{answer}</p>
         </div>
-        """,
-            unsafe_allow_html=True,
-        )
+        """, unsafe_allow_html=True)
 
 # ====================================================================================================
-# CONTACT PAGE
+# CONTACT PAGE - ✅ مع الواتساب وجوجل ماب
 # ====================================================================================================
 elif page == "contact":
     st.markdown("""
@@ -1218,12 +1191,9 @@ elif page == "contact":
         <p>نسعد بتواصلكم معنا في أي وقت</p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     if st.session_state.show_contact_success:
-        st.markdown(
-            '<div class="ec-success-msg">تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="ec-success-msg">تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>', unsafe_allow_html=True)
         st.session_state.show_contact_success = False
 
     col_form, col_info = st.columns(2)
@@ -1244,10 +1214,7 @@ elif page == "contact":
 
             if contact_submitted:
                 if not contact_name or not contact_phone or not inquiry_type or not contact_message:
-                    st.markdown(
-                        '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
-                        unsafe_allow_html=True,
-                    )
+                    st.markdown('<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>', unsafe_allow_html=True)
                 else:
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     telegram_text = (
@@ -1264,62 +1231,57 @@ elif page == "contact":
                         st.session_state.show_contact_success = True
                         st.rerun()
                     else:
-                        st.markdown(
-                            f'<div class="ec-error-msg">❌ {msg}</div>',
-                            unsafe_allow_html=True,
-                        )
+                        st.markdown(f'<div class="ec-error-msg">❌ {msg}</div>', unsafe_allow_html=True)
 
     with col_info:
         st.markdown("""
         <div class="ec-contact-card">
             <h3 style="color:#1e3a8a; margin:0 0 18px; font-size:1.3rem; font-weight:800;">📍 معلومات التواصل</h3>
+            
             <div class="ec-contact-item">
                 <div class="ec-icon">📍</div>
                 <div>
-                    <strong style="color:#1e293b;">العنوان</strong><br>
+                    <strong style="color:#1e293b;">العنوان</strong> <br>
                     <span style="color:#64748b;">ملاعب مدرسة السلام المتطورة - أسيوط</span>
                 </div>
             </div>
+            
             <div class="ec-contact-item">
-                <div class="ec-icon" style="background:#25D366; color:white;">📱</div>
+                <div class="ec-icon">🗺️</div>
                 <div>
-                    <strong style="color:#1e293b;">واتساب</strong><br>
-                    <a href="https://wa.me/201285197778" target="_blank" style="color:#25D366; font-weight:700; text-decoration:none; font-size:1.1rem;">+20 12 85197778</a>
+                    <strong style="color:#1e293b;">الموقع على الخريطة</strong> <br>
+                    <a href="https://maps.app.goo.gl/MX9GM7XC4jenPpgs8" target="_blank" style="color:#3b82f6; text-decoration:none; font-weight:600;">
+                        📍 افتح الموقع في جوجل ماب
+                    </a>
                 </div>
             </div>
+            
+            <div class="ec-contact-item">
+                <div class="ec-icon">📱</div>
+                <div>
+                    <strong style="color:#1e293b;">واتساب</strong> <br>
+                    <a href="https://wa.me/201285197778" target="_blank" class="ec-whatsapp-link">
+                        💬 +20 12 85197778
+                    </a>
+                </div>
+            </div>
+            
             <div class="ec-contact-item">
                 <div class="ec-icon">🕐</div>
                 <div>
-                    <strong style="color:#1e293b;">أوقات التدريب</strong><br>
+                    <strong style="color:#1e293b;">أوقات التدريب</strong> <br>
                     <span style="color:#64748b;">السبت والخميس - الفترة المسائية</span>
                 </div>
             </div>
+            
             <div class="ec-contact-item">
                 <div class="ec-icon">📧</div>
                 <div>
-                    <strong style="color:#1e293b;">التواصل الإلكتروني</strong><br>
+                    <strong style="color:#1e293b;">التواصل الإلكتروني</strong> <br>
                     <span style="color:#64748b;">أرسل رسالتك عبر النموذج وسنرد عليك</span>
                 </div>
             </div>
         </div>
-        
-        <!-- Google Maps -->
-        <div style="margin-top:20px; border-radius:22px; overflow:hidden; box-shadow: 0 6px 22px rgba(0,0,0,0.06);">
-            <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3556.7095096076776!2d31.193999999999996!3d27.186!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14450bebda3b5511%3A0x4dc15bc1d19cc6f6!2z2YXYr9ix2LPYqSDYp9mE2LPZhNin2YUg2KfZhNiu2KfYtdip!5e0!3m2!1sar!2seg!4v1710000000000!5m2!1sar!2seg"
-                width="100%" 
-                height="280" 
-                style="border:0; display:block;" 
-                allowfullscreen="" 
-                loading="lazy" 
-                referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
-        </div>
-        
-        <!-- WhatsApp Button -->
-        <a href="https://wa.me/201285197778" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:20px; background:#25D366; color:white; padding:16px 30px; border-radius:60px; font-weight:800; font-size:1.1rem; text-decoration:none; box-shadow: 0 8px 25px rgba(37,211,102,0.3); transition: all 0.3s ease;">
-            <span style="font-size:1.5rem;">📱</span> تواصل معنا عبر واتساب
-        </a>
         """, unsafe_allow_html=True)
 
 # ====================================================================================================
@@ -1332,51 +1294,24 @@ elif page == "news":
         <p>آخر أخبار وأنشطة الكوتش أكاديمي</p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     news_items = [
-        {
-            "title": "بدء التسجيل للموسم الجديد 2025/2026",
-            "date": "2025-08-15",
-            "desc": "يسعدنا الإعلان عن فتح باب التسجيل للموسم التدريبي الجديد 2025/2026. سارعوا بالتسجيل للاستفادة من خصم التسجيل المبكر. البرامج متاحة لجميع الفئات العمرية للبنين والبنات.",
-        },
-        {
-            "title": "فوز فريق الأكاديمية ببطولة أسيوط للناشئين",
-            "date": "2025-06-20",
-            "desc": "حقق فريق الأكاديمية إنجازًا رائعًا بالفوز ببطولة أسيوط للناشئين تحت 12 سنة، بعد مباراة نهائية مثيرة انتهت بنتيجة 3-1. تهانينا لجميع اللاعبين والمدربين!",
-        },
-        {
-            "title": "دورة تدريبية متقدمة للمدربين",
-            "date": "2025-05-10",
-            "desc": "أتم مدربو الأكاديمية بنجاح دورة تدريبية متقدمة في أساليب التدريب الحديثة، بالتعاون مع الاتحاد المصري لكرة القدم. الدورة شملت أحدث المنهجيات في تطوير الناشئين.",
-        },
-        {
-            "title": "انضمام لاعبين من الأكاديمية لمنتخب المحافظة",
-            "date": "2025-04-05",
-            "desc": "تم اختيار 5 لاعبين من الأكاديمية للانضمام لمنتخب محافظة أسيوط تحت 14 سنة، وهو ما يعكس مستوى التدريب المتميز الذي يحصل عليه لاعبونا.",
-        },
-        {
-            "title": "محاضرة تثقيفية عن التغذية الرياضية",
-            "date": "2025-03-15",
-            "desc": "نظمت الأكاديمية محاضرة تثقيفية لأولياء الأمور واللاعبين حول أهمية التغذية السليمة وتأثيرها على الأداء الرياضي، قدمها أخصائي تغذية رياضية معتمد.",
-        },
-        {
-            "title": "شراكة جديدة مع نادي أسيوط الرياضي",
-            "date": "2025-02-20",
-            "desc": "وقّعت الأكاديمية اتفاقية شراكة مع نادي أسيوط الرياضي لتسهيل انتقال اللاعبين الموهوبين إلى فرق النادي، مما يفتح آفاقًا جديدة للاحتراف أمام لاعبينا.",
-        },
+        {"title": "بدء التسجيل للموسم الجديد 2025/2026", "date": "2025-08-15", "desc": "يسعدنا الإعلان عن فتح باب التسجيل للموسم التدريبي الجديد 2025/2026. سارعوا بالتسجيل للاستفادة من خصم التسجيل المبكر. البرامج متاحة لجميع الفئات العمرية للبنين والبنات."},
+        {"title": "فوز فريق الأكاديمية ببطولة أسيوط للناشئين", "date": "2025-06-20", "desc": "حقق فريق الأكاديمية إنجازًا رائعًا بالفوز ببطولة أسيوط للناشئين تحت 12 سنة، بعد مباراة نهائية مثيرة انتهت بنتيجة 3-1. تهانينا لجميع اللاعبين والمدربين!"},
+        {"title": "دورة تدريبية متقدمة للمدربين", "date": "2025-05-10", "desc": "أتم مدربو الأكاديمية بنجاح دورة تدريبية متقدمة في أساليب التدريب الحديثة، بالتعاون مع الاتحاد المصري لكرة القدم. الدورة شملت أحدث المنهجيات في تطوير الناشئين."},
+        {"title": "انضمام لاعبين من الأكاديمية لمنتخب المحافظة", "date": "2025-04-05", "desc": "تم اختيار 5 لاعبين من الأكاديمية للانضمام لمنتخب محافظة أسيوط تحت 14 سنة، وهو ما يعكس مستوى التدريب المتميز الذي يحصل عليه لاعبونا."},
+        {"title": "محاضرة تثقيفية عن التغذية الرياضية", "date": "2025-03-15", "desc": "نظمت الأكاديمية محاضرة تثقيفية لأولياء الأمور واللاعبين حول أهمية التغذية السليمة وتأثيرها على الأداء الرياضي، قدمها أخصائي تغذية رياضية معتمد."},
+        {"title": "شراكة جديدة مع نادي أسيوط الرياضي", "date": "2025-02-20", "desc": "وقّعت الأكاديمية اتفاقية شراكة مع نادي أسيوط الرياضي لتسهيل انتقال اللاعبين الموهوبين إلى فرق النادي، مما يفتح آفاقًا جديدة للاحتراف أمام لاعبينا."},
     ]
 
     for item in news_items:
-        st.markdown(
-            f"""
+        st.markdown(f"""
         <div class="ec-news-card">
             <h3>📌 {item['title']}</h3>
             <div class="ec-news-date">🗓️ {item['date']}</div>
             <p>{item['desc']}</p>
         </div>
-        """,
-            unsafe_allow_html=True,
-        )
+        """, unsafe_allow_html=True)
 
 # Close container
 st.markdown("</div>", unsafe_allow_html=True)
@@ -1395,24 +1330,24 @@ st.markdown(f"""
         <div>
             <h4>روابط سريعة</h4>
             <ul>
-            <li><a href="?page=home">🏠 الرئيسية</a></li>
-                <li><a href="?page=about">ℹ️ من نحن</a></li>
-                <li><a href="?page=programs">⚽ البرامج التدريبية</a></li>
-                <li><a href="?page=captains">👨‍🏫 الكباتن</a></li>
-                <li><a href="?page=registration">📝 سجل لاعب جديد</a></li>
+                <li><a href="?page=home" onclick="navigateTo(event, 'home')">🏠 الرئيسية</a></li>
+                <li><a href="?page=about" onclick="navigateTo(event, 'about')">ℹ️ من نحن</a></li>
+                <li><a href="?page=programs" onclick="navigateTo(event, 'programs')">⚽ البرامج التدريبية</a></li>
+                <li><a href="?page=captains" onclick="navigateTo(event, 'captains')">👨‍🏫 الكباتن</a></li>
+                <li><a href="?page=registration" onclick="navigateTo(event, 'registration')">📝 سجل لاعب جديد</a></li>
             </ul>
         </div>
         <div>
             <h4>تواصل معنا</h4>
-            <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
-            <p>🕐 السبت والخميس - الفترة المسائية</p>
-            <p style="margin-top:12px;">
-                <a href="?page=contact" style="color:#f59e0b; font-weight:700;">📞 اتصل بنا</a>
-            </p>
+            <ul>
+                <li>📍 ملاعب مدرسة السلام المتطورة - أسيوط</li>
+                <li>🕐 السبت والخميس - الفترة المسائية</li>
+                <li><a href="?page=contact" onclick="navigateTo(event, 'contact')">📞 اتصل بنا</a></li>
+            </ul>
         </div>
     </div>
     <div class="ec-footer-bottom">
-        جميع الحقوق محفوظة &copy; {current_year} الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة
+        جميع الحقوق محفوظة © {current_year} الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة
     </div>
 </div>
 """, unsafe_allow_html=True)
