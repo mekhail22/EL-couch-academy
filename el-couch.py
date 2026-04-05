@@ -15,11 +15,23 @@ def save_to_google_sheets(data_row):
         from google.oauth2.service_account import Credentials
         import json
 
+        # محاولة الحصول على البيانات من البيئة أو من ملف
         service_account_info = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
         spreadsheet_id = os.environ.get("GOOGLE_SPREADSHEET_ID", "")
+        
+        # إذا لم توجد في البيئة، حاول من ملف config.json
+        if not service_account_info or not spreadsheet_id:
+            try:
+                if os.path.exists("config.json"):
+                    with open("config.json", "r", encoding="utf-8") as f:
+                        config = json.load(f)
+                        service_account_info = json.dumps(config.get("google_service_account", {}))
+                        spreadsheet_id = config.get("spreadsheet_id", "")
+            except Exception:
+                pass
 
         if not service_account_info or not spreadsheet_id:
-            return False, "لم يتم تكوين بيانات Google Sheets. يرجى التواصل مع الإدارة."
+            return False, "❌ لم يتم تكوين جوجل شيتس.\n\nالحل:\n1. أنشئ ملف config.json\n2. أو ضع متغيرات البيئة (GOOGLE_SERVICE_ACCOUNT_KEY و GOOGLE_SPREADSHEET_ID)"
 
         creds_dict = json.loads(service_account_info)
         scopes = [
@@ -31,9 +43,11 @@ def save_to_google_sheets(data_row):
         sheet = gc.open_by_key(spreadsheet_id).sheet1
 
         sheet.append_row(data_row, value_input_option="USER_ENTERED")
-        return True, "تم التسجيل بنجاح!"
+        return True, "✅ تم التسجيل بنجاح!"
+    except json.JSONDecodeError:
+        return False, "❌ خطأ: البيانات في config.json غير صحيحة. تأكد من صيغة JSON"
     except Exception as e:
-        return False, f"حدث خطأ أثناء الحفظ: {str(e)}"
+        return False, f"❌ خطأ: {str(e)}"
 
 
 # ====================================================================================================
@@ -44,18 +58,31 @@ def send_telegram_message(text):
     try:
         bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
         chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+        
+        # إذا لم توجد في البيئة، حاول من ملف config.json
+        if not bot_token or not chat_id:
+            try:
+                if os.path.exists("config.json"):
+                    import json
+                    with open("config.json", "r", encoding="utf-8") as f:
+                        config = json.load(f)
+                        telegram_config = config.get("telegram", {})
+                        bot_token = telegram_config.get("bot_token", "")
+                        chat_id = telegram_config.get("chat_id", "")
+            except Exception:
+                pass
 
         if not bot_token or not chat_id:
-            return False, "لم يتم تكوين بيانات Telegram. يرجى التواصل مع الإدارة."
+            return False, "❌ لم يتم تكوين بوت التلجرام.\n\nالحل:\n1. أنشئ ملف config.json\n2. أو ضع متغيرات البيئة (TELEGRAM_BOT_TOKEN و TELEGRAM_CHAT_ID)"
 
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
         resp = requests.post(url, json=payload, timeout=10)
         if resp.status_code == 200:
-            return True, "تم الإرسال بنجاح!"
-        return False, f"فشل الإرسال: {resp.text}"
+            return True, "✅ تم الإرسال بنجاح!"
+        return False, f"❌ فشل الإرسال: {resp.text}"
     except Exception as e:
-        return False, f"حدث خطأ أثناء الإرسال: {str(e)}"
+        return False, f"❌ خطأ: {str(e)}"
 
 
 # ====================================================================================================
@@ -1164,8 +1191,6 @@ elif page == "registration":
         st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
         col1, col2 = st.columns(2)
         with col1:
-            parent_email = st.text_input("البريد الإلكتروني *", placeholder="example@email.com")
-        with col2:
             parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
 
         notes = st.text_area("ملاحظات إضافية (اختياري)", placeholder="أي معلومات إضافية تود إضافتها...")
@@ -1173,14 +1198,14 @@ elif page == "registration":
         submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
         if submitted:
-            if not player_name or not age_group or not parent_phone or not parent_email:
+            if not player_name or not age_group or not parent_phone:
                 st.markdown(
                     '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
                     unsafe_allow_html=True,
                 )
             else:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                row = [player_name, age_group, position, parent_email, parent_phone, notes, timestamp]
+                row = [player_name, age_group, position, parent_phone, notes, timestamp]
                 success, msg = save_to_google_sheets(row)
                 
                 if success:
@@ -1192,8 +1217,7 @@ elif page == "registration":
                         f"• <b>الفئة العمرية:</b> {age_group}\n"
                         f"• <b>المركز المفضل:</b> {position or 'لم يتم التحديد'}\n\n"
                         f"<b>معلومات ولي الأمر:</b>\n"
-                        f"• <b>الهاتف:</b> {parent_phone}\n"
-                        f"• <b>الايميل:</b> {parent_email}\n\n"
+                        f"• <b>الهاتف:</b> {parent_phone}\n\n"
                         f"<b>ملاحظات:</b> {notes or 'بدون ملاحظات'}\n\n"
                         f"<b>وقت التسجيل:</b> {timestamp}"
                     )
@@ -1290,7 +1314,6 @@ elif page == "contact":
             st.markdown("### 📬 أرسل لنا رسالة")
             contact_name = st.text_input("الاسم *", placeholder="اسمك الكامل")
             contact_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
-            contact_email = st.text_input("البريد الإلكتروني *", placeholder="example@email.com")
             inquiry_type = st.selectbox(
                 "نوع الاستفسار *",
                 ["", "استفسار عام", "تسجيل لاعب جديد", "مواعيد التدريب", "الرسوم والاشتراكات", "شكوى أو اقتراح", "أخرى"],
@@ -1300,7 +1323,7 @@ elif page == "contact":
             contact_submitted = st.form_submit_button("📨 إرسال الرسالة", use_container_width=True)
 
             if contact_submitted:
-                if not contact_name or not contact_phone or not contact_email or not inquiry_type or not contact_message:
+                if not contact_name or not contact_phone or not inquiry_type or not contact_message:
                     st.markdown(
                         '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
                         unsafe_allow_html=True,
@@ -1311,7 +1334,6 @@ elif page == "contact":
                         f"<b>📬 رسالة جديدة - الكوتش أكاديمي</b>\n\n"
                         f"<b>الاسم:</b> {contact_name}\n"
                         f"<b>الهاتف:</b> {contact_phone}\n"
-                        f"<b>الإيميل:</b> {contact_email or 'غير محدد'}\n"
                         f"<b>نوع الاستفسار:</b> {inquiry_type}\n"
                         f"<b>الرسالة:</b>\n{contact_message}\n\n"
                         f"<b>وقت الإرسال:</b> {timestamp}"
