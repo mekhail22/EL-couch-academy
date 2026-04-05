@@ -753,7 +753,8 @@ div[data-testid="stDecoration"] { display: none !important; }
 # Helper function to generate navigation link (same tab)
 # ====================================================================================================
 def nav_link(text, page_name, icon=""):
-    return f'<a href="javascript:void(0)" onclick="window.parent.location.href=\'?page={page_name}\'; return false;">{icon} {text}</a>'
+    # Use regular href without any onclick to ensure same-tab navigation
+    return f'<a href="?page={page_name}">{icon} {text}</a>'
 
 
 # ====================================================================================================
@@ -792,7 +793,7 @@ sidenav_links = f"""
 header_html = f"""
 <div class="ec-header">
     <div class="ec-header-inner">
-        <a href="javascript:void(0)" onclick="window.parent.location.href='?page=home'; return false;" class="ec-logo-wrap">
+        <a href="?page=home" class="ec-logo-wrap">
             <div class="ec-logo-img">{logo_html}</div>
             <div class="ec-logo-txt">
                 <h1>الكوتش <span>أكاديمي</span></h1>
@@ -843,8 +844,8 @@ if page == "home":
         </p>
         <p class="ec-hero-slogan">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
         <div class="ec-hero-btns">
-            <a href="javascript:void(0)" onclick="window.parent.location.href='?page=registration'; return false;" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
-            <a href="javascript:void(0)" onclick="window.parent.location.href='?page=contact'; return false;" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
+            <a href="?page=registration" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
+            <a href="?page=contact" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1033,7 +1034,7 @@ elif page == "programs":
     <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
         <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
         <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <a href="javascript:void(0)" onclick="window.parent.location.href='?page=registration'; return false;" class="ec-btn ec-btn-gold" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
+        <a href="?page=registration" class="ec-btn ec-btn-gold" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1353,22 +1354,28 @@ elif page == "contact":
         </div>
         """, unsafe_allow_html=True)
 
-        # Google Map embed
+        # Google Map embed - using the actual link provided
+        # Note: The map URL is https://maps.app.goo.gl/MX9GM7XC4jenPpgs8
+        # We'll use a static embed link that works (but for accurate map, use the embed code from Google)
+        # Since the short link redirects, we'll put a placeholder but also provide the link.
+        # For better user experience, we'll use an iframe that loads the map from Google Maps embed.
+        # I'll generate an embed URL based on the coordinates (if known) or simply a link.
+        # To make it work, we'll use a standard Google Maps embed with the place ID if possible.
+        # For simplicity, we'll provide a button to open the map and a static image placeholder.
+        # Alternatively, use the following embed (requires actual coordinates). 
+        # I'll use a generic embed that shows the location as per the short link (may need adjustment).
+        # Better to just provide a direct link to the map with a nice button.
         st.markdown("""
-        <div class="ec-map-container">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3487.479845568981!2d31.201543!3d27.171729!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x144c4d4b4b4b4b4b%3A0x4b4b4b4b4b4b4b4b!2z2YXYrdmF2K8g2KfZhNio2K8g2KfZhNipINmF2YjZgyDYp9mE2K_Ys9mF!5e0!3m2!1sar!2seg!4v1234567890123!5m2!1sar!2seg" allowfullscreen="" loading="lazy"></iframe>
+        <div style="margin-top: 25px; text-align: center;">
+            <a href="https://maps.app.goo.gl/MX9GM7XC4jenPpgs8" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #4285F4; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700;">
+                🗺️ عرض الموقع على خرائط جوجل
+            </a>
+        </div>
+        <div class="ec-map-container" style="margin-top: 15px;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.123456789!2d31.201543!3d27.171729!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x144c4d4b4b4b4b4b%3A0x4b4b4b4b4b4b4b4b!2z2YXYrdmF2K8g2KfZhNio2K8g2KfZhNipINmF2YjZgyDYp9mE2K_Ys9mF!5e0!3m2!1sar!2seg!4v1234567890123!5m2!1sar!2seg" allowfullscreen="" loading="lazy"></iframe>
         </div>
         """, unsafe_allow_html=True)
-        # Note: The above map embed uses a placeholder URL. Replace with the actual embed URL from the link you provided.
-        # For accurate map, use the actual embed link from: https://maps.app.goo.gl/MX9GM7XC4jenPpgs8
-        # But since that link redirects, I'll put a generic iframe; user can replace with the correct embed code.
-
-        # Better: Use the actual embed URL from Google Maps (instructions will be provided, but for now I'll add a note)
-        st.markdown("""
-        <div style="font-size: 0.8rem; color: #64748b; text-align: center; margin-top: 8px;">
-            <a href="https://maps.app.goo.gl/MX9GM7XC4jenPpgs8" target="_blank" style="color: #3b82f6;">📌 عرض الموقع على خرائط Google</a>
-        </div>
-        """, unsafe_allow_html=True)
+        # Note: The above iframe uses placeholder coordinates. To get the exact map, replace the src with the actual embed code from Google Maps.
 
 # ====================================================================================================
 # NEWS PAGE
@@ -1455,7 +1462,7 @@ footer_links = f"""
             <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
             <p>🕐 السبت والخميس - الفترة المسائية</p>
             <p style="margin-top:12px;">
-                {nav_link("📞 اتصل بنا", "contact", "")}
+                {nav_link("📞 اتصل بنا", "contact")}
             </p>
         </div>
     </div>
