@@ -1164,7 +1164,6 @@ elif page == "registration":
         st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
         col1, col2 = st.columns(2)
         with col1:
-            parent_name = st.text_input("اسم ولي الأمر *", placeholder="مثال: أحمد محمود")
             parent_email = st.text_input("البريد الإلكتروني *", placeholder="example@email.com")
         with col2:
             parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
@@ -1174,14 +1173,14 @@ elif page == "registration":
         submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
         if submitted:
-            if not player_name or not age_group or not parent_name or not parent_phone or not parent_email:
+            if not player_name or not age_group or not parent_phone or not parent_email:
                 st.markdown(
                     '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
                     unsafe_allow_html=True,
                 )
             else:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                row = [player_name, age_group, position, parent_name, parent_email, parent_phone, notes, timestamp]
+                row = [player_name, age_group, position, parent_email, parent_phone, notes, timestamp]
                 success, msg = save_to_google_sheets(row)
                 
                 if success:
@@ -1193,7 +1192,6 @@ elif page == "registration":
                         f"• <b>الفئة العمرية:</b> {age_group}\n"
                         f"• <b>المركز المفضل:</b> {position or 'لم يتم التحديد'}\n\n"
                         f"<b>معلومات ولي الأمر:</b>\n"
-                        f"• <b>الاسم:</b> {parent_name}\n"
                         f"• <b>الهاتف:</b> {parent_phone}\n"
                         f"• <b>الايميل:</b> {parent_email}\n\n"
                         f"<b>ملاحظات:</b> {notes or 'بدون ملاحظات'}\n\n"
@@ -1292,7 +1290,7 @@ elif page == "contact":
             st.markdown("### 📬 أرسل لنا رسالة")
             contact_name = st.text_input("الاسم *", placeholder="اسمك الكامل")
             contact_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
-            contact_email = st.text_input("البريد الإلكتروني", placeholder="example@email.com")
+            contact_email = st.text_input("البريد الإلكتروني *", placeholder="example@email.com")
             inquiry_type = st.selectbox(
                 "نوع الاستفسار *",
                 ["", "استفسار عام", "تسجيل لاعب جديد", "مواعيد التدريب", "الرسوم والاشتراكات", "شكوى أو اقتراح", "أخرى"],
@@ -1302,7 +1300,7 @@ elif page == "contact":
             contact_submitted = st.form_submit_button("📨 إرسال الرسالة", use_container_width=True)
 
             if contact_submitted:
-                if not contact_name or not contact_phone or not inquiry_type or not contact_message:
+                if not contact_name or not contact_phone or not contact_email or not inquiry_type or not contact_message:
                     st.markdown(
                         '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
                         unsafe_allow_html=True,
