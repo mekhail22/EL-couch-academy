@@ -733,7 +733,7 @@ else:
 header_html = f"""
 <div class="ec-header">
     <div class="ec-header-inner">
-        <a href="?page=home" onclick="window.parent.location.href='?page=home';return false;" class="ec-logo-wrap">
+        <a href="?page=home" class="ec-logo-wrap">
             <div class="ec-logo-img">{logo_html}</div>
             <div class="ec-logo-txt">
                 <h1>الكوتش <span>أكاديمي</span></h1>
@@ -759,14 +759,14 @@ header_html = f"""
         </div>
         <label for="ec-menu-chk" class="ec-close-btn">&times;</label>
     </div>
-    <a href="?page=home" onclick="window.parent.location.href='?page=home';return false;">🏠 الرئيسية</a>
-    <a href="?page=about" onclick="window.parent.location.href='?page=about';return false;">ℹ️ من نحن</a>
-    <a href="?page=programs" onclick="window.parent.location.href='?page=programs';return false;">⚽ البرامج التدريبية</a>
-    <a href="?page=captains" onclick="window.parent.location.href='?page=captains';return false;">👨‍🏫 صفحة الكباتن</a>
-    <a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;">📝 سجل لاعب جديد</a>
-    <a href="?page=faq" onclick="window.parent.location.href='?page=faq';return false;">❓ الأسئلة الشائعة</a>
-    <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;">📞 اتصل بنا</a>
-    <a href="?page=news" onclick="window.parent.location.href='?page=news';return false;">📰 الأخبار</a>
+    <a href="?page=home">🏠 الرئيسية</a>
+    <a href="?page=about">ℹ️ من نحن</a>
+    <a href="?page=programs">⚽ البرامج التدريبية</a>
+    <a href="?page=captains">👨‍🏫 صفحة الكباتن</a>
+    <a href="?page=registration">📝 سجل لاعب جديد</a>
+    <a href="?page=faq">❓ الأسئلة الشائعة</a>
+    <a href="?page=contact">📞 اتصل بنا</a>
+    <a href="?page=news">📰 الأخبار</a>
 </nav>
 
 <div class="ec-spacer"></div>
@@ -803,8 +803,8 @@ if page == "home":
         </p>
         <p class="ec-hero-slogan">نحن لا نصنع لاعبين فقط.. نحن نصنع قادة!</p>
         <div class="ec-hero-btns">
-            <a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
-            <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
+            <a href="?page=registration" class="ec-btn ec-btn-gold">📝 سجل الآن</a>
+            <a href="?page=contact" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -993,7 +993,7 @@ elif page == "programs":
     <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
         <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
         <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <a class="ec-btn ec-btn-gold" href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
+        <a class="ec-btn ec-btn-gold" href="?page=registration" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1281,10 +1281,10 @@ elif page == "contact":
                 </div>
             </div>
             <div class="ec-contact-item">
-                <div class="ec-icon">📞</div>
+                <div class="ec-icon" style="background:#25D366; color:white;">📱</div>
                 <div>
-                    <strong style="color:#1e293b;">الهاتف</strong><br>
-                    <span style="color:#64748b;">تواصل معنا عبر الموقع</span>
+                    <strong style="color:#1e293b;">واتساب</strong><br>
+                    <a href="https://wa.me/201285197778" target="_blank" style="color:#25D366; font-weight:700; text-decoration:none; font-size:1.1rem;">+20 12 85197778</a>
                 </div>
             </div>
             <div class="ec-contact-item">
@@ -1302,6 +1302,24 @@ elif page == "contact":
                 </div>
             </div>
         </div>
+        
+        <!-- Google Maps -->
+        <div style="margin-top:20px; border-radius:22px; overflow:hidden; box-shadow: 0 6px 22px rgba(0,0,0,0.06);">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3556.7095096076776!2d31.193999999999996!3d27.186!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14450bebda3b5511%3A0x4dc15bc1d19cc6f6!2z2YXYr9ix2LPYqSDYp9mE2LPZhNin2YUg2KfZhNiu2KfYtdip!5e0!3m2!1sar!2seg!4v1710000000000!5m2!1sar!2seg"
+                width="100%" 
+                height="280" 
+                style="border:0; display:block;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+        
+        <!-- WhatsApp Button -->
+        <a href="https://wa.me/201285197778" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:20px; background:#25D366; color:white; padding:16px 30px; border-radius:60px; font-weight:800; font-size:1.1rem; text-decoration:none; box-shadow: 0 8px 25px rgba(37,211,102,0.3); transition: all 0.3s ease;">
+            <span style="font-size:1.5rem;">📱</span> تواصل معنا عبر واتساب
+        </a>
         """, unsafe_allow_html=True)
 
 # ====================================================================================================
@@ -1377,11 +1395,11 @@ st.markdown(f"""
         <div>
             <h4>روابط سريعة</h4>
             <ul>
-                <li><a href="?page=home" onclick="window.parent.location.href='?page=home';return false;">🏠 الرئيسية</a></li>
-                <li><a href="?page=about" onclick="window.parent.location.href='?page=about';return false;">ℹ️ من نحن</a></li>
-                <li><a href="?page=programs" onclick="window.parent.location.href='?page=programs';return false;">⚽ البرامج التدريبية</a></li>
-                <li><a href="?page=captains" onclick="window.parent.location.href='?page=captains';return false;">👨‍🏫 الكباتن</a></li>
-                <li><a href="?page=registration" onclick="window.parent.location.href='?page=registration';return false;">📝 سجل لاعب جديد</a></li>
+            <li><a href="?page=home">🏠 الرئيسية</a></li>
+                <li><a href="?page=about">ℹ️ من نحن</a></li>
+                <li><a href="?page=programs">⚽ البرامج التدريبية</a></li>
+                <li><a href="?page=captains">👨‍🏫 الكباتن</a></li>
+                <li><a href="?page=registration">📝 سجل لاعب جديد</a></li>
             </ul>
         </div>
         <div>
@@ -1389,7 +1407,7 @@ st.markdown(f"""
             <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
             <p>🕐 السبت والخميس - الفترة المسائية</p>
             <p style="margin-top:12px;">
-                <a href="?page=contact" onclick="window.parent.location.href='?page=contact';return false;" style="color:#f59e0b; font-weight:700;">📞 اتصل بنا</a>
+                <a href="?page=contact" style="color:#f59e0b; font-weight:700;">📞 اتصل بنا</a>
             </p>
         </div>
     </div>
