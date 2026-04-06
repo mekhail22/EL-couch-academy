@@ -8,19 +8,18 @@ from datetime import datetime
 # ====================================================================================================
 # Google Sheets Integration (باستخدام service account من secrets)
 # ====================================================================================================
-def save_to_google_sheets(data_row):
-    """Save a row of data to Google Sheets using gspread and service account info from secrets."""
+def save_to_google_sheets(data_dict):
+    """
+    حفظ البيانات في Google Sheets مع مطابقة الأعمدة حسب العناوين.
+    data_dict يحتوي على المفاتيح: 'player_name', 'age_group', 'position', 'parent_phone', 'notes', 'timestamp'
+    """
     try:
         import gspread
         from google.oauth2.service_account import Credentials
 
-        # قراءة البيانات من Streamlit Secrets (ككائن مباشر)
-        try:
-            # creds_info هي قاموس (dictionary) يحتوي على بيانات service account
-            creds_info = dict(st.secrets["google"]["service_account"])
-            spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
-        except KeyError as e:
-            return False, f"❌ لم يتم العثور على بيانات جوجل في Secrets: {e}"
+        # قراءة بيانات service account من secrets (ككائن مباشر)
+        creds_info = dict(st.secrets["google"]["service_account"])
+        spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
 
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
@@ -30,7 +29,43 @@ def save_to_google_sheets(data_row):
         gc = gspread.authorize(credentials)
         sheet = gc.open_by_key(spreadsheet_id).sheet1
 
-        sheet.append_row(data_row, value_input_option="USER_ENTERED")
+        # العناوين المتوقعة باللغة العربية
+        expected_headers = ["الاسم", "الفئة العمرية", "المركز المفضل", "رقم الهاتف", "ملاحظات", "تاريخ التسجيل"]
+
+        # الحصول على الصف الأول (العناوين الحالية)
+        headers = sheet.row_values(1)
+
+        if not headers:
+            # إذا كان الجدول فارغاً، نضيف العناوين
+            sheet.append_row(expected_headers, value_input_option="USER_ENTERED")
+            headers = expected_headers
+        else:
+            # التأكد من وجود جميع العناوين المطلوبة (إن لم تكن موجودة نضيفها في النهاية)
+            for h in expected_headers:
+                if h not in headers:
+                    col_index = len(headers) + 1
+                    sheet.update_cell(1, col_index, h)
+                    headers.append(h)
+
+        # ترتيب القيم حسب ترتيب العناوين الموجودة في الجدول
+        row_values = []
+        for col in headers:
+            if col == "الاسم":
+                row_values.append(data_dict.get('player_name', ''))
+            elif col == "الفئة العمرية":
+                row_values.append(data_dict.get('age_group', ''))
+            elif col == "المركز المفضل":
+                row_values.append(data_dict.get('position', ''))
+            elif col == "رقم الهاتف":
+                row_values.append(data_dict.get('parent_phone', ''))
+            elif col == "ملاحظات":
+                row_values.append(data_dict.get('notes', ''))
+            elif col == "تاريخ التسجيل":
+                row_values.append(data_dict.get('timestamp', ''))
+            else:
+                row_values.append('')  # أي عمود إضافي نتركه فارغاً
+
+        sheet.append_row(row_values, value_input_option="USER_ENTERED")
         return True, "✅ تم التسجيل بنجاح!"
     except Exception as e:
         return False, f"❌ خطأ في Google Sheets: {str(e)}"
@@ -40,22 +75,28 @@ def save_to_google_sheets(data_row):
 # Telegram Integration
 # ====================================================================================================
 def send_telegram_message(text):
-    """Send a message to a Telegram chat using Bot API."""
+    """إرسال رسالة إلى دردشة تلجرام باستخدام بوت API."""
     try:
-        # قراءة البيانات من Streamlit Secrets
-        try:
-            bot_token = st.secrets["telegram"]["bot_token"]
-            chat_id = st.secrets["telegram"]["chat_id"]
-        except KeyError as e:
-            return False, f"❌ لم يتم العثور على بيانات التلجرام في Secrets: {e}"
+        bot_token = st.secrets["telegram"]["bot_token"]
+        chat_id = st.secrets["telegram"]["chat_id"]
+
+        if not chat_id:
+            return False, "❌ chat_id غير موجود في Secrets"
 
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-        payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+        payload = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "HTML"
+        }
         resp = requests.post(url, json=payload, timeout=10)
+
         if resp.status_code == 200:
             return True, "✅ تم الإرسال بنجاح!"
-        error_detail = resp.json().get('description', resp.text)
-        return False, f"❌ فشل الإرسال: {error_detail}"
+        else:
+            error_data = resp.json()
+            error_msg = error_data.get('description', resp.text)
+            return False, f"❌ فشل الإرسال: {error_msg}"
     except Exception as e:
         return False, f"❌ خطأ في الاتصال بـ Telegram: {str(e)}"
 
@@ -97,7 +138,7 @@ def get_image_base64(image_path):
 logo_base64 = get_image_base64("logo.jpg")
 
 # ====================================================================================================
-# Main CSS (نفس الكود الموجود لديك، لم يتغير)
+# Main CSS (تم تعديله لجعل النصوص في الأزرار والرسائل واضحة)
 # ====================================================================================================
 st.markdown("""
 <style>
@@ -559,10 +600,11 @@ div[data-testid="stDecoration"] { display: none !important; }
     color: #64748b; font-size: 0.88rem; line-height: 1.7; text-align: right;
 }
 
-/* ---- Success / Error Messages ---- */
+/* ---- Success / Error Messages (تم تعديل الألوان لضمان الوضوح) ---- */
 .ec-success-msg {
     background: linear-gradient(135deg, #10b981, #059669);
-    color: white; padding: 20px; border-radius: 16px;
+    color: #ffffff !important;  /* النص أبيض */
+    padding: 20px; border-radius: 16px;
     margin-bottom: 25px; text-align: center;
     font-weight: 700; font-size: 1.05rem;
     animation: ec-fadeIn 0.5s ease;
@@ -570,7 +612,8 @@ div[data-testid="stDecoration"] { display: none !important; }
 }
 .ec-error-msg {
     background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white; padding: 20px; border-radius: 16px;
+    color: #ffffff !important;  /* النص أبيض */
+    padding: 20px; border-radius: 16px;
     margin-bottom: 25px; text-align: center;
     font-weight: 700; font-size: 1.05rem;
     animation: ec-fadeIn 0.5s ease;
@@ -580,7 +623,7 @@ div[data-testid="stDecoration"] { display: none !important; }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ---- Contact Page additions ---- */
+/* ---- Contact Page additions (جعل النص في الأزرار واضح) ---- */
 .ec-contact-card {
     background: white; padding: 32px; border-radius: 22px;
     box-shadow: 0 6px 22px rgba(0,0,0,0.06);
@@ -617,7 +660,7 @@ div[data-testid="stDecoration"] { display: none !important; }
     align-items: center;
     gap: 10px;
     background: #25D366;
-    color: white;
+    color: white !important;
     padding: 12px 25px;
     border-radius: 50px;
     text-decoration: none;
@@ -628,6 +671,35 @@ div[data-testid="stDecoration"] { display: none !important; }
 .ec-whatsapp-btn:hover {
     background: #128C7E;
     transform: scale(1.03);
+}
+
+/* ---- زر إرسال النموذج (لون النص أسود على خلفية فاتحة) ---- */
+.stButton button {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #000000 !important;  /* النص أسود */
+    font-weight: 800 !important;
+    border: none !important;
+    border-radius: 60px !important;
+    padding: 12px 28px !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+}
+.stButton button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(245,158,11,0.4) !important;
+    color: #000000 !important;
+}
+
+/* ---- تحسين وضوح النصوص في الحقول والعلامات ---- */
+label, .stTextInput label, .stSelectbox label, .stTextArea label {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+}
+input, textarea, select {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
 }
 
 /* ---- News Cards ---- */
@@ -832,7 +904,7 @@ st.session_state.page = page
 st.markdown('<div class="ec-container">', unsafe_allow_html=True)
 
 # ====================================================================================================
-# HOME PAGE (نفس الكود الأصلي، لم يتغير)
+# HOME PAGE
 # ====================================================================================================
 if page == "home":
     st.markdown("""
@@ -1136,7 +1208,7 @@ elif page == "registration":
 
     if st.session_state.show_success:
         st.markdown(
-            '<div class="ec-success-msg">تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
+            '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
             unsafe_allow_html=True,
         )
         st.session_state.show_success = False
@@ -1178,9 +1250,16 @@ elif page == "registration":
                 )
             else:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                row = [player_name, age_group, position, parent_phone, notes, timestamp]
-                success, msg = save_to_google_sheets(row)
-                
+                data_dict = {
+                    'player_name': player_name,
+                    'age_group': age_group,
+                    'position': position,
+                    'parent_phone': parent_phone,
+                    'notes': notes,
+                    'timestamp': timestamp
+                }
+                success, msg = save_to_google_sheets(data_dict)
+
                 if success:
                     # إرسال البيانات إلى التلجرام
                     telegram_text = (
@@ -1194,8 +1273,10 @@ elif page == "registration":
                         f"<b>ملاحظات:</b> {notes or 'بدون ملاحظات'}\n\n"
                         f"<b>وقت التسجيل:</b> {timestamp}"
                     )
-                    telegram_success, _ = send_telegram_message(telegram_text)
-                    
+                    telegram_success, telegram_msg = send_telegram_message(telegram_text)
+                    if not telegram_success:
+                        st.warning(f"تم الحفظ في Google Sheets، ولكن فشل إرسال إشعار Telegram: {telegram_msg}")
+
                     st.session_state.show_success = True
                     st.session_state.registration_submitted = True
                     st.rerun()
@@ -1275,7 +1356,7 @@ elif page == "contact":
 
     if st.session_state.show_contact_success:
         st.markdown(
-            '<div class="ec-success-msg">تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>',
+            '<div class="ec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>',
             unsafe_allow_html=True,
         )
         st.session_state.show_contact_success = False
@@ -1435,7 +1516,7 @@ elif page == "news":
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ====================================================================================================
-# FOOTER (with fixed links)
+# FOOTER
 # ====================================================================================================
 current_year = datetime.now().year
 footer_links = f"""
