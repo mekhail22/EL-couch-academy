@@ -105,6 +105,16 @@ def get_image_base64(image_path):
 logo_base64 = get_image_base64("logo.jpg")
 
 # ====================================================================================================
+# Helper: convert local image to base64 for HTML img
+# ====================================================================================================
+def img_to_base64(image_path):
+    try:
+        with open(image_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except Exception:
+        return None
+
+# ====================================================================================================
 # Main CSS (استخدام ثلاث علامات تنصيص مفردة لتجنب المشاكل)
 # ====================================================================================================
 st.markdown('''
@@ -514,10 +524,15 @@ div[data-testid="stDecoration"] { display: none !important; }
     height: 240px;
     background: linear-gradient(135deg, #f59e0b, #d97706, #f59e0b);
     background-size: 200% 200%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 5rem; color: white;
-    animation: ec-hdr-grad 4s ease infinite;
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.ec-lead-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .ec-lead-info {
     padding: 30px; text-align: center;
@@ -536,14 +551,31 @@ div[data-testid="stDecoration"] { display: none !important; }
 }
 
 .ec-captains-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 28px; margin-bottom: 50px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+    margin-bottom: 50px;
+}
+@media (max-width: 1024px) {
+    .ec-captains-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 640px) {
+    .ec-captains-grid {
+        grid-template-columns: 1fr;
+    }
 }
 .ec-captain-card {
-    background: white; border-radius: 22px; overflow: hidden;
-    text-align: center; border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 22px;
+    overflow: hidden;
+    text-align: center;
+    border: 1px solid #e2e8f0;
     box-shadow: 0 6px 22px rgba(0,0,0,0.06);
     transition: all 0.35s ease;
+    display: flex;
+    flex-direction: column;
 }
 .ec-captain-card:hover {
     transform: translateY(-10px);
@@ -551,20 +583,42 @@ div[data-testid="stDecoration"] { display: none !important; }
     border-color: #3b82f6;
 }
 .ec-captain-avatar {
-    height: 200px;
-    background: linear-gradient(135deg, #3b82f6, #1e3a8a);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 4rem; color: white;
+    height: 220px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
-.ec-captain-info { padding: 24px; }
+.ec-captain-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.ec-captain-info {
+    padding: 24px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
 .ec-captain-info h3 {
-    color: #1e3a8a; margin: 0 0 8px; font-size: 1.25rem; font-weight: 800;
+    color: #1e3a8a;
+    margin: 0 0 5px;
+    font-size: 1.25rem;
+    font-weight: 800;
 }
 .ec-captain-info .ec-coach-title {
-    color: #3b82f6; font-weight: 700; margin-bottom: 12px; font-size: 0.9rem;
+    color: #3b82f6;
+    font-weight: 700;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
 }
 .ec-captain-info .ec-coach-desc {
-    color: #64748b; font-size: 0.88rem; line-height: 1.7; text-align: right;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    text-align: right;
+    margin-top: 8px;
 }
 
 /* ---- Success / Error Messages ---- */
@@ -782,8 +836,7 @@ div[data-testid="stForm"] h3 {
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
     .ec-stats, .ec-features, .ec-programs-grid,
-    .ec-captains-grid, .ec-about-grid,
-    .ec-mv-grid {
+    .ec-about-grid, .ec-mv-grid {
         grid-template-columns: 1fr;
     }
     .ec-hero h1 { font-size: 2.2rem; }
@@ -1093,7 +1146,7 @@ elif page == "programs":
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# CAPTAINS PAGE
+# CAPTAINS PAGE (UPDATED WITH IMAGES AND NEW CAPTAINS)
 # ====================================================================================================
 elif page in ("coaches", "captains"):
     st.markdown('''
@@ -1103,9 +1156,21 @@ elif page in ("coaches", "captains"):
     </div>
     ''', unsafe_allow_html=True)
 
-    st.markdown('''
+    # Helper to get image base64 for local images
+    def get_img_base64(img_path):
+        try:
+            with open(img_path, "rb") as f:
+                return base64.b64encode(f.read()).decode()
+        except:
+            return None
+
+    # كابتن ميخائيل (قائد الأكاديمية)
+    mikhail_img = get_img_base64("C1.jpg")
+    mikhail_img_html = f'<img src="data:image/jpeg;base64,{mikhail_img}" alt="كابتن ميخائيل">' if mikhail_img else '<span>👨‍🏫</span>'
+
+    st.markdown(f'''
     <div class="ec-lead-captain">
-        <div class="ec-lead-avatar">👨‍🏫</div>
+        <div class="ec-lead-avatar">{mikhail_img_html}</div>
         <div class="ec-lead-info">
             <h3>كابتن / ميخائيل كميل رؤف</h3>
             <div class="ec-title-badge">المدير الفني - مؤسس الأكاديمية</div>
@@ -1121,44 +1186,53 @@ elif page in ("coaches", "captains"):
     </div>
     ''', unsafe_allow_html=True)
 
-    st.markdown('''
+    # الكابتن مينا أسامة (دبابة)
+    mina_img = get_img_base64("C2.jpg")
+    mina_img_html = f'<img src="data:image/jpeg;base64,{mina_img}" alt="كابتن مينا">' if mina_img else '<span>🧤</span>'
+
+    # الكابتن أبانوب جمال (بيبو)
+    ebanob_img = get_img_base64("C3.jpg")
+    ebanob_img_html = f'<img src="data:image/jpeg;base64,{ebanob_img}" alt="كابتن أبانوب">' if ebanob_img else '<span>⚽</span>'
+
+    # الكابتن ميرولا شهير (توتا)
+    merola_img = get_img_base64("C4.jpg")
+    merola_img_html = f'<img src="data:image/jpeg;base64,{merola_img}" alt="كابتن ميرولا">' if merola_img else '<span>👩‍🏫</span>'
+
+    st.markdown(f'''
     <div class="ec-captains-grid">
         <div class="ec-captain-card">
-            <div class="ec-captain-avatar">🧤</div>
+            <div class="ec-captain-avatar">{mina_img_html}</div>
             <div class="ec-captain-info">
-                <h3>كابتن أحمد علي</h3>
-                <div class="ec-coach-title">مدرب حراس مرمى - معتمد CAF</div>
+                <h3>كابتن / مينا أسامة</h3>
+                <div class="ec-coach-title">شهرته / دبابة</div>
                 <div class="ec-coach-desc">
-                    🎓 بكالوريوس تربية رياضية<br>
-                    📜 رخصة تدريب حراس مرمى CAF<br>
-                    📜 خبرة 15 عامًا في تدريب حراس المرمى<br>
-                    📜 عمل مع عدة أندية في الدوري المصري
+                    • مدرب حراس براعم معتمد من الاتحاد الأفريقي<br>
+                    • حاصل على كورسات إسعافات أولية وإصابات ملاعب<br>
+                    • حاصل على كورس لرفع اللياقة البدنية الخاصة بلاعب كرة القدم
                 </div>
             </div>
         </div>
         <div class="ec-captain-card">
-            <div class="ec-captain-avatar">🏃</div>
+            <div class="ec-captain-avatar">{ebanob_img_html}</div>
             <div class="ec-captain-info">
-                <h3>د. خالد السيد</h3>
-                <div class="ec-coach-title">مدرب لياقة بدنية - دكتوراه</div>
+                <h3>كابتن / أبانوب جمال</h3>
+                <div class="ec-coach-title">شهرته / بيبو</div>
                 <div class="ec-coach-desc">
-                    🎓 دكتوراه في علوم الرياضة<br>
-                    📜 أستاذ مساعد بكلية التربية الرياضية<br>
-                    📜 مختص في تطوير قدرات الناشئين<br>
-                    📜 مدرب لياقة معتمد من الاتحاد المصري
+                    طالب في كلية تربية رياضية جامعة أسيوط<br>
+                    كابتن في أكاديمية الكوتش<br>
+                    حاصل على شهادة معتمدة من الاتحاد المصري مُعِد بدني<br>
+                    عضو في الشباب والرياضة<br>
+                    لديه قدرات على تناسق التمرينات المهاري + التكتيك
                 </div>
             </div>
         </div>
         <div class="ec-captain-card">
-            <div class="ec-captain-avatar">⚽</div>
+            <div class="ec-captain-avatar">{merola_img_html}</div>
             <div class="ec-captain-info">
-                <h3>كابتن محمد جابر</h3>
-                <div class="ec-coach-title">مدرب مهارات فنية - معتمد CAF</div>
+                <h3>كابتن / ميرولا شهير</h3>
+                <div class="ec-coach-title">شهرتها / توتا</div>
                 <div class="ec-coach-desc">
-                    🎓 بكالوريوس تربية رياضية<br>
-                    📜 رخصة تدريب مهارات CAF<br>
-                    📜 خبرة 12 عامًا في تدريب المهارات الفنية<br>
-                    📜 دورات متقدمة في تدريب الناشئين
+                    مدربة براعم وحاصلة على كورسات تدريبية في مجال كرة القدم
                 </div>
             </div>
         </div>
