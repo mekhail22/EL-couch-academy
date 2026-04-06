@@ -101,6 +101,19 @@ def send_telegram_message(text):
         return False, f"❌ خطأ في الاتصال بـ Telegram: {str(e)}"
 
 
+def initialize_telegram_chat():
+    """محاولة إرسال رسالة تفعيل لتأكيد إعدادات Telegram."""
+    try:
+        # استخدام نص بسيط للتفعيل
+        test_message = "✅ تم تشغيل تطبيق الكوتش أكاديمي بنجاح وجميع الإعدادات صحيحة."
+        success, message = send_telegram_message(test_message)
+        if success:
+            st.success("✅ تم التفعيل بنجاح مع Telegram!")
+        else:
+            st.error(f"⚠️ فشل التفعيل مع Telegram: {message}\n\nلحل هذه المشكلة، يرجى التأكد من:\n1. أضف البوت إلى المجموعة التي تريد إرسال الرسائل إليها.\n2. أرسل رسالة واحدة على الأقل من المجموعة إلى البوت.\n3. تأكد من أن chat_id صحيح (للمجموعات يبدأ بـ -).")
+    except Exception as e:
+        st.error(f"⚠️ حدث خطأ أثناء محاولة تفعيل Telegram: {str(e)}")
+
 # ====================================================================================================
 # Page Config
 # ====================================================================================================
@@ -124,6 +137,8 @@ if "menu_open" not in st.session_state:
     st.session_state.menu_open = False
 if "registration_submitted" not in st.session_state:
     st.session_state.registration_submitted = False
+if "telegram_initialized" not in st.session_state:
+    st.session_state.telegram_initialized = False
 
 # ====================================================================================================
 # Logo Base64
@@ -902,6 +917,13 @@ if page == "coaches":
 st.session_state.page = page
 
 st.markdown('<div class="ec-container">', unsafe_allow_html=True)
+
+# ====================================================================================================
+# Initialize Telegram Chat
+# ====================================================================================================
+if not st.session_state.telegram_initialized:
+    initialize_telegram_chat()
+    st.session_state.telegram_initialized = True
 
 # ====================================================================================================
 # HOME PAGE
