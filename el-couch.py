@@ -1,9 +1,7 @@
 import streamlit as st
 import os
 import base64
-import requests
 from datetime import datetime
-
 
 # ====================================================================================================
 # Google Sheets Integration (باستخدام service account من secrets)
@@ -70,49 +68,6 @@ def save_to_google_sheets(data_dict):
     except Exception as e:
         return False, f"❌ خطأ في Google Sheets: {str(e)}"
 
-
-# ====================================================================================================
-# Telegram Integration
-# ====================================================================================================
-def send_telegram_message(text):
-    """إرسال رسالة إلى دردشة تلجرام باستخدام بوت API."""
-    try:
-        bot_token = st.secrets["telegram"]["bot_token"]
-        chat_id = st.secrets["telegram"]["chat_id"]
-
-        if not chat_id:
-            return False, "❌ chat_id غير موجود في Secrets"
-
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-        payload = {
-            "chat_id": chat_id,
-            "text": text,
-            "parse_mode": "HTML"
-        }
-        resp = requests.post(url, json=payload, timeout=10)
-
-        if resp.status_code == 200:
-            return True, "✅ تم الإرسال بنجاح!"
-        else:
-            error_data = resp.json()
-            error_msg = error_data.get('description', resp.text)
-            return False, f"❌ فشل الإرسال: {error_msg}"
-    except Exception as e:
-        return False, f"❌ خطأ في الاتصال بـ Telegram: {str(e)}"
-
-
-def initialize_telegram_chat():
-    """محاولة إرسال رسالة تفعيل لتأكيد إعدادات Telegram."""
-    try:
-        test_message = "✅ تم تشغيل تطبيق الكوتش أكاديمي بنجاح وجميع الإعدادات صحيحة."
-        success, message = send_telegram_message(test_message)
-        if success:
-            st.success("✅ تم التفعيل بنجاح مع Telegram!")
-        else:
-            st.error(f"⚠️ فشل التفعيل مع Telegram: {message}\n\nلحل هذه المشكلة، يرجى التأكد من:\n1. أضف البوت إلى المجموعة التي تريد إرسال الرسائل إليها.\n2. أرسل رسالة واحدة على الأقل من المجموعة إلى البوت.\n3. تأكد من أن chat_id صحيح (للمجموعات يبدأ بـ -).")
-    except Exception as e:
-        st.error(f"⚠️ حدث خطأ أثناء محاولة تفعيل Telegram: {str(e)}")
-
 # ====================================================================================================
 # Page Config
 # ====================================================================================================
@@ -136,8 +91,6 @@ if "menu_open" not in st.session_state:
     st.session_state.menu_open = False
 if "registration_submitted" not in st.session_state:
     st.session_state.registration_submitted = False
-if "telegram_initialized" not in st.session_state:
-    st.session_state.telegram_initialized = False
 
 # ====================================================================================================
 # Logo Base64
@@ -724,6 +677,15 @@ input, textarea, select {
     border-radius: 12px !important;
 }
 
+/* ---- جعل نص "أرسل لنا رسالة" أسود واضح ---- */
+.ec-contact-card h3,
+.ec-contact-card h4,
+.ec-contact-card .stMarkdown h3,
+div[data-testid="stForm"] h3 {
+    color: #000000 !important;
+    font-weight: 800 !important;
+}
+
 /* ---- News Cards ---- */
 .ec-news-card {
     background: white; border-radius: 20px; padding: 28px;
@@ -844,13 +806,11 @@ input, textarea, select {
 </style>
 ''', unsafe_allow_html=True)
 
-
 # ====================================================================================================
 # Helper function to generate navigation link (same tab)
 # ====================================================================================================
 def nav_link(text, page_name, icon=""):
     return f'<a href="?page={page_name}" target="_self">{icon} {text}</a>'
-
 
 # ====================================================================================================
 # Header + Side Navigation
@@ -924,13 +884,6 @@ if page == "coaches":
 st.session_state.page = page
 
 st.markdown('<div class="ec-container">', unsafe_allow_html=True)
-
-# ====================================================================================================
-# Initialize Telegram Chat
-# ====================================================================================================
-if not st.session_state.telegram_initialized:
-    initialize_telegram_chat()
-    st.session_state.telegram_initialized = True
 
 # ====================================================================================================
 # HOME PAGE
@@ -1290,22 +1243,6 @@ elif page == "registration":
                 success, msg = save_to_google_sheets(data_dict)
 
                 if success:
-                    # إرسال البيانات إلى التلجرام
-                    telegram_text = (
-                        f"<b>⚽ طلب تسجيل لاعب جديد - الكوتش أكاديمي</b>\n\n"
-                        f"<b>معلومات اللاعب:</b>\n"
-                        f"• <b>الاسم:</b> {player_name}\n"
-                        f"• <b>الفئة العمرية:</b> {age_group}\n"
-                        f"• <b>المركز المفضل:</b> {position or 'لم يتم التحديد'}\n\n"
-                        f"<b>معلومات ولي الأمر:</b>\n"
-                        f"• <b>الهاتف:</b> {parent_phone}\n\n"
-                        f"<b>ملاحظات:</b> {notes or 'بدون ملاحظات'}\n\n"
-                        f"<b>وقت التسجيل:</b> {timestamp}"
-                    )
-                    telegram_success, telegram_msg = send_telegram_message(telegram_text)
-                    if not telegram_success:
-                        st.warning(f"تم الحفظ في Google Sheets، ولكن فشل إرسال إشعار Telegram: {telegram_msg}")
-
                     st.session_state.show_success = True
                     st.session_state.registration_submitted = True
                     st.rerun()
@@ -1412,29 +1349,14 @@ elif page == "contact":
                         unsafe_allow_html=True,
                     )
                 else:
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    telegram_text = (
-                        f"<b>📬 رسالة جديدة - الكوتش أكاديمي</b>\n\n"
-                        f"<b>الاسم:</b> {contact_name}\n"
-                        f"<b>الهاتف:</b> {contact_phone}\n"
-                        f"<b>نوع الاستفسار:</b> {inquiry_type}\n"
-                        f"<b>الرسالة:</b>\n{contact_message}\n\n"
-                        f"<b>وقت الإرسال:</b> {timestamp}"
-                    )
-                    success, msg = send_telegram_message(telegram_text)
-                    if success:
-                        st.session_state.show_contact_success = True
-                        st.rerun()
-                    else:
-                        st.markdown(
-                            f'<div class="ec-error-msg">❌ {msg}</div>',
-                            unsafe_allow_html=True,
-                        )
+                    # تم إلغاء إرسال الإشعار إلى Telegram
+                    st.session_state.show_contact_success = True
+                    st.rerun()
 
     with col_info:
         st.markdown('''
         <div class="ec-contact-card">
-            <h3 style="color:#1e3a8a; margin:0 0 18px; font-size:1.3rem; font-weight:800;">📍 معلومات التواصل</h3>
+            <h3 style="color:#000000; margin:0 0 18px; font-size:1.3rem; font-weight:800;">📍 معلومات التواصل</h3>
             <div class="ec-contact-item">
                 <div class="ec-icon">📍</div>
                 <div>
