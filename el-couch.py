@@ -3,6 +3,7 @@ import os
 import base64
 import re
 from datetime import datetime
+import requests  # استيراد مكتبة requests لإرسال رسائل التيليجرام
 
 # ====================================================================================================
 # Google Sheets Integration (باستخدام service account من secrets)
@@ -87,6 +88,41 @@ def save_to_google_sheets(data_dict):
         return True, "✅ تم التسجيل بنجاح!"
     except Exception as e:
         return False, f"❌ خطأ في Google Sheets: {str(e)}"
+
+# ====================================================================================================
+# Telegram Messaging Function
+# ====================================================================================================
+def send_telegram_message(message_text):
+    """
+    إرسال رسالة إلى التيليجرام باستخدام بوت التيليجرام
+    """
+    try:
+        # الحصول على التوكن والمعرف من secrets
+        bot_token = st.secrets["telegram"]["bot_token"]
+        chat_id = st.secrets["telegram"]["chat_id"]
+
+        # إعداد رابط إرسال الرسالة
+        send_message_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+
+        # إعداد معاملات الرسالة
+        params = {
+            "chat_id": chat_id,
+            "text": message_text,
+            "parse_mode": "HTML"  # يمكن استخدام HTML لتنسيق النص
+        }
+
+        # إرسال الطلب إلى التيليجرام
+        response = requests.post(send_message_url, params=params)
+
+        # التحقق من نجاح الإرسال
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"خطأ في إرسال رسالة التيليجرام: {response.status_code} - {response.text}")
+            return False
+    except Exception as e:
+        print(f"استثناء في إرسال رسالة التيليجرام: {str(e)}")
+        return False
 
 # ====================================================================================================
 # Page Config
@@ -1143,9 +1179,9 @@ elif page == "programs":
                     <li><strong>الذكاء الكروي:</strong> القراءة التحليلية للملعب واتخاذ القرار</li>
                     <li><strong>بناء الشخصية:</strong> الثقة بالنفس والقيم الرياضية</li>
                 </ul>
-                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه الأكاديمية:</h4>
+                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه النادي:</h4>
                 <ul style="margin:0 20px 0 0; color:#334155; line-height:2;">
-                    <li>ملابس تدريب رسمية (قميص - شورت)</li>
+                    <li>ملابس تدريب رسمية (قميص - شورت - جوارب)</li>
                     <li>مسابقات دورية داخلية وخارجية</li>
                     <li>تقييمات شهرية وتقارير تطور الأداء</li>
                     <li>فيديوهات تحليل أداء للمتميزين</li>
@@ -1400,7 +1436,7 @@ elif page == "faq":
         )
 
 # ====================================================================================================
-# CONTACT PAGE (with Google Map and WhatsApp)
+# CONTACT PAGE (with Google Map and WhatsApp, now with Telegram integration)
 # ====================================================================================================
 elif page == "contact":
     st.markdown('''
@@ -1441,9 +1477,30 @@ elif page == "contact":
                 else:
                     # معالجة رقم الهاتف (اختياري، لكن للاتساق)
                     normalized_phone = normalize_phone(contact_phone)
-                    # يمكن حفظه أو إرساله إلى أي مكان، لكننا فقط نظهر رسالة نجاح
-                    st.session_state.show_contact_success = True
-                    st.rerun()
+                    
+                    # إعداد رسالة التيليجرام
+                    telegram_message = f"""
+📩 <b>رسالة جديدة من موقع الكوتش أكاديمي</b>
+━━━━━━━━━━━━━━━━━━━━
+👤 <b>الاسم:</b> {contact_name}
+📞 <b>رقم الهاتف:</b> {contact_phone}
+📋 <b>نوع الاستفسار:</b> {inquiry_type}
+💬 <b>الرسالة:</b> {contact_message}
+━━━━━━━━━━━━━━━━━━━━
+🕐 <b>تاريخ الإرسال:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                    """
+                    
+                    # إرسال الرسالة إلى التيليجرام
+                    telegram_sent = send_telegram_message(telegram_message)
+                    
+                    if telegram_sent:
+                        st.session_state.show_contact_success = True
+                        st.rerun()
+                    else:
+                        st.markdown(
+                            '<div class="ec-error-msg">❌ حدث خطأ في إرسال الرسالة، يرجى المحاولة مرة أخرى.</div>',
+                            unsafe_allow_html=True,
+                        )
 
     with col_info:
         st.markdown('''
