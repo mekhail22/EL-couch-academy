@@ -104,7 +104,6 @@ def send_telegram_message(text):
 def initialize_telegram_chat():
     """محاولة إرسال رسالة تفعيل لتأكيد إعدادات Telegram."""
     try:
-        # استخدام نص بسيط للتفعيل
         test_message = "✅ تم تشغيل تطبيق الكوتش أكاديمي بنجاح وجميع الإعدادات صحيحة."
         success, message = send_telegram_message(test_message)
         if success:
@@ -688,8 +687,12 @@ div[data-testid="stDecoration"] { display: none !important; }
     transform: scale(1.03);
 }
 
-/* ---- زر إرسال النموذج (لون النص أسود على خلفية فاتحة) ---- */
-.stButton button {
+/* ---- أزرار Streamlit (لون النص أسود واضح) ---- */
+.stButton button,
+div[data-testid="stForm"] button,
+div.stButton button,
+button[kind="primary"],
+button[kind="secondary"] {
     background: linear-gradient(135deg, #f59e0b, #d97706) !important;
     color: #000000 !important;  /* النص أسود */
     font-weight: 800 !important;
@@ -698,10 +701,14 @@ div[data-testid="stDecoration"] { display: none !important; }
     padding: 12px 28px !important;
     font-size: 1rem !important;
     transition: all 0.3s ease !important;
+    opacity: 1 !important;
 }
-.stButton button:hover {
+
+.stButton button:hover,
+div[data-testid="stForm"] button:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 20px rgba(245,158,11,0.4) !important;
+    background: linear-gradient(135deg, #e88b00, #c06500) !important;
     color: #000000 !important;
 }
 
@@ -990,134 +997,265 @@ if page == "home":
 # ABOUT PAGE
 # ====================================================================================================
 elif page == "about":
+    st.markdown(""about":
     st.markdown("""
-    <div class="ec-page-header">
-        <h1>من نحن</h1>
-        <p>الكوتش أكاديمي.. رؤية جديدة في عالم تدريب كرة القدم</p>
+   "
+    <div class="ec-page-header <div class="ec-page-header">
+">
+        <h1        <h1>من نحن</h1>
+       >من نحن</h1>
+        <p> <p>الكوتش أكاديمي.. رؤيةالكوتش أكاديمي.. ر جديدة في عالم تدريب كرة القدمؤية جديدة في عالم تدريب كرة القدم</p</p>
     </div>
-    """, unsafe_allow_html=True)
+   >
+    </div>
+    """, """, unsafe_allow_html=True)
+
+    st unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="ec-about-grid">
-        <div class="ec-about-visual">⚽</div>
+   .markdown("""
+    <div <div class="ec- class="ec-about-grid">
+        <div class="about-grid">
+        <div class="ec-about-visual">⚽ec-about-visual">⚽</div</div>
         <div>
-            <h2 style="color:#1e3a8a; font-size:1.8rem; margin:0 0 18px; font-weight:900;">تأسيس الأكاديمية</h2>
-            <p style="color:#334155; font-size:1rem; line-height:1.8;">
-                تأسست الأكاديمية عام 2020 على يد نخبة من المدربين المتخصصين بهدف
-                إنشاء مؤسسة رياضية متكاملة تُعنى ببناء اللاعب من جميع الجوانب.
+            <h2 style>
+        <div>
+            <h2 style="color:#1="color:#1e3e3a8a; font-size:1.8a8a; font-size:1.8rem; margin:0 rem; margin:0 18px; font-weight:900;">0 0 18px; font-weight:900;">تأسيس الأكاديمية</تأسيس الأكاديمية</h2>
+            <p style="color:#334155h2>
+            <p style="color:#334155; font; font-size:1rem; line-height:-size:1rem; line-height:1.8;">
+                تأسست1.8;">
+                تأسست الأك الأكاديماديمية عام 202ية عام 2020 على يد نخبة من المدرب0 على يد نخبة من المدربين المتخصصين بهدفين المتخصصين بهدف
+               
+                إنشاء مؤسسة رياضية متك إنشاء مؤسسة رياضية متكاملة تُاملة تُعنى ببناءعنى ببناء اللاعب من جميع الجوانب.
             </p>
-            <ul style="margin:16px 25px 0 0; color:#334155; font-size:0.95rem; line-height:2;">
-                <li><strong>كابتن ميخائيل كميل رؤف (ميخا)</strong> - المدير الفني والمؤسس</li>
-                <li><strong>كابتن أندرو</strong> - مدرب مهارات</li>
-                <li><strong>كابتن مينا</strong> - مدرب لياقة بدنية</li>
+            اللاعب من جميع الجوانب.
+            </p>
+            <ul style="margin:16px  <ul style="margin:16px 25px25px 0 0; color:#334155; 0 0; color:#334155; font-size:0.95rem; font-size:0.95rem; line-height:2;">
+                <li line-height:2;">
+                <li><strong>كابتن ميخائيل كم><strong>كابتن ميخائيل كميل ريل رؤف (ميخا)</strong> -ؤف (ميخا)</strong> - المدير الفني المدير الفني والمؤسس والمؤسس</li>
+                <li><strong>ك</li>
+                <li><strong>كابتنابتن أندرو</ أندرو</strong>strong> - مدرب مهارات</ - مدرب مهارات</li>
+                <li><strong>li>
+                <li><strong>كابتن مينا</strong> - مدرب لياقة بدنية</liكابتن مينا</strong> - مدرب لياقة بدنية</>
             </ul>
-            <p style="margin-top:18px; color:#334155;">
-                📍 مكان التدريب: <strong>ملاعب مدرسة السلام المتطورة - أسيوط</strong>
+           li>
+            </ul>
+            <p style="margin-top: <p style="margin-top:18px; color:#33415518px; color:#334;">
+                📍 مكان التدريب:155;">
+                📍 مكان التدريب: < <strong>ملاعب مدرسة السلام المتstrong>ملاعب مدرسةطورة - أسيوط</strong>
+            السلام المتطورة - أسيوط</strong>
             </p>
-            <p style="margin-top:14px; font-weight:800; color:#1e3a8a; font-size:1.05rem;">
-                بدعم من الأب الروحي للأكاديمية: مستر / مؤنس منير
+            <p style="margin-top </p>
+            <p style="margin:14px; font-weight:800; color:#1-top:14px; font-weight:800; color:#1e3a8a; font-size:1e3a8a; font-size:1.05.05rem;">
+                بدعم من الأب الروحي للأكاديمrem;">
+                بدعم من الأب الروحي للأكاديمية: مستر / مؤنس منية: مستر / مؤنس منير
+            </p>
+        </divير
             </p>
         </div>
     </div>
 
     <div class="ec-mv-grid">
-        <div class="ec-mission-card">
-            <h3>🎯 رسالتنا</h3>
-            <p>تطوير جيل جديد من اللاعبين المبدعين القادرين على التألق محليًا ودوليًا، من خلال تقديم تدريب عصري يعتمد على أحدث الأساليب العلمية، مع غرس القيم والأخلاق الرياضية.</p>
+        <div class>
+    </div>
+
+    <div class="ec-mv-grid">
+       ="ec-mission-card">
+            < <div class="ec-mission-card">
+            <h3>🎯 رسالتنا</hh3>🎯 رسالتنا</h3>
+            <p>تطوير جيل جديد من اللاعبين3>
+            <p>تطوير جيل جديد من اللاعبين المبدعين القادرين على التألق محليًا ودوليًا، من خلال تقديم المبدعين القادرين على التألق محليًا ودوليًا، من خلال تقديم تدريب عصري يعتمد على أحدث الأساليب العلمية تدريب عصري يعتمد على أحدث الأساليب العلمية، مع غرس القيم والأخلاق الرياضية.</p>
+           ، مع غرس القيم والأخلاق الرياضية.</p>
             <ul>
+                <li>تطوير المهارات الف <ul>
                 <li>تطوير المهارات الفنية الأساسية والمتقدمة</li>
-                <li>بناء اللياقة البدنية المخصصة لكل لاعب</li>
-                <li>تعزيز الذكاء الكروي والقدرات الذهنية</li>
-                <li>غرس القيم الرياضية والسلوك القيادي</li>
+                <li>بناء اللياقة البدنية المنية الأساسية والمتقدمة</li>
+                <li>بناء اللياقة البدنية المخصصةخصصة لكل لاعب</li>
+                <li>تعزيز الذ لكل لاعب</li>
+                <li>تعكاء الكروي والقدرات الذهنية</liزيز الذكاء الكروي والقدرات الذهنية</>
+                <li>غرس القيم الرياضية والسلوك القli>
+                <li>غرس القيم الرياضية والسلوك القيادييادي</li>
+            </ul</li>
             </ul>
+       >
         </div>
         <div class="ec-vision-card">
-            <h3>👁️ رؤيتنا</h3>
-            <p>أن نكون الوجهة الأولى لأي موهبة كروية في مصر والوطن العربي، والجسر الذي يعبر من خلاله الموهوبون إلى العالمية.</p>
+            <h3> </div>
+        <div class="ec-vision-card">
+            <h3>👁️ رؤيت👁️ رؤيتنا</h3>
+           نا</h3>
+            <p <p>أن نكون الوجهة الأولى>أن نكون الوجهة الأولى لأي موهبة كروية في مصر والوطن العربي، والجسر لأي موهبة كروية في مصر والوطن العربي، والجسر الذي يعبر من خلاله الموه الذي يعبر من خلاله الموهوبون إلى العالمية.</p>
+            <ulوبون إلى العالمية.</p>
             <ul>
-                <li>صناعة لاعبين مؤهلين للدوريات العالمية</li>
-                <li>تطوير منهج تدريبي يُدرَّس في المعاهد الرياضية</li>
-                <li>المساهمة في تطوير كرة القدم العربية</li>
-                <li>بناء قاعدة بيانات للمواهب الكروية</li>
+                <li>صناعة لاعبين مؤ>
+                <li>صناعة لاعبين مؤهلينهلين للدوريات العالمية</li>
+                <li>تطوير منهج تدريبي للدوريات العالمية</li>
+                <li>تطوير منهج تدريبي يُدر يُدرَّس في المعاهد الرياضية</li>
+               َّس في المعاهد الرياضية</li <li>المساهمة>
+                <li>المساهمة في تطوير كرة القدم العربية</ في تطوير كرة القدم العربية</li>
+                <li>بناء قاعدة بيانات للمواهب الكروli>
+                <li>بناء قاعدة بيانات للمواهب الكروية</ية</li>
+            </ulli>
             </ul>
+        </div>
+    </div>
+    """, unsafe_allow>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
+    st.markdown(""_html=True)
+
     st.markdown("""
+    <div class="ec-info-b"
     <div class="ec-info-banner" style="margin-top:40px;">
-        <h3>📊 أرقام وإحصائيات</h3>
+        <h3anner" style="margin-top:40px;">
+        <h3>📊 أرقام وإحصائيات</h>📊 أرقام وإحصائيات</h3>
+        <div class="ec-banner-stats3>
         <div class="ec-banner-stats">
-            <div class="ec-banner-stat"><span>🎓 4+</span>سنوات من التميز</div>
-            <div class="ec-banner-stat"><span>👥 500+</span>لاعب تم تدريبهم</div>
-            <div class="ec-banner-stat"><span>🏆 25+</span>بطولة محلية</div>
-            <div class="ec-banner-stat"><span>⭐ 150+</span>لاعب محترف</div>
+            <div class="ec-banner-stat">
+            <div class="ec-banner-stat"><span>🎓 4+</span>سن"><span>🎓 4+</span>سنوات من التميز</div>
+            <div classوات من التميز</div>
+            <div class="ec-banner-stat"><span>👥 500+</="ec-banner-stat"><span>👥 500+</span>لاعب تم تدريبهم</div>
+            <divspan>لاعب تم تدريبهم</div>
+            <div class=" class="ec-banner-stat"><span>🏆 25+ec-banner-stat"><span>🏆 </span>بطولة محلية</25+</span>بطولة محلية</div>
+            <div class="ec-banner-statdiv>
+            <div class="ec-banner-stat"><span>"><span>⭐ 150+</span>لاعب مح⭐ 150+</span>لاعترف</div>
+        </div>
+    </divب محترف</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+   >
+    """, unsafe_ """, unsafe_allow_html=True)
+
+# =================================================================================================allow_html=True)
 
 # ====================================================================================================
 # PROGRAMS PAGE
 # ====================================================================================================
+# PROGRAMS PAGE
+# ====================================================================================================
+elif page == "programs":
+    st.markdown("===
 elif page == "programs":
     st.markdown("""
     <div class="ec-page-header">
-        <h1>البرامج التدريبية</h1>
-        <p>مواعيد تدريبية مصممة لكل فئة عمرية</p>
+       ""
+    <div class="ec-page-header">
+        <h <h1>البرامج التدريبية</h1>البرامج التدريبية</h1>
+        <p>مواعيد تدريبية1>
+        <p>مواعيد تدريب مصممة لكل فئة عمريةية مصممة لكل فئة عمرية</p>
+    </div>
+   </p>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="ec-pro """, unsafe_allow_html=True)
 
     st.markdown("""
     <div class="ec-programs-grid">
+        <div class="ec-program-cardgrams-grid">
         <div class="ec-program-card">
-            <div class="ec-program-hdr">📅</div>
+           ">
+            <div class="ec <div class="ec-program-hdr">📅</div>
+           -program-hdr">📅</div>
             <div class="ec-program-body">
+                <h3>مو <div class="ec-program-body">
                 <h3>مواعيد تدريب السبت</h3>
+               اعيد تدريب السبت</h3>
                 <div class="ec-schedule-box">
-                    <div class="ec-schedule-item"><strong>🕔 ٥:٠٠ - ٦:٠٠ م</strong> ← 🏃‍♀️ بنات (جميع الأعمار)</div>
-                    <div class="ec-schedule-item"><strong>🕕 ٦:٠٠ - ٧:٣٠ م</strong> ← 🏃 بنين (الصف الأول - الخامس الابتدائي)</div>
-                    <div class="ec-schedule-item"><strong>🕢 ٧:٣٠ - ٩:٠٠ م</strong> ← 🏃 بنين (الصف السادس - الثاني الإعدادي)</div>
-                    <div style="margin-top:14px; color:#64748b; font-size:0.88rem;">📍 ملاعب مدرسة السلام المتطورة - أسيوط</div>
+                    <div class="ec-schedule-box">
+                    <div class="ec-schedule-item"><strong> <div class="ec-schedule-item"><strong>🕔 ٥:٠٠ - ٦:🕔 ٥:٠٠ - ٦:٠٠ م</strong> ← 🏃‍♀٠٠ م</strong> ← 🏃‍♀️ بنات (جم️ بنات (جميع الأعماريع الأعمار)</div>
+                    <div class="ec-schedule-item)</div>
+                    <div class="ec-schedule-item"><strong>🕕 ٦:٠٠"><strong>🕕 ٦:٠٠ - ٧:٣٠ م</strong> ← - ٧:٣٠ م</strong 🏃 بنين (> ← 🏃 بنين (الصف الأول - الخامس الابتدالصف الأول - الخامس الابتدائي)</div>
+                    <div class="ecائي)</div>
+                    <div class="ec-schedule-item"><strong>🕢 ٧:٣٠ --schedule-item"><strong>🕢 ٧:٣٠ - ٩:٠٠ م</strong> ← 🏃 ٩:٠٠ م</strong> ← بنين (الصف السادس 🏃 بنين (الصف السادس - الثاني - الثاني الإعدادي)</div الإعدادي)</div>
+                    <div style>
+                    <div style="margin-top:14px;="margin-top:14px; color:#64748b; font-size: color:#64748b; font-size:0.88rem;">📍 ملاعب مدرسة السلام0.88rem;">📍 ملاعب مدرسة السلام المتطورة - أسيوط</ المتطورة - أسيوط</div>
                 </div>
             </div>
         </div>
-        <div class="ec-program-card">
-            <div class="ec-program-hdr">📅</div>
+        <div classdiv>
+                </div>
+            </div>
+        </div>
+        <div class="ec="ec-program-card">
+-program-card">
+            <div class="ec-program-hdr            <div class="ec-program-hdr">">📅</div>
+            <div class📅</div>
             <div class="ec-program-body">
-                <h3>مواعيد تدريب الخميس</h3>
+                <h3>مواع="ec-program-body">
+                <hيد تدريب الخميس</h3>مواعيد تدريب الخميس</h3>
+                <3>
                 <div class="ec-schedule-box">
-                    <div class="ec-schedule-item"><strong>🕟 ٤:٣٠ - ٦:٠٠ م</strong> ← 🏃‍♀️ بنات (جميع الأعمار)</div>
-                    <div class="ec-schedule-item"><strong>🕕 ٦:٠٠ - ٨:٠٠ م</strong> ← 🏃 بنين (الصف الأول - الخامس الابتدائي)</div>
-                    <div class="ec-schedule-item"><strong>🕗 ٨:٠٠ - ١٠:٠٠ م</strong> ← 🏃 بنين (الصف السادس - الثاني الإعدادي)</div>
-                    <div style="margin-top:14px; color:#64748b; font-size:0.88rem;">📍 ملاعب مدرسة السلام المتطورة - أسيوط</div>
+                    <div class="ecdiv class="ec-schedule-box">
+                    <div class="ec-schedule-item"><strong>-schedule-item"><🕟 ٤:٣٠ - ٦:٠٠ م</strong>🕟 ٤:٣٠ - ٦:٠٠strong> ← 🏃‍♀️ بن م</strong> ← 🏃‍♀️ بنات (ات (جميع الأعمارجميع الأعمار)</div>
+                    <div class="ec-s)</div>
+                    <div class="ec-schedule-item"><strong>🕕 ٦:chedule-item"><strong>🕕 ٠٠ - ٨:٠٦:٠٠ - ٨:٠٠ م٠ م</strong> ← 🏃 بنين (</strong> ← 🏃 بنين (الصف الأول - الخامس الابتدالصف الأول - الخامس الابتدائي)</ائي)</div>
+                   div>
+                    <div class="ec-schedule-item"><strong> <div class="ec-schedule-item"><strong>🕗 ٨:٠٠ - ١🕗 ٨:٠٠ -٠:٠٠ م</strong> ← ١٠:٠٠ م</strong> ← 🏃 بنين (الصف السادس - الثاني الإعدادي)</div 🏃 بنين (الصف السادس - الثاني الإعدادي)</>
+                    <div stylediv>
+                    <div style="margin-top:14px="margin-top:14px; color:#64748b; color:#64748b; font-size:0.88rem;">📍 ملاع; font-size:0.88rem;">📍 ملاعب مدرسة السلام المتطورة - أسيوط</ب مدرسة السلام المتطورة - أسيوط</div>
+                </div>
+            </div>
                 </div>
             </div>
         </div>
     </div>
+   div>
+        </div>
+    </div """, unsafe_allow_html=True)
+
+   >
     """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="ec-program-card" style="margin-bottom:30px;">
+    <div class="ec st.markdown("""
+    <div class="ec-program-card" style="margin-bottom:30px-program-card" style="margin;">
+        <div class="ec-program-hdr">-bottom:30px;">
         <div class="ec-program-hdr">⚽</div>
         <div class="ec-program-body">
-            <h3>ماذا يشمل التدريب؟</h3>
+           ⚽</div>
+        <div class="ec-program-body">
+            <h3>ماذا <h3>ماذا يشمل التدريب؟</h3>
+            يشمل التدريب؟</h3>
             <div class="ec-schedule-box">
-                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">🎯 محاور التدريب الأساسية:</h4>
-                <ul style="margin:0 20px 18px 0; color:#334155; line-height:2;">
-                    <li><strong>المهارات الفنية:</strong> التمرير - الاستلام - المراوغة - التسديد</li>
-                    <li><strong>اللياقة البدنية:</strong> السرعة - الرشاقة - القوة - التحمل</li>
-                    <li><strong>العمل الجماعي:</strong> التكتيك والانضباط الجماعي</li>
+                <div class="ec-schedule-box">
+ <h4 style                <h4 style="color:#1e3="color:#1e3a8a; margin:0 0 14pxa8a; margin:0 0 14px; font-size:1.15rem;">🎯 محاور التد; font-size:1.15rem;">🎯 محريب الأساسية:</اور التدريب الأساسية:</h4>
+                <ul style="h4>
+                <ul style="margin:margin:0 20px 18px 0; color:#334155; line-height:20 20px 18px 0; color:#334155; line-height:2;">
+                    <li><strong>المهارات الفنية:</strong> التمرير - الاستلام;">
+                    <li><strong>المهارات الفنية:</strong> التمرير - الاستلام - المر - المراوغة - التساوغة - التسديد</li>
+                    <li><strong>الليديد</li>
+                    <li><strong>اللياقة البدنية:</strong> السرعة - الرشاقةاقة البدنية:</strong> السرعة - الر - القوة - التحملشاقة - القوة - التحمل</li>
+                    <li><strong</li>
+                    <li><strong>العمل الجماعي:</strong> التكتيك والانضباط الجماعي</li>العمل الجماعي:</strong> التكتيك والانض>
+                    <li><strong>الذكاء الكروي:</strong> القراءة التحليلية للملعب واتخباط الجماعي</li>
                     <li><strong>الذكاء الكروي:</strong> القراءة التحليلية للملعب واتخاذ القرار</li>
+                    <li><strong>بناء الشخصية:</strong> الثقةاذ القرار</li>
                     <li><strong>بناء الشخصية:</strong> الثقة بالنفس والقيم الرياضية</li>
                 </ul>
-                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه النادي:</h4>
-                <ul style="margin:0 20px 0 0; color:#334155; line-height:2;">
-                    <li>ملابس تدريب رسمية (قميص - شورت - جوارب)</li>
-                    <li>مسابقات دورية داخلية وخارجية</li>
-                    <li>تقييمات شهرية وتقارير تطور الأداء</li>
+                <h4 style="color:#1e3 بالنفس والقيم الرياضية</li>
+                </ul>
+                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ماa8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه النادي:</h4>
+                يقدمه النادي:</h4>
+                <ul style="margin:0 20px 0 0; color <ul style="margin:0 20px 0 0; color:#334155; line-height:2;">
+                    <li>ملابس تدريب:#334155; line-height:2;">
+                    <li>ملابس تدريب رسمية (قميص - رسمية (قميص - شورت - جوارب)</li>
+                    <li>مس شورت - جوارب)</li>
+                    <li>مسابقات دورية داخلية وخارجية</ابقات دورية داخلية وخارجية</li>
+                    <li>تقييمات شهرية وتقli>
+                    <li>تقييمات شهرية وتقارير تطور الأداء</liارير تطور الأداء</li>
+                    <li>فيديوهات تحليل أداء للمتميزين</>
                     <li>فيديوهات تحليل أداء للمتميزين</li>
-                    <li>فرص احتراف في الأندية الكبرى</li>
-                    <li>تأمين صحي للاعبين أثناء التدريبات</li>
+                    <li>li>
+                    <li>فرص احتراف في الأندية الكبرىفرص احتراف في الأندية الكبرى</li>
+                    <li>تأمين ص</li>
+                    <li>تأمين صحي للاعبين أثناء التدحي للاعبين أثناء التدريبات</li>
+                </ul>
+            </div>
+        </divريبات</li>
                 </ul>
             </div>
         </div>
@@ -1125,93 +1263,188 @@ elif page == "programs":
     """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
-        <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
-        <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
-        <a href="?page=registration" target="_self" class="ec-btn ec-btn-gold" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
+    <div style=">
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background:linear-gradient(135deg,#background:linear-gradient(135deg,#f0f9ff,#e0f0f9ff,#e0f2fe);f2fe); border-radius:24px; padding: border-radius:24px; padding:30px; text-align:30px; text-align:center;">
+       center;">
+        <h3 style="color:#1e <h3 style="color:#1e3a8a; margin:03a8a; margin:0 0 12 0 12px;">📞 للتسجيل والpx;">📞 للتسجيل والاستفسار</استفسار</h3>
+        <p style="color:#h3>
+        <p style="color:#334155; margin334155; margin:0 0 18px;">تواصل معنا الآن للحصول على:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
+        <a href="?page عرض تجريبي مجاني</p>
+        <a href="?page=registration" target="_self" class="ec=registration" target="_self" class="ec-btn ec-btn-gold" style="padding:12px-btn ec-btn-gold" style="padding:12px 35px; font-size:1rem;"> 35px; font-size:1rem;">سجل الآن</a>
+    </div>
+    """, unsafe_allow_html=True)
+
+# =================================================================سجل الآن</a>
     </div>
     """, unsafe_allow_html=True)
 
 # ====================================================================================================
 # CAPTAINS PAGE
 # ====================================================================================================
+===================================
+# CAPTAINS PAGE
+# ====================================================================================================
 elif page in ("coaches", "captains"):
+    st.markdownelif page in ("coaches", "captains"):
     st.markdown("""
     <div class="ec-page-header">
+       ("""
+    <div class="ec-page-header">
         <h1>صفحة الكباتن</h1>
-        <p>فريقنا من الكباتن والمدربين ذوي الخبرة والكفاءة</p>
+        <p>فريقنا <h1>صفحة الكباتن</h1>
+        <p>فريقنا من الكباتن والمدربين ذوي من الكباتن والمدربين ذوي الخبرة والكفاءة</p>
+    </div>
+    """, unsafe الخبرة والكفاءة</p>
     </div>
     """, unsafe_allow_html=True)
 
+    st.markdown("_allow_html=True)
+
     st.markdown("""
     <div class="ec-lead-captain">
+        <div class="ec-lead-avatar">""
+    <div class="ec-lead-captain">
         <div class="ec-lead-avatar">👨‍🏫</div>
+        <div class="👨‍🏫</div>
         <div class="ec-lead-info">
-            <h3>كابتن / ميخائيل كميل رؤف</h3>
-            <div class="ec-title-badge">المدير الفني - مؤسس الأكاديمية</div>
+            <h3>كابec-lead-info">
+            <h3>كابتن / ميخائيل كميل رؤف</hتن / ميخائيل كميل رؤف</h3>
+            <div class="ec-title-badge">المدير الفني -3>
+            <div class="ec-title-badge">المدير الفني - مؤسس الأكاديمية</div مؤسس الأكاديمية</div>
             <div class="ec-qualifications">
                 🎓 بكالوريوس تربية رياضية<br>
-                📜 رخصة تدريب CAF لمراحل البراعم<br>
-                📜 دبلومة الإعداد البدني المتقدم<br>
-                📜 دبلومة إصابات الملاعب والعلاج الطبيعي<br>
-                🏫 مدرس تربية رياضية بمدارس السلام الخاصة<br>
-                ⭐ خبرة أكثر من 10 سنوات في تدريب الناشئين
+                📜 ر>
+            <div class="ec-qualifications">
+                🎓 بكالوريوس تربية رياضية<br>
+                📜 رخصة تدريب CAF لمراحل البراعخصة تدريب CAF لمراحل البراعم<br>
+                📜 دبلومةم<br>
+                📜 دبلومة الإعداد الإعداد البدني المتقدم<br البدني المتقدم<br>
+                📜 د>
+                📜 دبلومة إصاباتبلومة إصابات الملاعب والعلاج الملاعب والعلاج الطبيعي<br>
+ الطبيعي<br>
+                🏫 مدرس                🏫 مدرس تربية رياضية بمدارس السلام الخاصة<br تربية رياضية بمدارس السلام الخاصة<br>
+                ⭐ خبرة أكثر من>
+                ⭐ خبرة أكثر من 10 10 سنوات في تدريب الناشئين
+            سنوات في تدريب الناشئين
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    </div>
+        </div>
+    </div>
+    """, unsafe_ """, unsafe_allow_htmlallow_html=True)
+
+    st.markdown("""
+    <div class="ec-captains-grid=True)
 
     st.markdown("""
     <div class="ec-captains-grid">
         <div class="ec-captain-card">
-            <div class="ec-captain-avatar">🧤</div>
+            <div class="">
+        <div class="ec-captain-card">
+            <div class="ec-captain-avatar">ec-captain-avatar">🧤</div>
             <div class="ec-captain-info">
-                <h3>كابتن أحمد علي</h3>
-                <div class="ec-coach-title">مدرب حراس مرمى - معتمد CAF</div>
+                <h🧤</div>
+            <div class="ec-captain-info">
+                <h3>كابتن أحمد3>كابتن أحمد علي</h3>
+                <div class="ec-coach-title">مدرب حراس مر علي</h3>
+                <div class="ec-coach-title">مدرب حراس مرمى - معتمد CAF</divمى - معتمد CAF</div>
+                <div class="ec-coach-desc">
+                    🎓 بكالوريوس ت>
                 <div class="ec-coach-desc">
                     🎓 بكالوريوس تربية رياضية<br>
+                    📜 رخصة تدريب حراس مرمربية رياضية<br>
                     📜 رخصة تدريب حراس مرمى CAF<br>
-                    📜 خبرة 15 عامًا في تدريب حراس المرمى<br>
-                    📜 عمل مع عدة أندية في الدوري المصري
+                    📜 خبرةى CAF<br>
+                    📜 خبرة 15 عامًا في تدريب حر 15 عامًا في تدريب حراس المرمى<br>
+                    📜 عمل مع عدة أندية فياس المرمى<br>
+                    📜 عمل مع عدة أندية في الدوري المصري الدوري المصري
+                </div>
+            </div>
+        </div>
+        <div
                 </div>
             </div>
         </div>
         <div class="ec-captain-card">
-            <div class="ec-captain-avatar">🏃</div>
+            class="ec-captain-card">
+            <div class="ec-captain-avatar">🏃 <div class="ec-captain-avatar">🏃</div>
+            <div class="ec-captain-info">
+                <h3>د</div>
             <div class="ec-captain-info">
                 <h3>د. خالد السيد</h3>
                 <div class="ec-coach-title">مدرب لياقة بدنية - دكتوراه</div>
+                <div class. خالد السيد</h3>
+                <div class="ec-coach-title">مدرب لياقة بدنية - دكتوراه</div>
                 <div class="ec-coach-desc">
+                   ="ec-coach-desc">
                     🎓 دكتوراه في علوم الرياضة<br>
+                    📜 أستاذ مساعد بكل 🎓 دكتوراه في علوم الرياضة<br>
                     📜 أستاذ مساعد بكلية التربية الرياضية<br>
+                    📜 مختص في تطية التربية الرياضية<br>
                     📜 مختص في تطوير قدرات الناشئين<br>
+                    📜 مدرب لياقة معتمد من الاتوير قدرات الناشئين<br>
                     📜 مدرب لياقة معتمد من الاتحاد المصري
+                </divحاد المصري
                 </div>
             </div>
         </div>
-        <div class="ec-captain-card">
+       >
+            </div>
+        </div>
+        <div class="ec-captain-card <div class="ec-captain-card">
+            <div class="ec-captain-avatar">⚽">
             <div class="ec-captain-avatar">⚽</div>
             <div class="ec-captain-info">
-                <h3>كابتن محمد جابر</h3>
+                <h3>كاب</div>
+            <div class="ec-captain-info">
+                <h3>كابتن محمد جابر</h3تن محمد جابر</h3>
+                <div class="ec>
+                <div class="ec-coach-title">مدرب مهارات فنية - معتمد CAF</div>
                 <div class="ec-coach-title">مدرب مهارات فنية - معتمد CAF</div>
                 <div class="ec-coach-desc">
+                   -coach-desc">
                     🎓 بكالوريوس تربية رياضية<br>
-                    📜 رخصة تدريب مهارات CAF<br>
+                    📜 🎓 بكالوريوس تربية رياضية<br>
+                    📜 رخصة تدريب مهارات CAF<br رخصة تدريب مهارات CAF<br>
+                    📜 خبرة 12 عامًا في>
                     📜 خبرة 12 عامًا في تدريب المهارات الفنية<br>
+                    📜 دورات متقدمة في تدريب المهارات الفنية<br>
                     📜 دورات متقدمة في تدريب الناشئين
+                </div تدريب الناشئين
                 </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
+    stallow_html=True)
+
     st.markdown("""
     <div class="ec-info-banner">
-        <h3>🌟 فريق تدريب متكامل</h3>
-        <p>يجمع فريقنا بين الخبرات الأكاديمية والعملية لضمان أفضل تدريب</p>
+        <h3>🌟 فريق.markdown("""
+    <div class="ec-info-banner">
+        <h3>🌟 فريق تدريب متكامل</h3 تدريب متكامل</h3>
+        <p>يجمع فريقنا بين الخبرات الأكاد>
+        <p>يجمع فريقنا بين الخبرات الأكاديمية والعملية لضمان أفضل تدريب</يمية والعملية لضمان أفضل تدريب</p>
+        <div class="ec-banner-stats">
+            <div class="ec-banner-stat"><span>12+</span>مدرب معتمد</div>
+            <div class="ec-banner-stat"><span>100+</span>دورة تدريبية</p>
         <div class="ec-banner-stats">
             <div class="ec-banner-stat"><span>12+</span>مدرب معتمد</div>
             <div class="ec-banner-stat"><span>100+</span>دورة تدريبية</div>
+            <div class="ec-banner-stat"><span>20+</span>سنة خبرة</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=Truediv>
             <div class="ec-banner-stat"><span>20+</span>سنة خبرة</div>
         </div>
     </div>
@@ -1221,261 +1454,527 @@ elif page in ("coaches", "captains"):
 # REGISTRATION PAGE
 # ====================================================================================================
 elif page == "registration":
+    st.markdown("")
+
+# ====================================================================================================
+# REGISTRATION PAGE
+# ====================================================================================================
+elif page == "registration":
     st.markdown("""
     <div class="ec-page-header">
+       "
+    <div class="ec-page-header">
         <h1>تسجيل لاعب جديد</h1>
+        <p>انضم إلى <h1>تسجيل لاعب جديد</h1>
         <p>انضم إلى الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
+    </ الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
     </div>
+    """, unsafe_allow_html=True)
+
+    if st.session_state.show_successdiv>
     """, unsafe_allow_html=True)
 
     if st.session_state.show_success:
         st.markdown(
-            '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
+            '<div class="ec-success-msg">✅ تم إ:
+        st.markdown(
+            '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24رسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
+            unsafe_allow_html=True,
+        )
+        st.session ساعة.</div>',
             unsafe_allow_html=True,
         )
         st.session_state.show_success = False
 
+    with st.form("_state.show_success = False
+
     with st.form("registration_form"):
-        st.markdown("### 📋 معلومات اللاعب")
+       registration_form"):
+        st.markdown(" st.markdown("### 📋 معلومات اللاعب")
+        col1, col2 = st.columns### 📋 معلومات اللاعب")
         col1, col2 = st.columns(2)
         with col1:
-            player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود")
+            player(2)
+        with col1:
+            player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود")
+            age_group = st.selectbox(
+                ": محمد أحمد محمود")
             age_group = st.selectbox(
                 "الفئة العمرية *",
                 [
                     "",
+                    "🏃‍♀️ بناتالفئة العمرية *",
+                [
+                    "",
                     "🏃‍♀️ بنات (جميع الأعمار)",
                     "🏃 بنين (الصف الأول - الخامس الابتدائي)",
-                    "🏃 بنين (الصف السادس - الثاني الإعدادي)",
+                    "🏃 بنين ( (جميع الأعمار)",
+                    "🏃 بنين (الصف الأول - الخامس الابتدائي)",
+                    "🏃 بنين (الصف السادس -الصف السادس - الثاني الإعدادي)",
+                ],
+            )
+        with col2 الثاني الإعدادي)",
                 ],
             )
         with col2:
             position = st.selectbox(
                 "المركز المفضل",
-                ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
+               :
+            position = st.selectbox(
+                "المركز المفضل",
+                ["", "حارس مرمى", "مدافع", "لاعب ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
+            وسط", "مهاجم", "أكثر من مركز"],
             )
 
-        st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
-        col1, col2 = st.columns(2)
-        with col1:
-            parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
+        st.markdown("### 👨‍👩‍ )
 
-        notes = st.text_area("ملاحظات إضافية (اختياري)", placeholder="أي معلومات إضافية تود إضافتها...")
+        st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
+        col1, col2 = st👦 معلومات ولي الأمر")
+        col1, col2 = st.columns(.columns(2)
+        with col1:
+            parent_phone = st.text_input("2)
+        with col1:
+            parent_phone = st.textرقم الهاتف *", placeholder="01XXXXXXXXX")
+
+        notes =_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
+
+        notes = st.text st.text_area("ملاحظات إضافية (اختياري)", placeholder_area("ملاحظات إضافية (اختياري)", placeholder="أي معلومات إضافية تود إضاف="أي معلومات إضافية تود إضافتها...")
+
+        submitted = st.form_submit_button("📝 تقديم طلبتها...")
 
         submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
+        if submitted التسجيل", use_container_width=True)
+
         if submitted:
             if not player_name or not age_group or not parent_phone:
+                st.mark:
+            if not player_name or not age_group or not parent_phone:
                 st.markdown(
-                    '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
+                    '<div class="ecdown(
+                    '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
+                    unsafe_allow_html=True المطلوبة</div>',
                     unsafe_allow_html=True,
+               ,
                 )
             else:
+                timestamp = datetime.now().strftime("%Y-%m-% )
+            else:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                data_dict =d %H:%M:%S")
                 data_dict = {
+                    'player_name': player_name,
+                    'age_group': {
                     'player_name': player_name,
                     'age_group': age_group,
                     'position': position,
+                    'parent_phone': parent_ age_group,
+                    'position': position,
                     'parent_phone': parent_phone,
+                    'notes': notes,
+                    'timestamp': timestampphone,
                     'notes': notes,
                     'timestamp': timestamp
                 }
-                success, msg = save_to_google_sheets(data_dict)
+                success, msg = save_to_google_sheets(data_dict
+                }
+                success, msg = save_to_google_sheets)
+
+                if success:
+                    # إرسال البيانات إلى التلجرام
+                   (data_dict)
 
                 if success:
                     # إرسال البيانات إلى التلجرام
                     telegram_text = (
-                        f"<b>⚽ طلب تسجيل لاعب جديد - الكوتش أكاديمي</b>\n\n"
-                        f"<b>معلومات اللاعب:</b>\n"
-                        f"• <b>الاسم:</b> {player_name}\n"
-                        f"• <b>الفئة العمرية:</b> {age_group}\n"
-                        f"• <b>المركز المفضل:</b> {position or 'لم يتم التحديد'}\n\n"
+                        f telegram_text = (
+                        f"<b>⚽ طلب تسجيل لاعب جديد - الك"<b>⚽ طلب تسجيل لاعب جديد - الكوتش أكاديمي</b>\n\n"
+                       وتش أكاديمي</b>\n\n"
+                        f"<b f"<b>معلومات اللاعب:</b>\n"
+                        f>معلومات اللاعب:</b>\n"
+                        f"• <b>الاسم:</b> {player"• <b>الاسم:</b>_name}\n"
+                        f {player_name}\n"
+                        f"• <b>الفئة العمرية"• <b>الفئة العمرية:</b> {age_group}\n"
+                        f"• <b>المر:</b> {age_group}\n"
+                        f"• <b>المركز المفضل:</b> {position or 'لم يتم التحديد'كز المفضل:</b> {position or 'لم يتم التحديد'}\n\n"
+                        f"<b>معلومات ولي}\n\n"
                         f"<b>معلومات ولي الأمر:</b>\n"
-                        f"• <b>الهاتف:</b> {parent_phone}\n\n"
-                        f"<b>ملاحظات:</b> {notes or 'بدون ملاحظات'}\n\n"
+                        f"• <b>الهاتف:</b الأمر:</b>\n"
+                        f"• <b>الهاتف> {parent_phone}\n\n"
+                        f"<b>ملاحظات:</b:</b> {parent_phone}\n\n"
+                        f"<b>ملاحظات:</b> {notes or 'بدون ملاحظات'}\n\n> {notes or 'بدون ملاحظات'}\n\n"
+                        f"<b>وقت التسجيل:</b> {timestamp}"
+                    )
+                    telegram_success, telegram_msg"
                         f"<b>وقت التسجيل:</b> {timestamp}"
                     )
                     telegram_success, telegram_msg = send_telegram_message(telegram_text)
-                    if not telegram_success:
-                        st.warning(f"تم الحفظ في Google Sheets، ولكن فشل إرسال إشعار Telegram: {telegram_msg}")
+                    = send_telegram_message(telegram_text)
+                    if not if not telegram_success:
+                        st.warning(f"تم الحفظ في Google Sheets telegram_success:
+                        st.warning(f"تم الحفظ في Google Sheets، ولكن فشل إرسال إشعار Telegram: {telegram_msg}، ولكن فشل إرسال إشعار Telegram: {telegram_msg}")
+
+                    st.session_state.show_success = True
+                    st.session")
 
                     st.session_state.show_success = True
                     st.session_state.registration_submitted = True
+                   _state.registration_submitted = True
                     st.rerun()
                 else:
                     st.markdown(
+                        f'<div st.rerun()
+                else:
+                    st.markdown(
                         f'<div class="ec-error-msg">❌ {msg}</div>',
-                        unsafe_allow_html=True,
+                        unsafe_allow_html class="ec-error-msg">❌ {msg}</div>',
+                        unsafe_allow=True,
+                    )
+
+# ===================================================================================================_html=True,
                     )
 
 # ====================================================================================================
 # FAQ PAGE
 # ====================================================================================================
+# FAQ PAGE
+# ====================================================================================================
+elif page == "faq":
+    st.markdown(""=
 elif page == "faq":
     st.markdown("""
+    <div class=""
     <div class="ec-page-header">
-        <h1>الأسئلة الشائعة</h1>
-        <p>إجابات على أكثر الأسئلة شيوعًا من أولياء الأمور واللاعبين</p>
+        <h1>الأسئلة الشec-page-header">
+        <h1>الأسئلة الشائائعة</h1>
+        <p>إجابات على أكثر الأسئلةعة</h1>
+        <p>إجابات على أكثر الأسئلة شيوع شيوعًا من أولياء الأمور واللاعبين</p>
+    </divًا من أولياء الأمور واللاعبين</p>
     </div>
+    """, unsafe_allow_html=True)
+
+    fa>
     """, unsafe_allow_html=True)
 
     faqs = [
         (
+            "ما هو سن القبول في الأكاديميةqs = [
+        (
             "ما هو سن القبول في الأكاديمية؟",
-            "نستقبل اللاعبين والبنات من سن الصف الأول الابتدائي وحتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفة لكل مرحلة لضمان تدريب مناسب لكل سن.",
+            "نستقبل؟",
+            "نستقبل اللاعبين والبنات من سن الصف الأول الابتدائي وح اللاعبين والبنات من سن الصف الأول الابتدائي وحتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفةتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفة لكل مرحلة لضمان تدريب مناسب لكل سن.",
+        لكل مرحلة لضمان تدريب مناسب لكل سن.",
         ),
+ ),
         (
             "ما هي مدة البرنامج التدريبي؟",
-            "الموسم التدريبي يمتد لمدة 10 أشهر تقريبًا، من بداية سبتمبر إلى نهاية يونيو. التدريبات تقام أيام السبت والخميس في الفترة المسائية حسب الجدول المحدد لكل فئة.",
+            "الموس        (
+            "ما هي مدة البرنامج التدريبي؟",
+            "الموسم التدريبي يمتد لمدة 10 أشهر تقريبًا،م التدريبي يمتد لمدة 10 أشهر تقريبًا، من بداية سبتمبر إلى نهاية يونيو. التدريبات تقام أي من بداية سبتمبر إلى نهاية يونيو. التدريبات تقام أيام السبت والخميسام السبت والخميس في الفترة المسائية حسب الجدول الم في الفترة المسائية حسب الجدول المحدد لكل فئةحدد لكل فئة.",
         ),
         (
             "هل يوجد تدريب للبنات؟",
-            "نعم، لدينا برامج تدريبية مخصصة للبنات في أيام السبت والخميس مع مدربات متخصصات ومؤهلات، وبيئة مناسبة تلبي احتياجاتهن الرياضية والنفسية مع مراعاة الخصوصية الكاملة.",
+            "نعم، لدينا برامج تدريبية م.",
+        ),
+        (
+            "هل يوجد تدريب للبنات؟",
+            "نعم، لدينا برامج تدريبية مخصصة للبنخصصة للبنات في أيام السبت والخميس معات في أيام السبت والخميس مع مدربات متخصصات ومؤهلات مدربات متخصصات ومؤهلات، و، وبيئة مناسبةبيئة مناسبة تلبي احتياجاتهن الرياضية والنفسية تلبي احتياجاتهن الرياضية والنفسية مع مراعاة الخصوصية الكاملة.",
+        ),
+        (
+            " مع مراعاة الخصوصية الكاملة.",
         ),
         (
             "هل يوجد تدريب للمبتدئين؟",
-            "بالتأكيد! لدينا برامج خاصة للمبتدئين تركز على تعلم أساسيات كرة القدم من الصفر، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس وحب الرياضة، وتدريبات ترفيهية محفزة للتعلم.",
+            "بهل يوجد تدريب للمبتدئين؟",
+            "بالتأكيد! لدينا برامج خاصة للمبتدئين تركز على تعلم أساسيات كرة القدم من الصفر، تطوير المهاراتالتأكيد! لدينا برامج خاصة للمبتدئين تركز على تعلم أساسيات كرة القدم من الصفر، تطوير المهارات الح الحركية الأساسية، بناء الثقة بالنفس وحب الرياضة،ركية الأساسية، بناء الثقة بالنفس وحب الرياضة، وتد وتدريبات ترفيهية محفزة للتعلم.",
+        ),
+        (
+           ريبات ترفيهية محفزة للتعلم.",
         ),
         (
             "كيف يتم تقييم اللاعبين؟",
-            "نوفر نظام تقييم شامل يشمل: تقييم فني دوري للمهارات، متابعة التطور البدني، تقارير شهرية عن الأداء، لقاءات دورية مع أولياء الأمور، فيديوهات تحليل أداء للمتميزين، وشهادات تقدير للمتفوقين.",
+            "نوفر نظام تقييم شامل يشمل: تقييم فني "كيف يتم تقييم اللاعبين؟",
+            "نوفر نظام تقييم شامل يشمل: تقييم فني دوري للمهار دوري للمهارات، متابعة التطور البدني، تقارات، متابعة التطور البدني، تقارير شهرية عن الأداء، لقاءات دورية مع أولياء الأمير شهرية عن الأداء، لقاءات دورية مع أولياء الأمور، فيديوهات تحليل أداء للمتميزين، وشهادات تقدير للمتفور، فيديوهات تحليل أداء للمتميزين، وشهادات تقديروقين.",
+        ),
+        (
+            "أين تقام التد للمتفوقين.",
         ),
         (
             "أين تقام التدريبات؟",
-            "تقام جميع التدريبات على ملاعب مدرسة السلام المتطورة في أسيوط، وهي ملاعب مجهزة بأحدث المعدات وتوفر بيئة آمنة ومناسبة للتدريب.",
+            "تقام جميع التدريباتريبات؟",
+            "تقام جميع التدريبات على ملاعب مدرسة السلام المتطورة في أسيوط على ملاعب مدرسة السلام المتطورة في أسيوط، وهي ملاعب مجهزة بأحدث المعدات وتوفر بيئة آمنة، وهي ملاعب مجهزة بأحدث المعدات وتوفر بيئة آمنة ومناسبة للتدريب.",
+        ),
+        (
+            "ما هي سياسة ومناسبة للتدريب.",
         ),
         (
             "ما هي سياسة الرسوم والدفع؟",
-            "تختلف الرسوم حسب الفئة العمرية وعدد أيام التدريب. نقدم: نظام تقسيط شهري مرن، خصومات خاصة للأشقاء، منح جزئية للمتميزين ماديًا أو فنيًا، وخصم للتسجيل المبكر. يرجى التواصل معنا لمعرفة التفاصيل.",
+            "تختلف الرسوم حسب الرسوم والدفع؟",
+            "تختلف الرسوم حسب الفئة الفئة العمرية وعدد أيام التدريب. نقدم: نظام تقسي العمرية وعدد أيام التدريب. نقدم: نظام تقسيط شهري مرن، خصومات خاصة للأشقاء،ط شهري مرن، خصومات خاصة للأشقاء، منح منح جزئية للمتميزين ماديًا أو فنيًا، وخصم جزئية للمتميزين ماديًا أو فنيًا، وخصم للتسجيل المبكر. يرجى التواصل معنا لمعرفة التف للتسجيل المبكر. يرجى التواصل معنا لمعرفة التفاصيل.",
+        ),
+        (
+           اصيل.",
         ),
         (
             "هل توجد خصومات؟",
-            "نعم! نقدم خصومات متعددة: خصم للأشقاء المسجلين معًا، خصم التسجيل المبكر قبل بداية الموسم، ومنح جزئية للمتميزين فنيًا أو المحتاجين ماديًا. تواصل معنا لمعرفة المزيد.",
+            "نعم! نقدم خصومات متعددة: خصم للأشق "هل توجد خصومات؟",
+            "نعم! نقدم خصومات متعددة: خصم للأشقاء المسجلين معًا، خصم التسجيل المبكر قبل بداء المسجلين معًا، خصم التسجيل المبكر قبل بداية الموسم، ومنح جزئية للمتميزين فنيًا أو المحاية الموسم، ومنح جزئية للمتميزين فنيًا أو المحتاجتاجين ماديًا. تواصل معنا لمعرفة المزيد.",
         ),
     ]
 
     for question, answer in faqs:
+        stين ماديًا. تواصل معنا لمعرفة المزيد.",
+        ),
+    ]
+
+    for question, answer in faqs.markdown(
+            f"""
+        <div class="ec-faq-card:
         st.markdown(
             f"""
         <div class="ec-faq-card">
+           ">
+            <h4>❓ {question}</h4>
             <h4>❓ {question}</h4>
             <p>{answer}</p>
+        </div>
+        """,
+            unsafe_allow_html=True <p>{answer}</p>
         </div>
         """,
             unsafe_allow_html=True,
         )
 
+#,
+        )
+
 # ====================================================================================================
+# CONTACT PAGE (with Google Map and WhatsApp ====================================================================================================
 # CONTACT PAGE (with Google Map and WhatsApp)
 # ====================================================================================================
 elif page == "contact":
+    st.markdown("")
+# ====================================================================================================
+elif page == "contact":
     st.markdown("""
+   "
     <div class="ec-page-header">
+        <h1>ات <div class="ec-page-header">
         <h1>اتصل بنا</h1>
+       صل بنا</h1 <p>نسعد بتواصلكم معنا في أي وقت</p>
+    </div>
         <p>نسعد بتواصلكم معنا في أي وقت</p>
     </div>
     """, unsafe_allow_html=True)
 
+   >
+    """, unsafe_allow_html=True)
+
     if st.session_state.show_contact_success:
+        st.markdown if st.session_state.show_contact_success:
         st.markdown(
-            '<div class="ec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>',
+            '<div class="(
+            '<div class="ec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معكec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب في أقرب وقت.</div>',
+            unsafe_allow_html=True وقت.</div>',
             unsafe_allow_html=True,
+        )
+        st.session_state.show_contact_success,
         )
         st.session_state.show_contact_success = False
 
     col_form, col_info = st.columns(2)
 
+    with col_form = False
+
+    col_form, col_info = st.columns(2)
+
     with col_form:
         with st.form("contact_form"):
+            st.markdown("### 📬 أرسل ل:
+        with st.form("contact_form"):
             st.markdown("### 📬 أرسل لنا رسالة")
-            contact_name = st.text_input("الاسم *", placeholder="اسمك الكامل")
-            contact_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
+            contactنا رسالة")
+            contact_name = st.text_input("الاسم *", placeholder="_name = st.text_input("الاسم *", placeholder="اسمك الكامل")
+            contact_phone = st.text_input("رقم الهاتف *اسمك الكامل")
+            contact_", placeholder="01XXXXXXXXX")
+            inquiry_type = st.selectbox(
+                "نphone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
             inquiry_type = st.selectbox(
                 "نوع الاستفسار *",
-                ["", "استفسار عام", "تسجيل لاعب جديد", "مواعيد التدريب", "الرسوم والاشتراكات", "شكوى أو اقتراح", "أخرى"],
+                ["", "استفسار عام", "تسجيل لاعب جديد",وع الاستفسار *",
+                ["", "استفسار عام", "تسجيل لاعب "مواعيد التدريب", "الرسوم والاشتراكات", "شكوى أو جديد", "مواعيد التدريب", "الرسوم والاشتراكات", "شك اقتراح", "أخرى"],
             )
-            contact_message = st.text_area("الرسالة *", placeholder="اكتب رسالتك هنا...")
+            contact_message = st.textوى أو اقتراح", "أخرى"],
+            )
+            contact_message = st.text_area("الرسالة *", placeholder="اكتب رسالتك_area("الرسالة *", placeholder="اكتب رسالتك هنا... هنا...")
 
-            contact_submitted = st.form_submit_button("📨 إرسال الرسالة", use_container_width=True)
+            contact_submitted = st.form_submit_button("📨 إرسال الرسالة", use_container")
+
+            contact_submitted = st.form_submit_button("📨 إرس_width=True)
+
+            if contact_submitted:
+                if notال الرسالة", use_container_width=True)
 
             if contact_submitted:
                 if not contact_name or not contact_phone or not inquiry_type or not contact_message:
                     st.markdown(
-                        '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
+                        contact_name or not contact_phone or not inquiry_type or not contact_message:
+                    st.markdown(
+                        '<div '<div class="ec-error-msg">⚠️ يرجى ملء جميع الح class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
                         unsafe_allow_html=True,
                     )
                 else:
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    timestamp = datetime.now().strftime("%Y-%m-%dقول المطلوبة</div>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S %H:%M:%S")
+                    telegram_text = (
+                        f"<b>")
                     telegram_text = (
                         f"<b>📬 رسالة جديدة - الكوتش أكاديمي</b>\n\n"
-                        f"<b>الاسم:</b> {contact_name}\n"
-                        f"<b>الهاتف:</b> {contact_phone}\n"
-                        f"<b>نوع الاستفسار:</b> {inquiry_type}\n"
+                       📬 رسالة جديدة - الكوتش أكاديمي</b>\n\n"
+                        f" f"<b>الاسم:</b> {contact_name}\n"
+                        f"<b>الهاتف<b>الاسم:</b> {contact_name}\n"
+                        f"<b>اله:</b> {contact_phone}\n"
+                        f"<b>نوع الاستفسار:</اتف:</b> {contact_phone}\n"
+                        f"<b>نوعb> {inquiry_type}\n"
+                        f"<b>الرسالة الاستفسار:</b> {inquiry_type}\n"
                         f"<b>الرسالة:</b>\n{contact_message}\n\n"
-                        f"<b>وقت الإرسال:</b> {timestamp}"
+                        f"<b:</b>\n{contact_message}\n\n"
+                        f"<b>وق>وقت الإرسال:</b> {timestamp}"
                     )
-                    success, msg = send_telegram_message(telegram_text)
+                    success, msg = send_telegram_messageت الإرسال:</b> {timestamp}"
+                    )
+                    success, msg = send(telegram_text)
+                    if success:
+                        st.session_state.show_contact_telegram_message(telegram_text)
                     if success:
                         st.session_state.show_contact_success = True
                         st.rerun()
                     else:
-                        st.markdown(
+                        st.markdown_success = True
+                        st.rerun()
+                    else:
+                        st(
+                            f'<div class="ec-error-msg">❌ {msg}</div>',
+                           .markdown(
                             f'<div class="ec-error-msg">❌ {msg}</div>',
                             unsafe_allow_html=True,
                         )
 
     with col_info:
+        st.markdown(" unsafe_allow_html=True,
+                        )
+
+    with col_info:
         st.markdown("""
         <div class="ec-contact-card">
-            <h3 style="color:#1e3a8a; margin:0 0 18px; font-size:1.3rem; font-weight:800;">📍 معلومات التواصل</h3>
+            <h3 style""
+        <div class="ec-contact-card">
+            <h3 style="color:#1="color:#1e3a8a; margin:0 0 18px; font-size:e3a8a; margin:0 0 18px; font-size:1.1.3rem; font-weight:800;">📍 معلومات التواصل</h3>
+           3rem; font-weight:800;">📍 معلومات التواصل</h3>
             <div class="ec-contact-item">
+                <div class="ec-icon"> <div class="ec-contact-item">
                 <div class="ec-icon">📍</div>
                 <div>
-                    <strong style="color:#1e293b;">العنوان</strong><br>
+                    <strong style="color:#1e293b;">العن📍</div>
+                <div>
+                    <strong style="color:#1e293b;">وان</strong><br>
+                    <span style="color:#64748b;">ملالعنوان</strong><br>
                     <span style="color:#64748b;">ملاعب مدرسة السلام المتطورة - أسيوط</span>
+                </اعب مدرسة السلام المتطورة - أسيوط</span>
                 </div>
             </div>
             <div class="ec-contact-item">
-                <div class="ec-icon">📞</div>
+                <div class="ec-icondiv>
+            </div>
+            <div class="ec-contact-item">
+                <div class="ec-icon">📞</">📞</div>
+                <div>
+                    <strong style="color:#1e293b;">الهاتdiv>
                 <div>
                     <strong style="color:#1e293b;">الهاتف</strong><br>
-                    <span style="color:#64748b;"><a href="tel:+201285197778" style="color:#64748b; text-decoration:none;">+20 12 851 97778</a></span>
+                    <span style="color:#64748b;"><a href="ف</strong><br>
+                    <span style="color:#64748b;"><a href="tel:+201285197778tel:+201285197778" style="color:#64748b; text-decoration:none;">" style="color:#64748b; text-decoration:none;">+20 12 851 977+20 12 851 97778</a></span>
                 </div>
             </div>
-            <div class="ec-contact-item">
-                <div class="ec-icon">🕐</div>
-                <div>
-                    <strong style="color:#1e293b;">أوقات التدريب</strong><br>
-                    <span style="color:#64748b;">السبت والخميس - الفترة المسائية</span>
+            <78</a></span>
                 </div>
+            </div>
+           div class="ec-contact-item">
+                <div class="ec-icon">🕐 <div class="ec-contact-item">
+                <div class="ec-icon">🕐</div</div>
+                <div>
+                    <strong style="color:#1e293b;">أوقات>
+                <div>
+                    <strong style="color:#1e293b;">أوقات التدريب التدريب</strong><br>
+                    <span style="color:#64748b;">السب</strong><br>
+                    <span style="color:#64748b;">السبت والخميس - الفترة المسائية</span>
+                </divت والخميس - الفترة المسائية</span>
+                </div>
+            </>
             </div>
             <div class="ec-contact-item">
                 <div class="ec-icon">📧</div>
+            <div class="ec-contact-item">
+                <div class="ec-icon">div>
                 <div>
                     <strong style="color:#1e293b;">التواصل الإلكتروني</strong><br>
-                    <span style="color:#64748b;">أرسل رسالتك عبر النموذج وسنرد عليك</span>
+                   📧</div>
+                <div>
+                    <strong style="color:#1e293b;">التواصل الإلكتروني</strong><br>
+                    <span style=" <span style="color:#64748b;">أرسل رسcolor:#64748b;">أرسل رسالتك عبر النموذالتك عبر النموذج وسنرد عليك</span>
+                </div>
+            </divج وسنرد عليك</span>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("""
-        <div style="margin-top: 20px; text-align: center;">
-            <a href="https://wa.me/201285197778?text=مرحباً%20بالكوتش%20أكاديمي" target="_blank" class="ec-whatsapp-btn">
-                💬 تواصل معنا عبر واتساب
-            </a>
+        st.markdown>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("""
-        <div style="margin-top: 25px; text-align: center;">
-            <a href="https://maps.app.goo.gl/MX9GM7XC4jenPpgs8" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #4285F4; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700;">
-                🗺️ عرض الموقع على خرائط جوجل
+        st("""
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="https://wa.me/.markdown("""
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="https://wa.me/201285201285197778?text=مرحباً%20بالكوتش%20أكاديمي" target="_blank" class197778?text=مرحباً%20بالكوتش%20أكاديمي" target="_blank" class="ec-whatsapp-btn">
+                💬 تواصل معنا عبر واتساب
             </a>
         </div>
-        <div class="ec-map-container" style="margin-top: 15px;">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.123456789!2d31.201543!3d27.171729!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x144c4d4b4b4b4b4b%3A0x4b4b4b4b4b4b4b4b!2z2YXYrdmF2K8g2KfZhNio2K8g2KfZhNipINmF2YjZgyDYp9mE2K_Ys9mF!5e0!3m2!1sar!2seg!4v1234567890123!5m2!1sar!2seg" allowfullscreen="" loading="lazy"></iframe>
+        """, unsafe_allow_html=True="ec-whatsapp-btn">
+                💬 تواصل معنا عبر واتساب
+            </a>
         </div>
+        """, unsafe_allow_html)
+
+        st.markdown("""
+        <div style="margin-top: 25px; text-align:=True)
+
+        st.markdown("""
+        <div style="margin-top: 25px; text-align: center;">
+            <a href="https center;">
+            <a href="https://maps.app.goo.gl/MX9://maps.app.goo.gl/MX9GM7XC4jenPpgs8" target="_blankGM7XC4jenPpgs8" target="_blank" style="display: inline" style="display: inline-flex; align-items: center; gap: 8px; background-flex; align-items: center; gap: 8px; background: #4285F4: #4285F4; color: white; padding: ; color: white; padding: 10px 20px; border-radius: 50px; text-decoration:10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700;">
+                🗺️ عرض الموقع على خر none; font-weight: 700;">
+                🗺️ عرض الموقع على خرائط جوجلائط جوجل
+            </a>
+        </div
+            </a>
+        </div>
+        <div class>
+        <div class="ec-map-container="ec-map-container" style="margin-top: 15" style="margin-top: 15px;">
+            <iframe srcpx;">
+            <iframe src="https://www.google.com/maps/embed="https://www.google.com/maps/embed?pb?pb=!1m18!1m=!1m18!1m12!1m3!1d12!1m3!1d3500.123456789!3500.123456789!2d31.2012d31.201543!3d27.171729!2m3!1f0543!3d27.171729!2m3!1f0!2f0!3f0!3m2!1!2f0!3f0!3m2!1i1024!2ii1024!2i768!4f768!4f13.1!3m13.1!3m3!1m2!3!1m2!1s0x144c4d1s0x144c4d4b4b4b4b4b4b4b4b4b%3A0x4b4b4b44b%3A0x4b4b4b4b4b4b4b4b4b!b4b4b4b!2z2YXYrd2z2YXYrdmF2K8gmF2K8g2KfZhNio2K2KfZhNio2K8g2KfZhNipINm8g2KfZhNipINmF2YjZgyDYp9mE2K_Ys9F2YjZgyDYp9mE2K_Ys9mFmF!5e0!3m2!1sar!!5e0!3m2!1sar!2seg!4v1234567892seg!4v1234567890123!5m2!1sar!2seg0123!5m2!1sar!2seg" allowfullscreen="" loading="lazy"></iframe>
+        </div" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ====================================================================================================
+# NEWS PAGE
+# ====================================================================================================
+elif>
         """, unsafe_allow_html=True)
 
 # ====================================================================================================
@@ -1483,42 +1982,86 @@ elif page == "contact":
 # ====================================================================================================
 elif page == "news":
     st.markdown("""
+    <div class page == "news":
+    st.markdown("""
     <div class="ec-page-header">
+        <h1>الأخ="ec-page-header">
         <h1>الأخبار</h1>
         <p>آخر أخبار وأنشطة الكوتش أكاديمي</p>
+   بار</h1>
+        <p>آخر أخبار وأنشطة الكوتش أكاديمي</p>
     </div>
+    """, unsafe_allow_html=True </div>
     """, unsafe_allow_html=True)
 
     news_items = [
+       )
+
+    news_items = [
         {
+            "title": "بدء التسجيل للموسم الجديد 2025 {
             "title": "بدء التسجيل للموسم الجديد 2025/2026",
             "date": "2025-08-15",
-            "desc": "يسعدنا الإعلان عن فتح باب التسجيل للموسم التدريبي الجديد 2025/2026. سارعوا بالتسجيل للاستفادة من خصم التسجيل المبكر. البرامج متاحة لجميع الفئات العمرية للبنين والبنات.",
+            "desc": "يس/2026",
+            "date": "2025-08-15",
+            "desc": "يسعدنا الإعلان عن فتح باب التسجيل للموسمعدنا الإعلان عن فتح باب التسجيل للموسم التدريبي الجديد 2025/202 التدريبي الجديد 2025/2026. سارعوا بالتسجيل للاستف6. سارعوا بالتسجيل للاستفادة من خصم التسجيل المبكر. البرامج متاحة لجميع الفئات العادة من خصم التسجيل المبكر. البرامج متاحة لجميع الفئات العمرية للبنين والبنات.",
+مرية للبنين والبنات.",
         },
         {
-            "title": "فوز فريق الأكاديمية ببطولة أسيوط للناشئين",
+            "title        },
+        {
+            "title": "فوز فريق الأكاديمية": "فوز فريق الأكاديمية ببطولة أسيوط للناشئين ببطولة أسيوط للناشئين",
             "date": "2025-06-20",
-            "desc": "حقق فريق الأكاديمية إنجازًا رائعًا بالفوز ببطولة أسيوط للناشئين تحت 12 سنة، بعد مباراة نهائية مثيرة انتهت بنتيجة 3-1. تهانينا لجميع اللاعبين والمدربين!",
+            "desc": "حقق فريق الأكاديمية إنجازًا رائعًا بالفوز ب",
+            "date": "2025-06-20",
+            "desc": "حقق فريق الأكاديمية إنجازًا رائعًا بالفوز ببطولة أسيوط للناشئين تحتبطولة أسيوط للناشئين تحت 12 سنة، بعد مباراة نهائية 12 سنة، بعد مباراة نهائية مثيرة انته مثيرة انتهت بنتيجة 3-1. تهانينا لجميعت بنتيجة 3-1. تهانينا لجميع اللاعبين والمدربين!",
+        اللاعبين والمدربين!",
         },
         {
-            "title": "دورة تدريبية متقدمة للمدربين",
+            "title": " },
+        {
+            "title": "دورة تدريبية متقدمة للمدربدورة تدريبية متقدمة للمدربين",
             "date": "2025-05-10",
-            "desc": "أتم مدربو الأكاديمية بنجاح دورة تدريبية متقدمة في أساليب التدريب الحديثة، بالتعاون مع الاتحاد المصري لكرة القدم. الدورة شملت أحدث المنهجيات في تطوير الناشئين.",
+           ين",
+            "date": "2025-05-10",
+            "desc": "أتم مدرب "desc": "أتم مدربو الأكاديمية بنجاح دو الأكاديمية بنجاح دورة تدريبية متقدمة في أساليورة تدريبية متقدمة في أساليب التدريب الحديثة، بالتعاون مع الاتحاد المصريب التدريب الحديثة، بالتعاون مع الاتحاد المصري لكرة القدم. الدورة شمل لكرة القدم. الدورة شملت أحدث المنهجيات في تطويرت أحدث المنهجيات في تطوير الناشئين الناشئين.",
         },
         {
-            "title": "انضمام لاعبين من الأكاديمية لمنتخب المحافظة",
+            "title": ".",
+        },
+        {
+            "title": "انضمام لاعبين من الأكانضمام لاعبين من الأكاديمية لمناديمية لمنتخب المحافظة",
+            "date": "2025-04-05تخب المحافظة",
             "date": "2025-04-05",
-            "desc": "تم اختيار 5 لاعبين من الأكاديمية للانضمام لمنتخب محافظة أسيوط تحت 14 سنة، وهو ما يعكس مستوى التدريب المتميز الذي يحصل عليه لاعبونا.",
+            "desc": "تم اختيار",
+            "desc": "تم اختيار 5 5 لاعبين من الأكاديمية للانضمام لمنتخب محافظة أسيوط تحت 14 سنة، وهو ما يعكس مستوى التدريب المتميز الذي يح لاعبين من الأكاديمية للانضمام لمنتخب محافظة أسيوط تحت 14 سنة، وهو ما يعكس مستوى التدريب المتميز الذي يحصل عليه لاعبونا.",
+        },
+        {
+            "title": "محاضرة تصل عليه لاعبونا.",
         },
         {
             "title": "محاضرة تثقيفية عن التغذية الرياضية",
             "date": "2025-03-15",
-            "desc": "نظمت الأكاديمية محاضرة تثقيفية لأولياء الأمور واللاعبين حول أهمية التغذية السليمة وتأثيرها على الأداء الرياضي، قدمها أخصائي تغذية رياضية معتمد.",
+            "desc": "نظمتثقيفية عن التغذية الرياضية",
+            "date": "2025-03-15",
+            "desc": "ن الأكاديمية محاضرة تثقيفية لأولياء الأمور واللاعبين حول أهمية التغذية السليمة وتأثيرها على الأداء الرياضي، قدمها أخصائي تغذية رياضيةظمت الأكاديمية محاضرة تثقيفية لأولياء الأمور واللاعبين حول أهمية التغذية السليمة وتأثيرها على الأداء الرياضي، قدمها أخصائي تغذية رياضية معتمد معتمد.",
         },
         {
             "title": "شراكة جديدة مع نادي أسيوط الرياضي",
+           .",
+        },
+        {
+            "title": "شراكة جديدة مع نادي أسيوط الرياضي "date": "2025-02-20",
+            "desc": "وقّعت الأكاديمية اتفاقية شراكة مع",
             "date": "2025-02-20",
-            "desc": "وقّعت الأكاديمية اتفاقية شراكة مع نادي أسيوط الرياضي لتسهيل انتقال اللاعبين الموهوبين إلى فرق النادي، مما يفتح آفاقًا جديدة للاحتراف أمام لاعبينا.",
+            "desc": "وقّعت الأكاديمية اتفاقية شراكة مع نادي أسيوط الرياضي لتسهيل نادي أسيوط الرياضي لتسهيل انتقال اللاعبين الموهوبين إلى فرق النادي، مما يفتح آفاقًا جديدة للاح انتقال اللاعبين الموهوبين إلى فرق النادي، مما يفتح آفاقًا جديدة للاحتراف أمام لاعبتراف أمام لاعبينا.",
+        },
+    ]
+
+    for item in news_items:
+        st.markdown(
+            f"""
+        <divينا.",
         },
     ]
 
@@ -1526,49 +2069,97 @@ elif page == "news":
         st.markdown(
             f"""
         <div class="ec-news-card">
+            <h3>📌 {item['title class="ec-news-card">
             <h3>📌 {item['title']}</h3>
+            <div class="ec-news-date">🗓️ {item['date']}</div']}</h3>
             <div class="ec-news-date">🗓️ {item['date']}</div>
             <p>{item['desc']}</p>
         </div>
         """,
             unsafe_allow_html=True,
+       >
+            <p>{item['desc']}</p>
+        </div>
+        """,
+            unsafe_allow_html=True )
+
+# Close container
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ===================================================================================================,
         )
 
 # Close container
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ====================================================================================================
-# FOOTER
+#=
+# FOOTER FOOTER
+# ====================================================================================================
+current_year = datetime.now().year
 # ====================================================================================================
 current_year = datetime.now().year
 footer_links = f"""
 <div class="ec-footer">
+    <div class="ec-footer-inner
+footer_links = f"""
+<div class="ec-footer">
     <div class="ec-footer-inner">
+">
         <div>
             <h4>الكوتش أكاديمي</h4>
-            <p>أكاديمية كرة القدم المتخصصة في بناء اللاعب الشامل فنيًا وبدنيًا وذهنيًا. نؤمن بأن كل لاعب يستحق فرصة حقيقية للتطور والاحتراف.</p>
+            <p>أكاد        <div>
+            <h4>الكوتش أكاديمي</h4>
+            <p>أكاديمية كرة القدم المتخصصة في بناء اللاعب الشامل فيمية كرة القدم المتخصصة في بناء اللاعب الشامل فنيًا وبدنيًا وذهنيًا. نؤمن بأن كل لاعب يستحق فرصة حقيقية للتطور والاحتراف.</p>
+        </div>
+        <div>
+            <h4نيًا وبدنيًا وذهنيًا. نؤمن بأن كل لاعب يستحق فرصة حقيقية للتطور والاحتراف.</p>
         </div>
         <div>
             <h4>روابط سريعة</h4>
+           >روابط سريعة</h4>
             <ul>
+                <li>{nav_link("🏠 الرئيسية", "home")}</ <ul>
                 <li>{nav_link("🏠 الرئيسية", "home")}</li>
+                <li>{nav_linkli>
                 <li>{nav_link("ℹ️ من نحن", "about")}</li>
-                <li>{nav_link("⚽ البرامج التدريبية", "programs")}</li>
+                <("ℹ️ من نحن", "about")}</li>
+                <li>{li>{nav_link("⚽ البرامج التدريبية", "programs")}</li>
+                <li>{nav_link("nav_link("⚽ البرامج التدريبية", "programs")}</li>
                 <li>{nav_link("👨‍🏫 الكباتن", "captains")}</li>
-                <li>{nav_link("📝 سجل لاعب جديد", "registration")}</li>
+                <li👨‍🏫 الكباتن", "captains")}</li>
+                <li>{nav>{nav_link("📝 سجل لاعب جديد", "registration")}</li>
+            </ul>
+        </div>
+        <div>
+            <h4>تواصل معنا</h4_link("📝 سجل لاعب جديد", "registration")}</li>
             </ul>
         </div>
         <div>
             <h4>تواصل معنا</h4>
             <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
-            <p>🕐 السبت والخميس - الفترة المسائية</p>
+            <p>
+            <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
+            <p>>🕐 السبت والخم🕐 السبت والخميس - الفترة المسائية</p>
             <p style="margin-top:12px;">
                 {nav_link("📞 اتصل بنا", "contact")}
             </p>
-        </div>
+        </يس - الفترة المسائية</p>
+            <p style="margin-top:12px;">
+                {nav_link("📞 اتصل بنا", "contact")}
+            </p>
+       div>
+    </div>
+    </div>
     </div>
     <div class="ec-footer-bottom">
+        جميع الحقوق محفوظة &copy; {current <div class="ec-footer-bottom">
         جميع الحقوق محفوظة &copy; {current_year} الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة
+    </div>
+</div>
+"""
+st.markdown(footer_links, unsafe_allow_html=True)
+_year} الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة
     </div>
 </div>
 """
