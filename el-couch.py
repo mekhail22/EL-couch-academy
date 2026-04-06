@@ -1267,7 +1267,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE
+# REGISTRATION PAGE (MODIFIED: success message moved below the form)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1276,13 +1276,6 @@ elif page == "registration":
         <p>انضم إلى الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
     </div>
     ''', unsafe_allow_html=True)
-
-    if st.session_state.show_success:
-        st.markdown(
-            '<div class="ec-success-msg">تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
-            unsafe_allow_html=True,
-        )
-        st.session_state.show_success = False
 
     with st.form("registration_form"):
         st.markdown("### 📋 معلومات اللاعب")
@@ -1340,6 +1333,14 @@ elif page == "registration":
                         f'<div class="ec-error-msg">❌ {msg}</div>',
                         unsafe_allow_html=True,
                     )
+
+    # Display success message directly below the submit button (after the form)
+    if st.session_state.get("show_success", False):
+        st.markdown(
+            '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
+            unsafe_allow_html=True,
+        )
+        st.session_state.show_success = False
 
 # ====================================================================================================
 # FAQ PAGE
