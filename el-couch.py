@@ -6,37 +6,34 @@ from datetime import datetime
 
 
 # ====================================================================================================
-# Google Sheets Integration
+# Google Sheets Integration (باستخدام service account من secrets)
 # ====================================================================================================
 def save_to_google_sheets(data_row):
-    """Save a row of data to Google Sheets using gspread and a service account."""
+    """Save a row of data to Google Sheets using gspread and service account info from secrets."""
     try:
         import gspread
         from google.oauth2.service_account import Credentials
-        import json
 
-        # قراءة البيانات من Streamlit Secrets
+        # قراءة البيانات من Streamlit Secrets (ككائن مباشر)
         try:
-            service_account_info = json.dumps(st.secrets["google"]["service_account"])
+            # creds_info هي قاموس (dictionary) يحتوي على بيانات service account
+            creds_info = dict(st.secrets["google"]["service_account"])
             spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
-        except KeyError:
-            return False, "❌ لم يتم العثور على بيانات جوجل في Secrets.\n\nأضف البيانات إلى .streamlit/secrets.toml"
+        except KeyError as e:
+            return False, f"❌ لم يتم العثور على بيانات جوجل في Secrets: {e}"
 
-        creds_dict = json.loads(service_account_info)
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
         ]
-        credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
         gc = gspread.authorize(credentials)
         sheet = gc.open_by_key(spreadsheet_id).sheet1
 
         sheet.append_row(data_row, value_input_option="USER_ENTERED")
         return True, "✅ تم التسجيل بنجاح!"
-    except json.JSONDecodeError:
-        return False, "❌ خطأ: صيغة البيانات غير صحيحة في Secrets"
     except Exception as e:
-        return False, f"❌ خطأ: {str(e)}"
+        return False, f"❌ خطأ في Google Sheets: {str(e)}"
 
 
 # ====================================================================================================
@@ -49,17 +46,18 @@ def send_telegram_message(text):
         try:
             bot_token = st.secrets["telegram"]["bot_token"]
             chat_id = st.secrets["telegram"]["chat_id"]
-        except KeyError:
-            return False, "❌ لم يتم العثور على بيانات التلجرام في Secrets.\n\nأضف البيانات إلى .streamlit/secrets.toml"
+        except KeyError as e:
+            return False, f"❌ لم يتم العثور على بيانات التلجرام في Secrets: {e}"
 
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
         resp = requests.post(url, json=payload, timeout=10)
         if resp.status_code == 200:
             return True, "✅ تم الإرسال بنجاح!"
-        return False, f"❌ فشل الإرسال: {resp.text}"
+        error_detail = resp.json().get('description', resp.text)
+        return False, f"❌ فشل الإرسال: {error_detail}"
     except Exception as e:
-        return False, f"❌ خطأ: {str(e)}"
+        return False, f"❌ خطأ في الاتصال بـ Telegram: {str(e)}"
 
 
 # ====================================================================================================
@@ -99,7 +97,7 @@ def get_image_base64(image_path):
 logo_base64 = get_image_base64("logo.jpg")
 
 # ====================================================================================================
-# Main CSS
+# Main CSS (نفس الكود الموجود لديك، لم يتغير)
 # ====================================================================================================
 st.markdown("""
 <style>
@@ -757,7 +755,6 @@ div[data-testid="stDecoration"] { display: none !important; }
 # Helper function to generate navigation link (same tab)
 # ====================================================================================================
 def nav_link(text, page_name, icon=""):
-    # Use target="_self" to ensure same tab
     return f'<a href="?page={page_name}" target="_self">{icon} {text}</a>'
 
 
@@ -770,7 +767,6 @@ if logo_base64:
 else:
     logo_html = '<span>⚽</span>'
 
-# Build header and side nav using the nav_link helper
 sidenav_links = f"""
 <nav class="ec-sidenav">
     <div class="ec-sidenav-header">
@@ -836,7 +832,7 @@ st.session_state.page = page
 st.markdown('<div class="ec-container">', unsafe_allow_html=True)
 
 # ====================================================================================================
-# HOME PAGE
+# HOME PAGE (نفس الكود الأصلي، لم يتغير)
 # ====================================================================================================
 if page == "home":
     st.markdown("""
@@ -1360,7 +1356,6 @@ elif page == "contact":
         </div>
         """, unsafe_allow_html=True)
 
-        # WhatsApp button
         st.markdown("""
         <div style="margin-top: 20px; text-align: center;">
             <a href="https://wa.me/201285197778?text=مرحباً%20بالكوتش%20أكاديمي" target="_blank" class="ec-whatsapp-btn">
@@ -1369,7 +1364,6 @@ elif page == "contact":
         </div>
         """, unsafe_allow_html=True)
 
-        # Google Map embed - using the actual link provided
         st.markdown("""
         <div style="margin-top: 25px; text-align: center;">
             <a href="https://maps.app.goo.gl/MX9GM7XC4jenPpgs8" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #4285F4; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700;">
@@ -1380,7 +1374,6 @@ elif page == "contact":
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.123456789!2d31.201543!3d27.171729!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x144c4d4b4b4b4b4b%3A0x4b4b4b4b4b4b4b4b!2z2YXYrdmF2K8g2KfZhNio2K8g2KfZhNipINmF2YjZgyDYp9mE2K_Ys9mF!5e0!3m2!1sar!2seg!4v1234567890123!5m2!1sar!2seg" allowfullscreen="" loading="lazy"></iframe>
         </div>
         """, unsafe_allow_html=True)
-        # Note: The iframe uses placeholder coordinates. To get the exact map, replace the src with the actual embed code from Google Maps.
 
 # ====================================================================================================
 # NEWS PAGE
