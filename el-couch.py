@@ -1436,7 +1436,7 @@ elif page == "faq":
         )
 
 # ====================================================================================================
-# CONTACT PAGE (with Google Map and WhatsApp, now with Telegram integration)
+# CONTACT PAGE (with Google Map and WhatsApp, success message moved below the form)
 # ====================================================================================================
 elif page == "contact":
     st.markdown('''
@@ -1445,13 +1445,6 @@ elif page == "contact":
         <p>نسعد بتواصلكم معنا في أي وقت</p>
     </div>
     ''', unsafe_allow_html=True)
-
-    if st.session_state.show_contact_success:
-        st.markdown(
-            '<div class="ec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>',
-            unsafe_allow_html=True,
-        )
-        st.session_state.show_contact_success = False
 
     col_form, col_info = st.columns(2)
 
@@ -1501,6 +1494,14 @@ elif page == "contact":
                             '<div class="ec-error-msg">❌ حدث خطأ في إرسال الرسالة، يرجى المحاولة مرة أخرى.</div>',
                             unsafe_allow_html=True,
                         )
+
+        # Display success message directly below the submit button (after the form)
+        if st.session_state.get("show_contact_success", False):
+            st.markdown(
+                '<div class="ec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>',
+                unsafe_allow_html=True,
+            )
+            st.session_state.show_contact_success = False
 
     with col_info:
         st.markdown('''
