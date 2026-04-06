@@ -1,11 +1,27 @@
 import streamlit as st
 import os
 import base64
+import re
 from datetime import datetime
 
 # ====================================================================================================
 # Google Sheets Integration (باستخدام service account من secrets)
 # ====================================================================================================
+def normalize_phone(phone):
+    """
+    تحويل الأرقام العربية إلى إنجليزية، وإزالة المسافات والشرطات،
+    ثم إرجاع الرقم كنص مع بادئة ' لضمان الاحتفاظ بالصفر البادئ.
+    """
+    if not phone:
+        return ''
+    # تحويل الأرقام العربية إلى إنجليزية
+    arabic_to_english = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
+    phone = phone.translate(arabic_to_english)
+    # إزالة أي شيء ليس رقماً (مسافات، شرطات، أقواس)
+    phone = re.sub(r'[^0-9]', '', phone)
+    # إضافة علامة اقتباس مفردة في البداية لفرض النص في Google Sheets
+    return "'" + phone
+
 def save_to_google_sheets(data_dict):
     """
     حفظ البيانات في Google Sheets مع مطابقة الأعمدة حسب العناوين.
@@ -45,6 +61,10 @@ def save_to_google_sheets(data_dict):
                     sheet.update_cell(1, col_index, h)
                     headers.append(h)
 
+        # معالجة رقم الهاتف لضمان الاحتفاظ بالصفر البادئ
+        raw_phone = data_dict.get('parent_phone', '')
+        normalized_phone = normalize_phone(raw_phone)
+
         # ترتيب القيم حسب ترتيب العناوين الموجودة في الجدول
         row_values = []
         for col in headers:
@@ -55,7 +75,7 @@ def save_to_google_sheets(data_dict):
             elif col == "المركز المفضل":
                 row_values.append(data_dict.get('position', ''))
             elif col == "رقم الهاتف":
-                row_values.append(data_dict.get('parent_phone', ''))
+                row_values.append(normalized_phone)
             elif col == "ملاحظات":
                 row_values.append(data_dict.get('notes', ''))
             elif col == "تاريخ التسجيل":
@@ -1156,7 +1176,6 @@ elif page in ("coaches", "captains"):
     </div>
     ''', unsafe_allow_html=True)
 
-    # Helper to get image base64 for local images
     def get_img_base64(img_path):
         try:
             with open(img_path, "rb") as f:
@@ -1164,7 +1183,6 @@ elif page in ("coaches", "captains"):
         except:
             return None
 
-    # كابتن ميخائيل (قائد الأكاديمية)
     mikhail_img = get_img_base64("C1.jpg")
     mikhail_img_html = f'<img src="data:image/jpeg;base64,{mikhail_img}" alt="كابتن ميخائيل">' if mikhail_img else '<span>👨‍🏫</span>'
 
@@ -1186,15 +1204,12 @@ elif page in ("coaches", "captains"):
     </div>
     ''', unsafe_allow_html=True)
 
-    # الكابتن مينا أسامة (دبابة)
     mina_img = get_img_base64("C2.jpg")
     mina_img_html = f'<img src="data:image/jpeg;base64,{mina_img}" alt="كابتن مينا">' if mina_img else '<span>🧤</span>'
 
-    # الكابتن أبانوب جمال (بيبو)
     ebanob_img = get_img_base64("C3.jpg")
     ebanob_img_html = f'<img src="data:image/jpeg;base64,{ebanob_img}" alt="كابتن أبانوب">' if ebanob_img else '<span>⚽</span>'
 
-    # الكابتن ميرولا شهير (توتا)
     merola_img = get_img_base64("C4.jpg")
     merola_img_html = f'<img src="data:image/jpeg;base64,{merola_img}" alt="كابتن ميرولا">' if merola_img else '<span>👩‍🏫</span>'
 
@@ -1264,7 +1279,7 @@ elif page == "registration":
 
     if st.session_state.show_success:
         st.markdown(
-            '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
+            '<div class="ec-success-msg">تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
             unsafe_allow_html=True,
         )
         st.session_state.show_success = False
@@ -1423,7 +1438,9 @@ elif page == "contact":
                         unsafe_allow_html=True,
                     )
                 else:
-                    # تم إلغاء إرسال الإشعار إلى Telegram
+                    # معالجة رقم الهاتف (اختياري، لكن للاتساق)
+                    normalized_phone = normalize_phone(contact_phone)
+                    # يمكن حفظه أو إرساله إلى أي مكان، لكننا فقط نظهر رسالة نجاح
                     st.session_state.show_contact_success = True
                     st.rerun()
 
