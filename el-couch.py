@@ -1018,7 +1018,7 @@ if page == "home":
     <div class="ec-stats">
         <div class="ec-stat-card">
             <div class="ec-stat-icon">👥</div>
-            <span class="ec-stat-num">500+</span>
+            <span class="ec-stat-num">3000+</span>
             <div class="ec-stat-label">لاعب مُدرَّب</div>
         </div>
         <div class="ec-stat-card">
@@ -1028,7 +1028,7 @@ if page == "home":
         </div>
         <div class="ec-stat-card">
             <div class="ec-stat-icon">🏆</div>
-            <span class="ec-stat-num">150+</span>
+            <span class="ec-stat-num">1000+</span>
             <div class="ec-stat-label">لاعب محترف</div>
         </div>
     </div>
@@ -1117,10 +1117,10 @@ elif page == "about":
     <div class="ec-info-banner" style="margin-top:40px;">
         <h3>📊 أرقام وإحصائيات</h3>
         <div class="ec-banner-stats">
-            <div class="ec-banner-stat"><span>🎓 4+</span>سنوات من التميز</div>
-            <div class="ec-banner-stat"><span>👥 500+</span>لاعب تم تدريبهم</div>
+            <div class="ec-banner-stat"><span>🎓 6+</span>سنوات من التميز</div>
+            <div class="ec-banner-stat"><span>👥 3000+</span>لاعب تم تدريبهم</div>
             <div class="ec-banner-stat"><span>🏆 25+</span>بطولة محلية</div>
-            <div class="ec-banner-stat"><span>⭐ 150+</span>لاعب محترف</div>
+            <div class="ec-banner-stat"><span>⭐ 1000+</span>لاعب محترف</div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
@@ -1179,9 +1179,9 @@ elif page == "programs":
                     <li><strong>الذكاء الكروي:</strong> القراءة التحليلية للملعب واتخاذ القرار</li>
                     <li><strong>بناء الشخصية:</strong> الثقة بالنفس والقيم الرياضية</li>
                 </ul>
-                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه النادي:</h4>
+                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه الاكاديمه:</h4>
                 <ul style="margin:0 20px 0 0; color:#334155; line-height:2;">
-                    <li>ملابس تدريب رسمية (قميص - شورت - جوارب)</li>
+                    <li>ملابس تدريب رسمية (قميص - شورت)</li>
                     <li>مسابقات دورية داخلية وخارجية</li>
                     <li>تقييمات شهرية وتقارير تطور الأداء</li>
                     <li>فيديوهات تحليل أداء للمتميزين</li>
