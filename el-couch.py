@@ -26,7 +26,7 @@ def normalize_phone(phone):
 def save_to_google_sheets(data_dict):
     """
     حفظ البيانات في Google Sheets مع مطابقة الأعمدة حسب العناوين.
-    يتحقق أولاً من عدم وجود رقم الهاتف مسبقاً.
+    يتحقق أولاً من عدم وجود تطابق كامل في البيانات الأساسية (الاسم، الفئة، المركز، الهاتف).
     data_dict يحتوي على المفاتيح: 'player_name', 'age_group', 'position', 'parent_phone', 'notes', 'timestamp'
     """
     try:
@@ -66,24 +66,38 @@ def save_to_google_sheets(data_dict):
         # معالجة رقم الهاتف لضمان الاحتفاظ بالصفر البادئ
         raw_phone = data_dict.get('parent_phone', '')
         normalized_phone = normalize_phone(raw_phone)
-        # إزالة علامة الاقتباس المفردة للمقارنة
         phone_for_comparison = normalized_phone.lstrip("'")
 
-        # ---- التحقق من عدم وجود الرقم مسبقاً ----
-        # الحصول على جميع الصفوف ما عدا العنوان
+        # ---- التحقق من عدم وجود تطابق كامل في البيانات الأساسية ----
         all_rows = sheet.get_all_values()
         if len(all_rows) > 1:
-            # البحث عن فهرس عمود "رقم الهاتف" في العناوين
+            # الحصول على فهارس الأعمدة المطلوبة
             try:
-                phone_col_index = headers.index("رقم الهاتف")
+                name_col = headers.index("الاسم")
+                age_col = headers.index("الفئة العمرية")
+                pos_col = headers.index("المركز المفضل")
+                phone_col = headers.index("رقم الهاتف")
             except ValueError:
-                phone_col_index = -1
-            if phone_col_index != -1:
+                # إذا لم توجد الأعمدة، نتجاهل التحقق (يفترض أنها موجودة)
+                pass
+            else:
                 for row in all_rows[1:]:
-                    if len(row) > phone_col_index:
-                        existing_phone = row[phone_col_index].lstrip("'")
-                        if existing_phone == phone_for_comparison:
-                            return False, "⚠️ رقم الهاتف هذا مسجل مسبقاً. لا يمكن التسجيل مرة أخرى بنفس الرقم."
+                    # التأكد من أن الصف يحتوي على عدد كافٍ من الأعمدة
+                    if len(row) > max(name_col, age_col, pos_col, phone_col):
+                        existing_name = row[name_col].strip()
+                        existing_age = row[age_col].strip()
+                        existing_pos = row[pos_col].strip()
+                        existing_phone = row[phone_col].lstrip("'").strip()
+                        
+                        new_name = data_dict.get('player_name', '').strip()
+                        new_age = data_dict.get('age_group', '').strip()
+                        new_pos = data_dict.get('position', '').strip()
+                        
+                        if (existing_name == new_name and 
+                            existing_age == new_age and 
+                            existing_pos == new_pos and 
+                            existing_phone == phone_for_comparison):
+                            return False, "⚠️ هذه البيانات مسجلة مسبقاً. لا يمكن التسجيل مرة أخرى بنفس البيانات."
 
         # ترتيب القيم حسب ترتيب العناوين الموجودة في الجدول
         row_values = []
@@ -1324,7 +1338,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (MODIFIED: success message moved below the form)
+# REGISTRATION PAGE (التحقق من التطابق الكامل وعرض الخطأ بعد الزر)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1334,19 +1348,24 @@ elif page == "registration":
     </div>
     ''', unsafe_allow_html=True)
 
-    # عرض رسالة خطأ إذا كانت موجودة (مثل رقم مكرر)
+    # تعريف متغيرات لتخزين القيم المدخلة (لاستخدامها داخل النموذج وللاحتفاظ بها بعد التقديم)
+    default_name = ""
+    default_age = ""
+    default_pos = ""
+    default_phone = ""
+    default_notes = ""
+
+    # إذا كان هناك خطأ، نعيد تعبئة القيم السابقة
     if st.session_state.get("registration_error"):
-        st.markdown(
-            f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
-            unsafe_allow_html=True,
-        )
-        st.session_state.registration_error = None
+        # لا نفعل شيء هنا لأننا سنستخدم st.session_state لتخزين القيم
+        pass
 
     with st.form("registration_form"):
         st.markdown("### 📋 معلومات اللاعب")
         col1, col2 = st.columns(2)
         with col1:
-            player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود")
+            player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود", 
+                                        value=st.session_state.get("reg_name", ""))
             age_group = st.selectbox(
                 "الفئة العمرية *",
                 [
@@ -1355,23 +1374,36 @@ elif page == "registration":
                     "🏃 بنين (الصف الأول - الخامس الابتدائي)",
                     "🏃 بنين (الصف السادس - الثاني الإعدادي)",
                 ],
+                index=0 if not st.session_state.get("reg_age") else 
+                      ["", "🏃‍♀️ بنات (جميع الأعمار)", "🏃 بنين (الصف الأول - الخامس الابتدائي)", "🏃 بنين (الصف السادس - الثاني الإعدادي)"].index(st.session_state.get("reg_age", ""))
             )
         with col2:
             position = st.selectbox(
                 "المركز المفضل",
                 ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
+                index=0 if not st.session_state.get("reg_pos") else 
+                      ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
             )
 
         st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
         col1, col2 = st.columns(2)
         with col1:
-            parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX")
+            parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX",
+                                         value=st.session_state.get("reg_phone", ""))
 
-        notes = st.text_area("ملاحظات إضافية (اختياري)", placeholder="أي معلومات إضافية تود إضافتها...")
+        notes = st.text_area("ملاحظات إضافية (اختياري)", placeholder="أي معلومات إضافية تود إضافتها...",
+                             value=st.session_state.get("reg_notes", ""))
 
         submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
         if submitted:
+            # حفظ القيم المدخلة في session_state لاسترجاعها في حالة الخطأ
+            st.session_state.reg_name = player_name
+            st.session_state.reg_age = age_group
+            st.session_state.reg_pos = position
+            st.session_state.reg_phone = parent_phone
+            st.session_state.reg_notes = notes
+
             if not player_name or not age_group or not parent_phone:
                 st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
                 st.rerun()
@@ -1388,14 +1420,27 @@ elif page == "registration":
                 success, msg = save_to_google_sheets(data_dict)
 
                 if success:
+                    # مسح القيم المخزنة بعد النجاح
+                    for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
                     st.session_state.show_success = True
                     st.session_state.registration_submitted = True
+                    st.session_state.registration_error = None
                     st.rerun()
                 else:
                     st.session_state.registration_error = msg
                     st.rerun()
 
-    # Display success message directly below the submit button (after the form)
+    # عرض رسالة الخطأ بعد النموذج إذا وجدت
+    if st.session_state.get("registration_error"):
+        st.markdown(
+            f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
+            unsafe_allow_html=True,
+        )
+        # لا نقوم بحذف الخطأ هنا لأنه سيتم إعادة تحميل الصفحة وقد نعود للعرض
+
+    # عرض رسالة النجاح
     if st.session_state.get("show_success", False):
         st.markdown(
             '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
