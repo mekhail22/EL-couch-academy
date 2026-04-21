@@ -26,6 +26,7 @@ def normalize_phone(phone):
 def save_to_google_sheets(data_dict):
     """
     حفظ البيانات في Google Sheets مع مطابقة الأعمدة حسب العناوين.
+    يتحقق أولاً من عدم وجود رقم الهاتف مسبقاً.
     data_dict يحتوي على المفاتيح: 'player_name', 'age_group', 'position', 'parent_phone', 'notes', 'timestamp'
     """
     try:
@@ -65,6 +66,24 @@ def save_to_google_sheets(data_dict):
         # معالجة رقم الهاتف لضمان الاحتفاظ بالصفر البادئ
         raw_phone = data_dict.get('parent_phone', '')
         normalized_phone = normalize_phone(raw_phone)
+        # إزالة علامة الاقتباس المفردة للمقارنة
+        phone_for_comparison = normalized_phone.lstrip("'")
+
+        # ---- التحقق من عدم وجود الرقم مسبقاً ----
+        # الحصول على جميع الصفوف ما عدا العنوان
+        all_rows = sheet.get_all_values()
+        if len(all_rows) > 1:
+            # البحث عن فهرس عمود "رقم الهاتف" في العناوين
+            try:
+                phone_col_index = headers.index("رقم الهاتف")
+            except ValueError:
+                phone_col_index = -1
+            if phone_col_index != -1:
+                for row in all_rows[1:]:
+                    if len(row) > phone_col_index:
+                        existing_phone = row[phone_col_index].lstrip("'")
+                        if existing_phone == phone_for_comparison:
+                            return False, "⚠️ رقم الهاتف هذا مسجل مسبقاً. لا يمكن التسجيل مرة أخرى بنفس الرقم."
 
         # ترتيب القيم حسب ترتيب العناوين الموجودة في الجدول
         row_values = []
@@ -147,6 +166,8 @@ if "menu_open" not in st.session_state:
     st.session_state.menu_open = False
 if "registration_submitted" not in st.session_state:
     st.session_state.registration_submitted = False
+if "registration_error" not in st.session_state:
+    st.session_state.registration_error = None
 
 # ====================================================================================================
 # Logo Base64
@@ -1313,6 +1334,14 @@ elif page == "registration":
     </div>
     ''', unsafe_allow_html=True)
 
+    # عرض رسالة خطأ إذا كانت موجودة (مثل رقم مكرر)
+    if st.session_state.get("registration_error"):
+        st.markdown(
+            f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
+            unsafe_allow_html=True,
+        )
+        st.session_state.registration_error = None
+
     with st.form("registration_form"):
         st.markdown("### 📋 معلومات اللاعب")
         col1, col2 = st.columns(2)
@@ -1344,10 +1373,8 @@ elif page == "registration":
 
         if submitted:
             if not player_name or not age_group or not parent_phone:
-                st.markdown(
-                    '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
-                    unsafe_allow_html=True,
-                )
+                st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
+                st.rerun()
             else:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 data_dict = {
@@ -1365,10 +1392,8 @@ elif page == "registration":
                     st.session_state.registration_submitted = True
                     st.rerun()
                 else:
-                    st.markdown(
-                        f'<div class="ec-error-msg">❌ {msg}</div>',
-                        unsafe_allow_html=True,
-                    )
+                    st.session_state.registration_error = msg
+                    st.rerun()
 
     # Display success message directly below the submit button (after the form)
     if st.session_state.get("show_success", False):
