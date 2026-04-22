@@ -8,7 +8,7 @@ import requests
 # ====================================================================================================
 # إعدادات الحد الأقصى
 # ====================================================================================================
-MAX_PLAYERS = 5  # يمكن تغيير الرقم حسب الحاجة
+MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
 # دوال Google Sheets (بما فيها قراءة العدد)
@@ -31,17 +31,12 @@ def get_player_count():
         sheet = gc.open_by_key(spreadsheet_id).sheet1
 
         all_rows = sheet.get_all_values()
-        # عدد الصفوف - 1 (لأن الصف الأول عناوين)
         return max(0, len(all_rows) - 1)
     except Exception as e:
         st.error(f"❌ خطأ في قراءة عدد اللاعبين: {str(e)}")
         return 0
 
 def normalize_phone(phone):
-    """
-    تحويل الأرقام العربية إلى إنجليزية، وإزالة المسافات والشرطات،
-    ثم إرجاع الرقم كنص مع بادئة ' لضمان الاحتفاظ بالصفر البادئ.
-    """
     if not phone:
         return ''
     arabic_to_english = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
@@ -50,10 +45,6 @@ def normalize_phone(phone):
     return "'" + phone
 
 def save_to_google_sheets(data_dict):
-    """
-    حفظ البيانات في Google Sheets مع التحقق من عدم تكرار البيانات
-    والتحقق من الحد الأقصى قبل الحفظ.
-    """
     try:
         import gspread
         from google.oauth2.service_account import Credentials
@@ -86,7 +77,6 @@ def save_to_google_sheets(data_dict):
         normalized_phone = normalize_phone(raw_phone)
         phone_for_comparison = normalized_phone.lstrip("'")
 
-        # ---- التحقق من عدم وجود تطابق كامل في البيانات الأساسية ----
         all_rows = sheet.get_all_values()
         if len(all_rows) > 1:
             try:
@@ -114,12 +104,10 @@ def save_to_google_sheets(data_dict):
                             existing_phone == phone_for_comparison):
                             return False, "⚠️ هذه البيانات مسجلة مسبقاً. لا يمكن التسجيل مرة أخرى بنفس البيانات."
 
-        # ---- التحقق من الحد الأقصى قبل الحفظ (إعادة التحقق) ----
         current_count = len(all_rows) - 1 if len(all_rows) > 1 else 0
         if current_count >= MAX_PLAYERS:
             return False, f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب). التسجيل مغلق حالياً."
 
-        # ترتيب القيم حسب ترتيب العناوين
         row_values = []
         for col in headers:
             if col == "الاسم":
@@ -204,23 +192,12 @@ def get_image_base64(image_path):
 logo_base64 = get_image_base64("logo.jpg")
 
 # ====================================================================================================
-# Helper: convert local image to base64 for HTML img
-# ====================================================================================================
-def img_to_base64(image_path):
-    try:
-        with open(image_path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    except Exception:
-        return None
-
-# ====================================================================================================
-# Main CSS (نفس الـ CSS السابق دون تغيير)
+# Main CSS
 # ====================================================================================================
 st.markdown('''
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
-/* ---- Hide Streamlit defaults ---- */
 header[data-testid="stHeader"] { display: none !important; }
 .stApp > header { display: none !important; }
 #MainMenu { display: none !important; }
@@ -229,7 +206,6 @@ footer { display: none !important; }
 [data-testid="stSidebar"] { display: none !important; }
 div[data-testid="stDecoration"] { display: none !important; }
 
-/* ---- Reset ---- */
 *, *::before, *::after {
     box-sizing: border-box;
     font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
@@ -248,7 +224,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     direction: rtl;
 }
 
-/* ---- Fixed Header ---- */
 .ec-header {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -290,7 +265,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     font-size: 0.75rem; color: #64748b; margin: 3px 0 0; font-weight: 600;
 }
 
-/* ---- Menu Toggle (Pure CSS) ---- */
 .ec-menu-toggle { display: none; }
 .ec-menu-btn {
     display: inline-flex; align-items: center; gap: 10px;
@@ -305,7 +279,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     box-shadow: 0 12px 30px rgba(59,130,246,0.3);
 }
 
-/* ---- Overlay ---- */
 .ec-overlay {
     position: fixed; inset: 0;
     background: rgba(15,23,42,0.55);
@@ -314,7 +287,6 @@ div[data-testid="stDecoration"] { display: none !important; }
 }
 .ec-menu-toggle:checked ~ .ec-overlay { display: block; }
 
-/* ---- Side Navigation ---- */
 .ec-sidenav {
     position: fixed; top: 82px; right: 16px;
     width: 370px; max-width: calc(100vw - 32px);
@@ -373,16 +345,13 @@ div[data-testid="stDecoration"] { display: none !important; }
     color: #1d4ed8; transform: translateX(-6px);
 }
 
-/* ---- Spacer ---- */
 .ec-spacer { height: 96px; }
 
-/* ---- Content Container ---- */
 .ec-container {
     width: 90%; max-width: 1200px;
     margin: 0 auto; padding: 25px 15px;
 }
 
-/* ---- Hero Section ---- */
 .ec-hero {
     background: linear-gradient(135deg, rgba(15,23,42,0.88), rgba(30,58,138,0.75)),
                 url('https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=1600&q=80');
@@ -445,7 +414,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     box-shadow: 0 14px 35px rgba(255,255,255,0.15);
 }
 
-/* ---- Section Title ---- */
 .ec-section-title {
     font-size: 2.2rem; font-weight: 900; color: #1e293b;
     text-align: center; margin-bottom: 45px;
@@ -459,7 +427,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     border-radius: 2px;
 }
 
-/* ---- Stats Grid ---- */
 .ec-stats {
     display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 28px; margin-bottom: 60px;
@@ -484,7 +451,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     color: #64748b; margin-top: 10px; font-weight: 600; font-size: 1rem;
 }
 
-/* ---- Feature Cards ---- */
 .ec-features {
     display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 28px; margin-bottom: 60px;
@@ -508,7 +474,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     color: #64748b; font-size: 0.93rem; line-height: 1.7; margin: 0;
 }
 
-/* ---- Page Header ---- */
 .ec-page-header {
     background: linear-gradient(135deg, #1e3a8a, #3b82f6, #1e3a8a);
     background-size: 200% 200%;
@@ -527,7 +492,6 @@ div[data-testid="stDecoration"] { display: none !important; }
 }
 .ec-page-header p { color: #e2e8f0; font-size: 1.05rem; margin: 0; }
 
-/* ---- About Page ---- */
 .ec-about-grid {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 40px; margin-bottom: 50px; align-items: center;
@@ -574,7 +538,6 @@ div[data-testid="stDecoration"] { display: none !important; }
 }
 .ec-mission-card li, .ec-vision-card li { margin-bottom: 6px; }
 
-/* ---- Programs ---- */
 .ec-programs-grid {
     display: grid; grid-template-columns: repeat(2, 1fr);
     gap: 28px; margin-bottom: 50px;
@@ -607,7 +570,6 @@ div[data-testid="stDecoration"] { display: none !important; }
 }
 .ec-schedule-item:last-child { border-bottom: none; }
 
-/* ---- Captains Page ---- */
 .ec-lead-captain {
     max-width: 600px; margin: 0 auto 40px;
     background: white; border-radius: 24px; overflow: hidden;
@@ -720,7 +682,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     margin-top: 8px;
 }
 
-/* ---- Success / Error Messages ---- */
 .ec-success-msg {
     background: linear-gradient(135deg, #10b981, #059669);
     color: #ffffff !important;
@@ -743,7 +704,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ---- Contact Page ---- */
 .ec-contact-card {
     background: white; padding: 32px; border-radius: 22px;
     box-shadow: 0 6px 22px rgba(0,0,0,0.06);
@@ -793,7 +753,6 @@ div[data-testid="stDecoration"] { display: none !important; }
     transform: scale(1.03);
 }
 
-/* ---- أزرار Streamlit (لون النص أسود واضح) ---- */
 .stButton button,
 div[data-testid="stForm"] button,
 div.stButton button,
@@ -818,7 +777,6 @@ div[data-testid="stForm"] button:hover {
     color: #000000 !important;
 }
 
-/* ---- تحسين وضوح النصوص في الحقول والعلامات ---- */
 label, .stTextInput label, .stSelectbox label, .stTextArea label {
     color: #1e293b !important;
     font-weight: 600 !important;
@@ -830,7 +788,6 @@ input, textarea, select {
     border-radius: 12px !important;
 }
 
-/* ---- جعل نص "أرسل لنا رسالة" أسود واضح ---- */
 .ec-contact-card h3,
 .ec-contact-card h4,
 .ec-contact-card .stMarkdown h3,
@@ -839,7 +796,6 @@ div[data-testid="stForm"] h3 {
     font-weight: 800 !important;
 }
 
-/* ---- News Cards ---- */
 .ec-news-card {
     background: white; border-radius: 20px; padding: 28px;
     margin-bottom: 20px;
@@ -861,7 +817,6 @@ div[data-testid="stForm"] h3 {
     color: #475569; font-size: 0.93rem; line-height: 1.7; margin: 0;
 }
 
-/* ---- FAQ ---- */
 .ec-faq-card {
     background: white; border-radius: 20px; padding: 28px;
     margin-bottom: 16px;
@@ -882,7 +837,6 @@ div[data-testid="stForm"] h3 {
     padding-right: 32px;
 }
 
-/* ---- Footer ---- */
 .ec-footer {
     background: linear-gradient(135deg, #0f172a, #1e293b);
     color: white; padding: 50px 0 30px;
@@ -912,7 +866,6 @@ div[data-testid="stForm"] h3 {
     width: 90%; max-width: 1200px; margin: 0 auto;
 }
 
-/* ---- Info Banner ---- */
 .ec-info-banner {
     background: linear-gradient(135deg, #1e3a8a, #3b82f6);
     border-radius: 24px; padding: 35px; text-align: center;
@@ -932,7 +885,6 @@ div[data-testid="stForm"] h3 {
     display: block; font-size: 1.6rem; font-weight: 900;
 }
 
-/* ---- Responsive ---- */
 @media (max-width: 768px) {
     .ec-stats, .ec-features, .ec-programs-grid,
     .ec-about-grid, .ec-mv-grid {
@@ -959,7 +911,7 @@ div[data-testid="stForm"] h3 {
 ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# Helper function to generate navigation link (same tab)
+# Helper function to generate navigation link
 # ====================================================================================================
 def nav_link(text, page_name, icon=""):
     return f'<a href="?page={page_name}" target="_self">{icon} {text}</a>'
@@ -1346,7 +1298,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (مع ميزة الحد الأقصى وإخفاء الفورم)
+# REGISTRATION PAGE (مع رسالة إغلاق محسنة وزر اتصل بنا)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1356,10 +1308,8 @@ elif page == "registration":
     </div>
     ''', unsafe_allow_html=True)
 
-    # قراءة العدد الحالي للاعبين
     current_count = get_player_count()
     
-    # عرض رسالة خطأ مخزنة مسبقاً (إن وجدت)
     if st.session_state.get("registration_error"):
         st.markdown(
             f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
@@ -1367,21 +1317,20 @@ elif page == "registration":
         )
         st.session_state.registration_error = None
 
-    # -------------------------------------------------------------------------
-    # التحقق من الحد الأقصى: إظهار الفورم فقط إذا كان العدد أقل من الحد
-    # -------------------------------------------------------------------------
     if current_count >= MAX_PLAYERS:
-        # العدد اكتمل: إخفاء الفورم نهائياً وعرض رسالة الإغلاق
+        # رسالة إغلاق بسيطة مع زر "اتصل بنا"
         st.markdown(f'''
-        <div class="ec-info-banner" style="margin-top:0; background: #f59e0b;">
-            <h3>🚫 التسجيل مغلق</h3>
-            <p style="font-size:1.2rem; margin:20px 0;">وصلنا إلى الحد الأقصى لعدد اللاعبين المسجلين ({MAX_PLAYERS} لاعب).</p>
-            <p>نشكركم على اهتمامكم ونتطلع لاستقبالكم في الموسم القادم.</p>
-            <p style="margin-top:30px;">📞 للاستفسار: 01285197778</p>
+        <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 24px; padding: 50px 30px; text-align: center; max-width: 700px; margin: 0 auto;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🚫</div>
+            <h2 style="color: #1e3a8a; font-size: 2rem; margin-bottom: 20px; font-weight: 900;">التسجيل مغلق حالياً</h2>
+            <p style="color: #334155; font-size: 1.2rem; line-height: 1.8; margin-bottom: 30px;">
+                نعتذر، لقد اكتمل العدد المسموح به للتسجيل في الموسم الحالي.<br>
+                نشكركم على اهتمامكم ونتطلع لاستقبالكم في المواسم القادمة.
+            </p>
+            <a href="?page=contact" target="_self" class="ec-btn ec-btn-gold" style="padding: 16px 40px; font-size: 1.2rem;">📞 اتصل بنا للاستفسار</a>
         </div>
         ''', unsafe_allow_html=True)
     else:
-        # عرض النموذج بشكل طبيعي مع إظهار عدد الأماكن المتبقية
         remaining = MAX_PLAYERS - current_count
         st.markdown(f'''
         <div style="background:#e0f2fe; border-radius:16px; padding:15px; margin-bottom:25px; text-align:center;">
@@ -1428,7 +1377,6 @@ elif page == "registration":
             submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
             if submitted:
-                # حفظ القيم المدخلة في session_state
                 st.session_state.reg_name = player_name
                 st.session_state.reg_age = age_group
                 st.session_state.reg_pos = position
@@ -1439,7 +1387,6 @@ elif page == "registration":
                     st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
                     st.rerun()
                 else:
-                    # إعادة التحقق من العدد قبل الحفظ (حماية من التسجيلات المتزامنة)
                     current_count = get_player_count()
                     if current_count >= MAX_PLAYERS:
                         st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب) أثناء محاولة التسجيل. لم يعد هناك أماكن متاحة."
@@ -1457,7 +1404,6 @@ elif page == "registration":
                         success, msg = save_to_google_sheets(data_dict)
 
                         if success:
-                            # مسح القيم المخزنة بعد النجاح
                             for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
                                 if key in st.session_state:
                                     del st.session_state[key]
@@ -1469,7 +1415,6 @@ elif page == "registration":
                             st.session_state.registration_error = msg
                             st.rerun()
 
-        # عرض رسالة النجاح إذا وجدت
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
