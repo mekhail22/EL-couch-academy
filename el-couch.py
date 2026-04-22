@@ -8,7 +8,7 @@ import requests
 # ====================================================================================================
 # إعدادات الحد الأقصى
 # ====================================================================================================
-MAX_PLAYERS = 5  # يمكن تغيير الرقم حسب الحاجة
+MAX_PLAYERS = 6  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
 # دوال Google Sheets (بما فيها قراءة العدد)
@@ -1298,7 +1298,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (مع رسالة إغلاق محسنة وزر اتصل بنا)
+# REGISTRATION PAGE (تظهر فقط الأماكن المتبقية، بدون عدد المسجلين)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1318,7 +1318,7 @@ elif page == "registration":
         st.session_state.registration_error = None
 
     if current_count >= MAX_PLAYERS:
-        # رسالة إغلاق بسيطة مع زر "اتصل بنا"
+        # رسالة إغلاق مع زر اتصل بنا
         st.markdown(f'''
         <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 24px; padding: 50px 30px; text-align: center; max-width: 700px; margin: 0 auto;">
             <div style="font-size: 4rem; margin-bottom: 20px;">🚫</div>
@@ -1332,11 +1332,10 @@ elif page == "registration":
         ''', unsafe_allow_html=True)
     else:
         remaining = MAX_PLAYERS - current_count
+        # عرض الأماكن المتبقية فقط
         st.markdown(f'''
         <div style="background:#e0f2fe; border-radius:16px; padding:15px; margin-bottom:25px; text-align:center;">
-            <span style="font-size:1.1rem;">📊 عدد المسجلين حالياً: <strong>{current_count}</strong> من <strong>{MAX_PLAYERS}</strong></span>
-            <span style="margin:0 15px;">|</span>
-            <span style="color:#1e3a8a; font-weight:800;">✨ الأماكن المتبقية: {remaining}</span>
+            <span style="color:#1e3a8a; font-weight:800; font-size:1.3rem;">✨ الأماكن المتبقية: {remaining}</span>
         </div>
         ''', unsafe_allow_html=True)
 
