@@ -3,37 +3,22 @@ import os
 import base64
 import re
 from datetime import datetime
-import requests  # استيراد مكتبة requests لإرسال رسائل التيليجرام
+import requests
 
 # ====================================================================================================
-# Google Sheets Integration (باستخدام service account من secrets)
+# إعدادات الحد الأقصى
 # ====================================================================================================
-def normalize_phone(phone):
-    """
-    تحويل الأرقام العربية إلى إنجليزية، وإزالة المسافات والشرطات،
-    ثم إرجاع الرقم كنص مع بادئة ' لضمان الاحتفاظ بالصفر البادئ.
-    """
-    if not phone:
-        return ''
-    # تحويل الأرقام العربية إلى إنجليزية
-    arabic_to_english = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
-    phone = phone.translate(arabic_to_english)
-    # إزالة أي شيء ليس رقماً (مسافات، شرطات، أقواس)
-    phone = re.sub(r'[^0-9]', '', phone)
-    # إضافة علامة اقتباس مفردة في البداية لفرض النص في Google Sheets
-    return "'" + phone
+MAX_PLAYERS = 5  # يمكن تغيير الرقم حسب الحاجة
 
-def save_to_google_sheets(data_dict):
-    """
-    حفظ البيانات في Google Sheets مع مطابقة الأعمدة حسب العناوين.
-    يتحقق أولاً من عدم وجود تطابق كامل في البيانات الأساسية (الاسم، الفئة، المركز، الهاتف).
-    data_dict يحتوي على المفاتيح: 'player_name', 'age_group', 'position', 'parent_phone', 'notes', 'timestamp'
-    """
+# ====================================================================================================
+# دوال Google Sheets (بما فيها قراءة العدد)
+# ====================================================================================================
+def get_player_count():
+    """ترجع عدد اللاعبين المسجلين حالياً في Google Sheets"""
     try:
         import gspread
         from google.oauth2.service_account import Credentials
 
-        # قراءة بيانات service account من secrets (ككائن مباشر)
         creds_info = dict(st.secrets["google"]["service_account"])
         spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
 
@@ -45,25 +30,58 @@ def save_to_google_sheets(data_dict):
         gc = gspread.authorize(credentials)
         sheet = gc.open_by_key(spreadsheet_id).sheet1
 
-        # العناوين المتوقعة باللغة العربية
+        all_rows = sheet.get_all_values()
+        # عدد الصفوف - 1 (لأن الصف الأول عناوين)
+        return max(0, len(all_rows) - 1)
+    except Exception as e:
+        st.error(f"❌ خطأ في قراءة عدد اللاعبين: {str(e)}")
+        return 0
+
+def normalize_phone(phone):
+    """
+    تحويل الأرقام العربية إلى إنجليزية، وإزالة المسافات والشرطات،
+    ثم إرجاع الرقم كنص مع بادئة ' لضمان الاحتفاظ بالصفر البادئ.
+    """
+    if not phone:
+        return ''
+    arabic_to_english = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
+    phone = phone.translate(arabic_to_english)
+    phone = re.sub(r'[^0-9]', '', phone)
+    return "'" + phone
+
+def save_to_google_sheets(data_dict):
+    """
+    حفظ البيانات في Google Sheets مع التحقق من عدم تكرار البيانات
+    والتحقق من الحد الأقصى قبل الحفظ.
+    """
+    try:
+        import gspread
+        from google.oauth2.service_account import Credentials
+
+        creds_info = dict(st.secrets["google"]["service_account"])
+        spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
+
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
+        gc = gspread.authorize(credentials)
+        sheet = gc.open_by_key(spreadsheet_id).sheet1
+
         expected_headers = ["الاسم", "الفئة العمرية", "المركز المفضل", "رقم الهاتف", "ملاحظات", "تاريخ التسجيل"]
 
-        # الحصول على الصف الأول (العناوين الحالية)
         headers = sheet.row_values(1)
-
         if not headers:
-            # إذا كان الجدول فارغاً، نضيف العناوين
             sheet.append_row(expected_headers, value_input_option="USER_ENTERED")
             headers = expected_headers
         else:
-            # التأكد من وجود جميع العناوين المطلوبة (إن لم تكن موجودة نضيفها في النهاية)
             for h in expected_headers:
                 if h not in headers:
                     col_index = len(headers) + 1
                     sheet.update_cell(1, col_index, h)
                     headers.append(h)
 
-        # معالجة رقم الهاتف لضمان الاحتفاظ بالصفر البادئ
         raw_phone = data_dict.get('parent_phone', '')
         normalized_phone = normalize_phone(raw_phone)
         phone_for_comparison = normalized_phone.lstrip("'")
@@ -71,18 +89,15 @@ def save_to_google_sheets(data_dict):
         # ---- التحقق من عدم وجود تطابق كامل في البيانات الأساسية ----
         all_rows = sheet.get_all_values()
         if len(all_rows) > 1:
-            # الحصول على فهارس الأعمدة المطلوبة
             try:
                 name_col = headers.index("الاسم")
                 age_col = headers.index("الفئة العمرية")
                 pos_col = headers.index("المركز المفضل")
                 phone_col = headers.index("رقم الهاتف")
             except ValueError:
-                # إذا لم توجد الأعمدة، نتجاهل التحقق (يفترض أنها موجودة)
                 pass
             else:
                 for row in all_rows[1:]:
-                    # التأكد من أن الصف يحتوي على عدد كافٍ من الأعمدة
                     if len(row) > max(name_col, age_col, pos_col, phone_col):
                         existing_name = row[name_col].strip()
                         existing_age = row[age_col].strip()
@@ -99,7 +114,12 @@ def save_to_google_sheets(data_dict):
                             existing_phone == phone_for_comparison):
                             return False, "⚠️ هذه البيانات مسجلة مسبقاً. لا يمكن التسجيل مرة أخرى بنفس البيانات."
 
-        # ترتيب القيم حسب ترتيب العناوين الموجودة في الجدول
+        # ---- التحقق من الحد الأقصى قبل الحفظ (إعادة التحقق) ----
+        current_count = len(all_rows) - 1 if len(all_rows) > 1 else 0
+        if current_count >= MAX_PLAYERS:
+            return False, f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب). التسجيل مغلق حالياً."
+
+        # ترتيب القيم حسب ترتيب العناوين
         row_values = []
         for col in headers:
             if col == "الاسم":
@@ -115,7 +135,7 @@ def save_to_google_sheets(data_dict):
             elif col == "تاريخ التسجيل":
                 row_values.append(data_dict.get('timestamp', ''))
             else:
-                row_values.append('')  # أي عمود إضافي نتركه فارغاً
+                row_values.append('')
 
         sheet.append_row(row_values, value_input_option="USER_ENTERED")
         return True, "✅ تم التسجيل بنجاح!"
@@ -126,28 +146,16 @@ def save_to_google_sheets(data_dict):
 # Telegram Messaging Function
 # ====================================================================================================
 def send_telegram_message(message_text):
-    """
-    إرسال رسالة إلى التيليجرام باستخدام بوت التيليجرام
-    """
     try:
-        # الحصول على التوكن والمعرف من secrets
         bot_token = st.secrets["telegram"]["bot_token"]
         chat_id = st.secrets["telegram"]["chat_id"]
-
-        # إعداد رابط إرسال الرسالة
         send_message_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-
-        # إعداد معاملات الرسالة
         params = {
             "chat_id": chat_id,
             "text": message_text,
-            "parse_mode": "HTML"  # يمكن استخدام HTML لتنسيق النص
+            "parse_mode": "HTML"
         }
-
-        # إرسال الطلب إلى التيليجرام
         response = requests.post(send_message_url, params=params)
-
-        # التحقق من نجاح الإرسال
         if response.status_code == 200:
             return True
         else:
@@ -206,7 +214,7 @@ def img_to_base64(image_path):
         return None
 
 # ====================================================================================================
-# Main CSS (استخدام ثلاث علامات تنصيص مفردة لتجنب المشاكل)
+# Main CSS (نفس الـ CSS السابق دون تغيير)
 # ====================================================================================================
 st.markdown('''
 <style>
@@ -1237,7 +1245,7 @@ elif page == "programs":
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# CAPTAINS PAGE (UPDATED WITH IMAGES AND NEW CAPTAINS)
+# CAPTAINS PAGE
 # ====================================================================================================
 elif page in ("coaches", "captains"):
     st.markdown('''
@@ -1338,7 +1346,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (التحقق من التطابق الكامل وعرض الخطأ بعد الزر)
+# REGISTRATION PAGE (مع ميزة الحد الأقصى وإخفاء الفورم)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1348,105 +1356,126 @@ elif page == "registration":
     </div>
     ''', unsafe_allow_html=True)
 
-    # تعريف متغيرات لتخزين القيم المدخلة (لاستخدامها داخل النموذج وللاحتفاظ بها بعد التقديم)
-    default_name = ""
-    default_age = ""
-    default_pos = ""
-    default_phone = ""
-    default_notes = ""
-
-    # إذا كان هناك خطأ، نعيد تعبئة القيم السابقة
-    if st.session_state.get("registration_error"):
-        # لا نفعل شيء هنا لأننا سنستخدم st.session_state لتخزين القيم
-        pass
-
-    with st.form("registration_form"):
-        st.markdown("### 📋 معلومات اللاعب")
-        col1, col2 = st.columns(2)
-        with col1:
-            player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود", 
-                                        value=st.session_state.get("reg_name", ""))
-            age_group = st.selectbox(
-                "الفئة العمرية *",
-                [
-                    "",
-                    "🏃‍♀️ بنات (جميع الأعمار)",
-                    "🏃 بنين (الصف الأول - الخامس الابتدائي)",
-                    "🏃 بنين (الصف السادس - الثاني الإعدادي)",
-                ],
-                index=0 if not st.session_state.get("reg_age") else 
-                      ["", "🏃‍♀️ بنات (جميع الأعمار)", "🏃 بنين (الصف الأول - الخامس الابتدائي)", "🏃 بنين (الصف السادس - الثاني الإعدادي)"].index(st.session_state.get("reg_age", ""))
-            )
-        with col2:
-            position = st.selectbox(
-                "المركز المفضل",
-                ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
-                index=0 if not st.session_state.get("reg_pos") else 
-                      ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
-            )
-
-        st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
-        col1, col2 = st.columns(2)
-        with col1:
-            parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX",
-                                         value=st.session_state.get("reg_phone", ""))
-
-        notes = st.text_area("ملاحظات إضافية (اختياري)", placeholder="أي معلومات إضافية تود إضافتها...",
-                             value=st.session_state.get("reg_notes", ""))
-
-        submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
-
-        if submitted:
-            # حفظ القيم المدخلة في session_state لاسترجاعها في حالة الخطأ
-            st.session_state.reg_name = player_name
-            st.session_state.reg_age = age_group
-            st.session_state.reg_pos = position
-            st.session_state.reg_phone = parent_phone
-            st.session_state.reg_notes = notes
-
-            if not player_name or not age_group or not parent_phone:
-                st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
-                st.rerun()
-            else:
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                data_dict = {
-                    'player_name': player_name,
-                    'age_group': age_group,
-                    'position': position,
-                    'parent_phone': parent_phone,
-                    'notes': notes,
-                    'timestamp': timestamp
-                }
-                success, msg = save_to_google_sheets(data_dict)
-
-                if success:
-                    # مسح القيم المخزنة بعد النجاح
-                    for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
-                        if key in st.session_state:
-                            del st.session_state[key]
-                    st.session_state.show_success = True
-                    st.session_state.registration_submitted = True
-                    st.session_state.registration_error = None
-                    st.rerun()
-                else:
-                    st.session_state.registration_error = msg
-                    st.rerun()
-
-    # عرض رسالة الخطأ بعد النموذج إذا وجدت
+    # قراءة العدد الحالي للاعبين
+    current_count = get_player_count()
+    
+    # عرض رسالة خطأ مخزنة مسبقاً (إن وجدت)
     if st.session_state.get("registration_error"):
         st.markdown(
             f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
             unsafe_allow_html=True,
         )
-        # لا نقوم بحذف الخطأ هنا لأنه سيتم إعادة تحميل الصفحة وقد نعود للعرض
+        st.session_state.registration_error = None
 
-    # عرض رسالة النجاح
-    if st.session_state.get("show_success", False):
-        st.markdown(
-            '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
-            unsafe_allow_html=True,
-        )
-        st.session_state.show_success = False
+    # -------------------------------------------------------------------------
+    # التحقق من الحد الأقصى: إظهار الفورم فقط إذا كان العدد أقل من الحد
+    # -------------------------------------------------------------------------
+    if current_count >= MAX_PLAYERS:
+        # العدد اكتمل: إخفاء الفورم نهائياً وعرض رسالة الإغلاق
+        st.markdown(f'''
+        <div class="ec-info-banner" style="margin-top:0; background: #f59e0b;">
+            <h3>🚫 التسجيل مغلق</h3>
+            <p style="font-size:1.2rem; margin:20px 0;">وصلنا إلى الحد الأقصى لعدد اللاعبين المسجلين ({MAX_PLAYERS} لاعب).</p>
+            <p>نشكركم على اهتمامكم ونتطلع لاستقبالكم في الموسم القادم.</p>
+            <p style="margin-top:30px;">📞 للاستفسار: 01285197778</p>
+        </div>
+        ''', unsafe_allow_html=True)
+    else:
+        # عرض النموذج بشكل طبيعي مع إظهار عدد الأماكن المتبقية
+        remaining = MAX_PLAYERS - current_count
+        st.markdown(f'''
+        <div style="background:#e0f2fe; border-radius:16px; padding:15px; margin-bottom:25px; text-align:center;">
+            <span style="font-size:1.1rem;">📊 عدد المسجلين حالياً: <strong>{current_count}</strong> من <strong>{MAX_PLAYERS}</strong></span>
+            <span style="margin:0 15px;">|</span>
+            <span style="color:#1e3a8a; font-weight:800;">✨ الأماكن المتبقية: {remaining}</span>
+        </div>
+        ''', unsafe_allow_html=True)
+
+        with st.form("registration_form"):
+            st.markdown("### 📋 معلومات اللاعب")
+            col1, col2 = st.columns(2)
+            with col1:
+                player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود", 
+                                            value=st.session_state.get("reg_name", ""))
+                age_group = st.selectbox(
+                    "الفئة العمرية *",
+                    [
+                        "",
+                        "🏃‍♀️ بنات (جميع الأعمار)",
+                        "🏃 بنين (الصف الأول - الخامس الابتدائي)",
+                        "🏃 بنين (الصف السادس - الثاني الإعدادي)",
+                    ],
+                    index=0 if not st.session_state.get("reg_age") else 
+                          ["", "🏃‍♀️ بنات (جميع الأعمار)", "🏃 بنين (الصف الأول - الخامس الابتدائي)", "🏃 بنين (الصف السادس - الثاني الإعدادي)"].index(st.session_state.get("reg_age", ""))
+                )
+            with col2:
+                position = st.selectbox(
+                    "المركز المفضل",
+                    ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
+                    index=0 if not st.session_state.get("reg_pos") else 
+                          ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
+                )
+
+            st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
+            col1, col2 = st.columns(2)
+            with col1:
+                parent_phone = st.text_input("رقم الهاتف *", placeholder="01XXXXXXXXX",
+                                             value=st.session_state.get("reg_phone", ""))
+
+            notes = st.text_area("ملاحظات إضافية (اختياري)", placeholder="أي معلومات إضافية تود إضافتها...",
+                                 value=st.session_state.get("reg_notes", ""))
+
+            submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
+
+            if submitted:
+                # حفظ القيم المدخلة في session_state
+                st.session_state.reg_name = player_name
+                st.session_state.reg_age = age_group
+                st.session_state.reg_pos = position
+                st.session_state.reg_phone = parent_phone
+                st.session_state.reg_notes = notes
+
+                if not player_name or not age_group or not parent_phone:
+                    st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
+                    st.rerun()
+                else:
+                    # إعادة التحقق من العدد قبل الحفظ (حماية من التسجيلات المتزامنة)
+                    current_count = get_player_count()
+                    if current_count >= MAX_PLAYERS:
+                        st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب) أثناء محاولة التسجيل. لم يعد هناك أماكن متاحة."
+                        st.rerun()
+                    else:
+                        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        data_dict = {
+                            'player_name': player_name,
+                            'age_group': age_group,
+                            'position': position,
+                            'parent_phone': parent_phone,
+                            'notes': notes,
+                            'timestamp': timestamp
+                        }
+                        success, msg = save_to_google_sheets(data_dict)
+
+                        if success:
+                            # مسح القيم المخزنة بعد النجاح
+                            for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
+                                if key in st.session_state:
+                                    del st.session_state[key]
+                            st.session_state.show_success = True
+                            st.session_state.registration_submitted = True
+                            st.session_state.registration_error = None
+                            st.rerun()
+                        else:
+                            st.session_state.registration_error = msg
+                            st.rerun()
+
+        # عرض رسالة النجاح إذا وجدت
+        if st.session_state.get("show_success", False):
+            st.markdown(
+                '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
+                unsafe_allow_html=True,
+            )
+            st.session_state.show_success = False
 
 # ====================================================================================================
 # FAQ PAGE
@@ -1460,49 +1489,25 @@ elif page == "faq":
     ''', unsafe_allow_html=True)
 
     faqs = [
-        (
-            "ما هو سن القبول في الأكاديمية؟",
-            "نستقبل اللاعبين والبنات من سن الصف الأول الابتدائي وحتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفة لكل مرحلة لضمان تدريب مناسب لكل سن.",
-        ),
-        (
-            "ما هي مدة البرنامج التدريبي؟",
-            "الموسم التدريبي يمتد لمدة 10 أشهر تقريبًا، من بداية سبتمبر إلى نهاية يونيو. التدريبات تقام أيام السبت والخميس في الفترة المسائية حسب الجدول المحدد لكل فئة.",
-        ),
-        (
-            "هل يوجد تدريب للبنات؟",
-            "نعم، لدينا برامج تدريبية مخصصة للبنات في أيام السبت والخميس مع مدربات متخصصات ومؤهلات، وبيئة مناسبة تلبي احتياجاتهن الرياضية والنفسية مع مراعاة الخصوصية الكاملة.",
-        ),
-        (
-            "هل يوجد تدريب للمبتدئين؟",
-            "بالتأكيد! لدينا برامج خاصة للمبتدئين تركز على تعلم أساسيات كرة القدم من الصفر، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس وحب الرياضة، وتدريبات ترفيهية محفزة للتعلم.",
-        ),
-        (
-            "كيف يتم تقييم اللاعبين؟",
-            "نوفر نظام تقييم شامل يشمل: تقييم فني دوري للمهارات، متابعة التطور البدني، تقارير شهرية عن الأداء، لقاءات دورية مع أولياء الأمور، فيديوهات تحليل أداء للمتميزين، وشهادات تقدير للمتفوقين.",
-        ),
-        (
-            "أين تقام التدريبات؟",
-            "تقام جميع التدريبات على ملاعب مدرسة السلام المتطورة في أسيوط، وهي ملاعب مجهزة بأحدث المعدات وتوفر بيئة آمنة ومناسبة للتدريب.",
-        ),
-        (
-            "ما هي سياسة الرسوم والدفع؟",
-            "تختلف الرسوم حسب الفئة العمرية وعدد أيام التدريب. نقدم: نظام تقسيط شهري مرن. يرجى التواصل معنا لمعرفة التفاصيل.",
-        ),
+        ("ما هو سن القبول في الأكاديمية؟", "نستقبل اللاعبين والبنات من سن الصف الأول الابتدائي وحتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفة لكل مرحلة لضمان تدريب مناسب لكل سن."),
+        ("ما هي مدة البرنامج التدريبي؟", "الموسم التدريبي يمتد لمدة 10 أشهر تقريبًا، من بداية سبتمبر إلى نهاية يونيو. التدريبات تقام أيام السبت والخميس في الفترة المسائية حسب الجدول المحدد لكل فئة."),
+        ("هل يوجد تدريب للبنات؟", "نعم، لدينا برامج تدريبية مخصصة للبنات في أيام السبت والخميس مع مدربات متخصصات ومؤهلات، وبيئة مناسبة تلبي احتياجاتهن الرياضية والنفسية مع مراعاة الخصوصية الكاملة."),
+        ("هل يوجد تدريب للمبتدئين؟", "بالتأكيد! لدينا برامج خاصة للمبتدئين تركز على تعلم أساسيات كرة القدم من الصفر، تطوير المهارات الحركية الأساسية، بناء الثقة بالنفس وحب الرياضة، وتدريبات ترفيهية محفزة للتعلم."),
+        ("كيف يتم تقييم اللاعبين؟", "نوفر نظام تقييم شامل يشمل: تقييم فني دوري للمهارات، متابعة التطور البدني، تقارير شهرية عن الأداء، لقاءات دورية مع أولياء الأمور، فيديوهات تحليل أداء للمتميزين، وشهادات تقدير للمتفوقين."),
+        ("أين تقام التدريبات؟", "تقام جميع التدريبات على ملاعب مدرسة السلام المتطورة في أسيوط، وهي ملاعب مجهزة بأحدث المعدات وتوفر بيئة آمنة ومناسبة للتدريب."),
+        ("ما هي سياسة الرسوم والدفع؟", "تختلف الرسوم حسب الفئة العمرية وعدد أيام التدريب. نقدم: نظام تقسيط شهري مرن. يرجى التواصل معنا لمعرفة التفاصيل."),
     ]
 
     for question, answer in faqs:
-        st.markdown(
-            f'''
+        st.markdown(f'''
         <div class="ec-faq-card">
             <h4>❓ {question}</h4>
             <p>{answer}</p>
         </div>
-        ''',
-            unsafe_allow_html=True,
-        )
+        ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# CONTACT PAGE (with Google Map and WhatsApp, success message moved below the form)
+# CONTACT PAGE
 # ====================================================================================================
 elif page == "contact":
     st.markdown('''
@@ -1529,15 +1534,8 @@ elif page == "contact":
 
             if contact_submitted:
                 if not contact_name or not contact_phone or not inquiry_type or not contact_message:
-                    st.markdown(
-                        '<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>',
-                        unsafe_allow_html=True,
-                    )
+                    st.markdown('<div class="ec-error-msg">⚠️ يرجى ملء جميع الحقول المطلوبة</div>', unsafe_allow_html=True)
                 else:
-                    # معالجة رقم الهاتف (اختياري، لكن للاتساق)
-                    normalized_phone = normalize_phone(contact_phone)
-                    
-                    # إعداد رسالة التيليجرام
                     telegram_message = f"""
 📩 <b>رسالة جديدة من موقع الكوتش أكاديمي</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -1548,25 +1546,15 @@ elif page == "contact":
 ━━━━━━━━━━━━━━━━━━━━
 🕐 <b>تاريخ الإرسال:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                     """
-                    
-                    # إرسال الرسالة إلى التيليجرام
                     telegram_sent = send_telegram_message(telegram_message)
-                    
                     if telegram_sent:
                         st.session_state.show_contact_success = True
                         st.rerun()
                     else:
-                        st.markdown(
-                            '<div class="ec-error-msg">❌ حدث خطأ في إرسال الرسالة، يرجى المحاولة مرة أخرى.</div>',
-                            unsafe_allow_html=True,
-                        )
+                        st.markdown('<div class="ec-error-msg">❌ حدث خطأ في إرسال الرسالة، يرجى المحاولة مرة أخرى.</div>', unsafe_allow_html=True)
 
-        # Display success message directly below the submit button (after the form)
         if st.session_state.get("show_contact_success", False):
-            st.markdown(
-                '<div class="ec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>',
-                unsafe_allow_html=True,
-            )
+            st.markdown('<div class="ec-success-msg">✅ تم إرسال رسالتك بنجاح! سنتواصل معك في أقرب وقت.</div>', unsafe_allow_html=True)
             st.session_state.show_contact_success = False
 
     with col_info:
@@ -1610,9 +1598,6 @@ elif page == "contact":
                 💬 تواصل معنا عبر واتساب
             </a>
         </div>
-        ''', unsafe_allow_html=True)
-
-        st.markdown('''
         <div style="margin-top: 25px; text-align: center;">
             <a href="https://maps.app.goo.gl/MX9GM7XC4jenPpgs8" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #4285F4; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700;">
                 🗺️ عرض الموقع على خرائط جوجل
@@ -1635,51 +1620,23 @@ elif page == "news":
     ''', unsafe_allow_html=True)
 
     news_items = [
-        {
-            "title": "بدء التسجيل للموسم الجديد 2025/2026",
-            "date": "2025-08-15",
-            "desc": "يسعدنا الإعلان عن فتح باب التسجيل للموسم التدريبي الجديد 2025/2026. سارعوا بالتسجيل للاستفادة من خصم التسجيل المبكر. البرامج متاحة لجميع الفئات العمرية للبنين والبنات.",
-        },
-        {
-            "title": "فوز فريق الأكاديمية ببطولة أسيوط للناشئين",
-            "date": "2025-06-20",
-            "desc": "حقق فريق الأكاديمية إنجازًا رائعًا بالفوز ببطولة أسيوط للناشئين تحت 12 سنة، بعد مباراة نهائية مثيرة انتهت بنتيجة 3-1. تهانينا لجميع اللاعبين والمدربين!",
-        },
-        {
-            "title": "دورة تدريبية متقدمة للمدربين",
-            "date": "2025-05-10",
-            "desc": "أتم مدربو الأكاديمية بنجاح دورة تدريبية متقدمة في أساليب التدريب الحديثة، بالتعاون مع الاتحاد المصري لكرة القدم. الدورة شملت أحدث المنهجيات في تطوير الناشئين.",
-        },
-        {
-            "title": "انضمام لاعبين من الأكاديمية لمنتخب المحافظة",
-            "date": "2025-04-05",
-            "desc": "تم اختيار 5 لاعبين من الأكاديمية للانضمام لمنتخب محافظة أسيوط تحت 14 سنة، وهو ما يعكس مستوى التدريب المتميز الذي يحصل عليه لاعبونا.",
-        },
-        {
-            "title": "محاضرة تثقيفية عن التغذية الرياضية",
-            "date": "2025-03-15",
-            "desc": "نظمت الأكاديمية محاضرة تثقيفية لأولياء الأمور واللاعبين حول أهمية التغذية السليمة وتأثيرها على الأداء الرياضي، قدمها أخصائي تغذية رياضية معتمد.",
-        },
-        {
-            "title": "شراكة جديدة مع نادي أسيوط الرياضي",
-            "date": "2025-02-20",
-            "desc": "وقّعت الأكاديمية اتفاقية شراكة مع نادي أسيوط الرياضي لتسهيل انتقال اللاعبين الموهوبين إلى فرق النادي، مما يفتح آفاقًا جديدة للاحتراف أمام لاعبينا.",
-        },
+        {"title": "بدء التسجيل للموسم الجديد 2025/2026", "date": "2025-08-15", "desc": "يسعدنا الإعلان عن فتح باب التسجيل للموسم التدريبي الجديد 2025/2026. سارعوا بالتسجيل للاستفادة من خصم التسجيل المبكر."},
+        {"title": "فوز فريق الأكاديمية ببطولة أسيوط للناشئين", "date": "2025-06-20", "desc": "حقق فريق الأكاديمية إنجازًا رائعًا بالفوز ببطولة أسيوط للناشئين تحت 12 سنة، بعد مباراة نهائية مثيرة."},
+        {"title": "دورة تدريبية متقدمة للمدربين", "date": "2025-05-10", "desc": "أتم مدربو الأكاديمية بنجاح دورة تدريبية متقدمة في أساليب التدريب الحديثة، بالتعاون مع الاتحاد المصري لكرة القدم."},
+        {"title": "انضمام لاعبين من الأكاديمية لمنتخب المحافظة", "date": "2025-04-05", "desc": "تم اختيار 5 لاعبين من الأكاديمية للانضمام لمنتخب محافظة أسيوط تحت 14 سنة."},
+        {"title": "محاضرة تثقيفية عن التغذية الرياضية", "date": "2025-03-15", "desc": "نظمت الأكاديمية محاضرة تثقيفية لأولياء الأمور واللاعبين حول أهمية التغذية السليمة."},
+        {"title": "شراكة جديدة مع نادي أسيوط الرياضي", "date": "2025-02-20", "desc": "وقّعت الأكاديمية اتفاقية شراكة مع نادي أسيوط الرياضي لتسهيل انتقال اللاعبين الموهوبين."},
     ]
 
     for item in news_items:
-        st.markdown(
-            f'''
+        st.markdown(f'''
         <div class="ec-news-card">
             <h3>📌 {item['title']}</h3>
             <div class="ec-news-date">🗓️ {item['date']}</div>
             <p>{item['desc']}</p>
         </div>
-        ''',
-            unsafe_allow_html=True,
-        )
+        ''', unsafe_allow_html=True)
 
-# Close container
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ====================================================================================================
@@ -1691,7 +1648,7 @@ footer_links = f"""
     <div class="ec-footer-inner">
         <div>
             <h4>الكوتش أكاديمي</h4>
-            <p>أكاديمية كرة القدم المتخصصة في بناء اللاعب الشامل فنيًا وبدنيًا وذهنيًا. نؤمن بأن كل لاعب يستحق فرصة حقيقية للتطور والاحتراف.</p>
+            <p>أكاديمية كرة القدم المتخصصة في بناء اللاعب الشامل فنيًا وبدنيًا وذهنيًا.</p>
         </div>
         <div>
             <h4>روابط سريعة</h4>
@@ -1707,13 +1664,11 @@ footer_links = f"""
             <h4>تواصل معنا</h4>
             <p>📍 ملاعب مدرسة السلام المتطورة - أسيوط</p>
             <p>🕐 السبت والخميس - الفترة المسائية</p>
-            <p style="margin-top:12px;">
-                {nav_link("📞 اتصل بنا", "contact")}
-            </p>
+            <p style="margin-top:12px;">{nav_link("📞 اتصل بنا", "contact")}</p>
         </div>
     </div>
     <div class="ec-footer-bottom">
-        جميع الحقوق محفوظة &copy; {current_year} الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة
+        جميع الحقوق محفوظة &copy; {current_year} الكوتش أكاديمي
     </div>
 </div>
 """
