@@ -686,7 +686,7 @@ div[data-testid="stDecoration"] { display: none !important; }
     background: linear-gradient(135deg, #10b981, #059669);
     color: #ffffff !important;
     padding: 20px; border-radius: 16px;
-    margin-bottom: 25px; text-align: center;
+    margin-top: 25px; text-align: center;
     font-weight: 700; font-size: 1.05rem;
     animation: ec-fadeIn 0.5s ease;
     box-shadow: 0 6px 20px rgba(16,185,129,0.3);
@@ -695,7 +695,7 @@ div[data-testid="stDecoration"] { display: none !important; }
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: #ffffff !important;
     padding: 20px; border-radius: 16px;
-    margin-bottom: 25px; text-align: center;
+    margin-top: 25px; text-align: center;
     font-weight: 700; font-size: 1.05rem;
     animation: ec-fadeIn 0.5s ease;
 }
@@ -1298,7 +1298,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (تظهر فقط الأماكن المتبقية، بدون عدد المسجلين)
+# REGISTRATION PAGE (رسائل الخطأ والنجاح تظهر أسفل النموذج)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1310,12 +1310,7 @@ elif page == "registration":
 
     current_count = get_player_count()
     
-    if st.session_state.get("registration_error"):
-        st.markdown(
-            f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
-            unsafe_allow_html=True,
-        )
-        st.session_state.registration_error = None
+    # لا نعرض رسائل الخطأ المحفوظة قبل النموذج
 
     if current_count >= MAX_PLAYERS:
         # رسالة إغلاق مع زر اتصل بنا
@@ -1414,6 +1409,16 @@ elif page == "registration":
                             st.session_state.registration_error = msg
                             st.rerun()
 
+        # عرض رسالة الخطأ (إن وجدت) أسفل النموذج مباشرة
+        if st.session_state.get("registration_error"):
+            st.markdown(
+                f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
+                unsafe_allow_html=True,
+            )
+            # بعد عرضها نمسحها لتجنب ظهورها مرة أخرى بعد تحديث الصفحة
+            st.session_state.registration_error = None
+
+        # عرض رسالة النجاح (إن وجدت) أسفل النموذج مباشرة
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
