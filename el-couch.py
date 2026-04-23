@@ -8,7 +8,7 @@ import requests
 # ====================================================================================================
 # إعدادات الحد الأقصى
 # ====================================================================================================
-MAX_PLAYERS = 400  # يمكن تغيير الرقم حسب الحاجة
+MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
 # دوال Google Sheets (بما فيها قراءة العدد)
@@ -93,14 +93,14 @@ def save_to_google_sheets(data_dict):
                         existing_age = row[age_col].strip()
                         existing_pos = row[pos_col].strip()
                         existing_phone = row[phone_col].lstrip("'").strip()
-                        
+
                         new_name = data_dict.get('player_name', '').strip()
                         new_age = data_dict.get('age_group', '').strip()
                         new_pos = data_dict.get('position', '').strip()
-                        
-                        if (existing_name == new_name and 
-                            existing_age == new_age and 
-                            existing_pos == new_pos and 
+
+                        if (existing_name == new_name and
+                            existing_age == new_age and
+                            existing_pos == new_pos and
                             existing_phone == phone_for_comparison):
                             return False, "⚠️ هذه البيانات مسجلة مسبقاً. لا يمكن التسجيل مرة أخرى بنفس البيانات."
 
@@ -1298,7 +1298,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (رسائل الخطأ والنجاح تظهر أسفل النموذج)
+# REGISTRATION PAGE (تم إزالة عرض الأماكن المتبقية)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1309,8 +1309,6 @@ elif page == "registration":
     ''', unsafe_allow_html=True)
 
     current_count = get_player_count()
-    
-    # لا نعرض رسائل الخطأ المحفوظة قبل النموذج
 
     if current_count >= MAX_PLAYERS:
         # رسالة إغلاق مع زر اتصل بنا
@@ -1326,19 +1324,12 @@ elif page == "registration":
         </div>
         ''', unsafe_allow_html=True)
     else:
-        remaining = MAX_PLAYERS - current_count
-        # عرض الأماكن المتبقية فقط
-        st.markdown(f'''
-        <div style="background:#e0f2fe; border-radius:16px; padding:15px; margin-bottom:25px; text-align:center;">
-            <span style="color:#1e3a8a; font-weight:800; font-size:1.3rem;">✨ الأماكن المتبقية: {remaining}</span>
-        </div>
-        ''', unsafe_allow_html=True)
-
+        # لم نعد نعرض عدد الأماكن المتبقية هنا - تمت إزالة جزء "الأماكن المتبقية"
         with st.form("registration_form"):
             st.markdown("### 📋 معلومات اللاعب")
             col1, col2 = st.columns(2)
             with col1:
-                player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود", 
+                player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود",
                                             value=st.session_state.get("reg_name", ""))
                 age_group = st.selectbox(
                     "الفئة العمرية *",
@@ -1348,14 +1339,14 @@ elif page == "registration":
                         "🏃 بنين (الصف الأول - الخامس الابتدائي)",
                         "🏃 بنين (الصف السادس - الثاني الإعدادي)",
                     ],
-                    index=0 if not st.session_state.get("reg_age") else 
+                    index=0 if not st.session_state.get("reg_age") else
                           ["", "🏃‍♀️ بنات (جميع الأعمار)", "🏃 بنين (الصف الأول - الخامس الابتدائي)", "🏃 بنين (الصف السادس - الثاني الإعدادي)"].index(st.session_state.get("reg_age", ""))
                 )
             with col2:
                 position = st.selectbox(
                     "المركز المفضل",
                     ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
-                    index=0 if not st.session_state.get("reg_pos") else 
+                    index=0 if not st.session_state.get("reg_pos") else
                           ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
                 )
 
@@ -1415,7 +1406,6 @@ elif page == "registration":
                 f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
                 unsafe_allow_html=True,
             )
-            # بعد عرضها نمسحها لتجنب ظهورها مرة أخرى بعد تحديث الصفحة
             st.session_state.registration_error = None
 
         # عرض رسالة النجاح (إن وجدت) أسفل النموذج مباشرة
