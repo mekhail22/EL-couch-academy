@@ -2,3 +2,4 @@ streamlit
 gspread
 requests
 firebase-admin
+google-cloud-firestore
