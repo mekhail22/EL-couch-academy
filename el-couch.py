@@ -4,8 +4,6 @@ import base64
 import re
 from datetime import datetime
 import requests
-import threading
-import time
 
 # ====================================================================================================
 # إعدادات الحد الأقصى
@@ -13,57 +11,9 @@ import time
 MAX_PLAYERS = 50
 
 # ====================================================================================================
-# إعدادات قاعدة بيانات Firestore (الدرع الواقي)
-# ====================================================================================================
-FIRESTORE_DATABASE = "coach-registrations"
-
-# ====================================================================================================
-# Firestore Client (مع معالجة صامتة - يفشل بصمت ويستخدم Sheets)
-# ====================================================================================================
-db = None
-firestore_available = False
-firestore_error_msg = ""
-
-def init_firestore():
-    """إنشاء عميل Firestore - لو فشل، يشتغل على Sheets بدون ما يعطل المستخدم"""
-    try:
-        from google.cloud import firestore as fs
-        from google.oauth2 import service_account
-
-        creds_info = dict(st.secrets["google"]["service_account"])
-        credentials = service_account.Credentials.from_service_account_info(creds_info)
-        client_kwargs = {
-            "project": creds_info["project_id"],
-            "credentials": credentials,
-        }
-        if FIRESTORE_DATABASE and FIRESTORE_DATABASE.strip() not in ["", "(default)"]:
-            client_kwargs["database"] = FIRESTORE_DATABASE
-
-        client = fs.Client(**client_kwargs)
-        client.collection("counters").document("test").get()
-        return client, ""
-    except Exception as e:
-        err = str(e)
-        print(f"[Firestore Init] غير متاح (مش مشكلة - هنشتغل على Sheets): {err}")
-        return None, err
-
-try:
-    db, firestore_error_msg = init_firestore()
-    if db is not None:
-        firestore_available = True
-        print("[Firestore] متصل وجاهز")
-    else:
-        firestore_available = False
-except Exception as e:
-    firestore_error_msg = str(e)
-    db = None
-    firestore_available = False
-
-# ====================================================================================================
-# Google Sheets Helper (مصدر الحقيقة النهائي)
+# Google Sheets Helper (المصدر الوحيد والأساسي)
 # ====================================================================================================
 def get_sheets_client():
-    """إنشاء عميل Google Sheets"""
     import gspread
     from google.oauth2.service_account import Credentials
     creds_info = dict(st.secrets["google"]["service_account"])
@@ -77,7 +27,6 @@ def get_sheets_client():
     return gc.open_by_key(spreadsheet_id).sheet1
 
 def get_sheets_headers(sheet):
-    """التأكد من وجود الهيدرز في Google Sheets"""
     headers = sheet.row_values(1)
     expected_headers = ["الاسم", "الفئة العمرية", "المركز المفضل", "رقم الهاتف", "ملاحظات", "تاريخ التسجيل"]
     if not headers:
@@ -92,7 +41,6 @@ def get_sheets_headers(sheet):
         return headers
 
 def get_real_count_from_sheets():
-    """قراءة العدد الحقيقي من Google Sheets"""
     try:
         sheet = get_sheets_client()
         all_rows = sheet.get_all_values()
@@ -101,83 +49,6 @@ def get_real_count_from_sheets():
         print(f"[Sheets Count Error] {str(e)}")
         return 0
 
-# ====================================================================================================
-# عداد اللاعبين (Firestore أولاً، fallback على Sheets)
-# ====================================================================================================
-def get_player_count():
-    """يقرأ العدد من Firestore (سريع). لو واقف، يقرأ من Sheets."""
-    if firestore_available and db is not None:
-        try:
-            doc = db.collection("counters").document("player_count").get()
-            if doc.exists:
-                count = doc.to_dict().get("count", 0)
-                if count > 0:
-                    return count
-        except Exception as e:
-            print(f"[Firestore Count Error] {str(e)}")
-    return get_real_count_from_sheets()
-
-def increment_firestore_counter():
-    """زيادة العداد في Firestore بشكل ذري"""
-    if firestore_available and db is not None:
-        try:
-            from google.cloud import firestore as fs
-            db.collection("counters").document("player_count").set(
-                {"count": fs.Increment(1)}, merge=True
-            )
-        except Exception as e:
-            print(f"[Firestore Increment Error] {str(e)}")
-
-# ====================================================================================================
-# التحقق من التكرار في Firestore (سريع جداً)
-# ====================================================================================================
-def check_duplicate_in_firestore(data_dict):
-    """يبحث في Firestore عن نفس الاسم + رقم التليفون."""
-    if not firestore_available or db is None:
-        return False
-    try:
-        player_name = data_dict.get('player_name', '').strip()
-        if not player_name:
-            return False
-        docs = db.collection("registrations").where("player_name", "==", player_name).limit(5).stream()
-        for doc in docs:
-            data = doc.to_dict()
-            existing_phone = normalize_phone(data.get('parent_phone', '')).lstrip("'")
-            new_phone = normalize_phone(data_dict.get('parent_phone', '')).lstrip("'")
-            if existing_phone == new_phone:
-                return True
-        return False
-    except Exception as e:
-        print(f"[Firestore Dup Check Error] {str(e)}")
-        return False
-
-# ====================================================================================================
-# حفظ التسجيل في Firestore (الدرع الواقي - فوري)
-# ====================================================================================================
-def save_to_firestore(data_dict):
-    """يكتب في Firestore فوراً ويرجع نجاح."""
-    if not firestore_available or db is None:
-        return False, "Firestore غير متاح"
-    try:
-        from google.cloud import firestore as fs
-        db.collection("registrations").add({
-            "player_name": data_dict["player_name"],
-            "age_group": data_dict["age_group"],
-            "position": data_dict["position"],
-            "parent_phone": data_dict["parent_phone"],
-            "notes": data_dict.get("notes", ""),
-            "timestamp": fs.SERVER_TIMESTAMP,
-            "processed": False
-        })
-        increment_firestore_counter()
-        return True, "تم التسجيل بنجاح!"
-    except Exception as e:
-        print(f"[Firestore Save Error] {str(e)}")
-        return False, str(e)
-
-# ====================================================================================================
-# Google Sheets (المعالجة الخلفية البطيئة)
-# ====================================================================================================
 def normalize_phone(phone):
     if not phone:
         return ''
@@ -187,7 +58,6 @@ def normalize_phone(phone):
     return "'" + phone
 
 def check_duplicate_in_sheets(sheet, headers, data_dict):
-    """التحقق النهائي من التكرار في Google Sheets"""
     try:
         name_col = headers.index("الاسم")
         age_col = headers.index("الفئة العمرية")
@@ -215,12 +85,11 @@ def check_duplicate_in_sheets(sheet, headers, data_dict):
     return False
 
 def save_to_google_sheets(data_dict):
-    """الكتابة في Google Sheets (تُستدعى من الـ Worker فقط)"""
     try:
         sheet = get_sheets_client()
         headers = get_sheets_headers(sheet)
         if check_duplicate_in_sheets(sheet, headers, data_dict):
-            return False, "هذه البيانات مسجلة مسبقاً."
+            return False, "⚠️ هذه البيانات مسجلة مسبقاً."
         normalized_phone = normalize_phone(data_dict.get('parent_phone', ''))
         row_values = []
         for col in headers:
@@ -239,54 +108,15 @@ def save_to_google_sheets(data_dict):
             else:
                 row_values.append('')
         sheet.append_row(row_values, value_input_option="USER_ENTERED")
-        return True, "تم التسجيل في Google Sheets!"
+        return True, "✅ تم التسجيل بنجاح!"
     except Exception as e:
-        return False, f"خطأ في Google Sheets: {str(e)}"
+        return False, f"❌ خطأ في Google Sheets: {str(e)}"
 
 # ====================================================================================================
-# العامل الخلفي (الحارس الأمين - ينقل من Firestore إلى Google Sheets)
+# عداد اللاعبين (من Google Sheets مباشرة)
 # ====================================================================================================
-def process_pending_registrations():
-    """يأخذ سجلات غير معالجة من Firestore ويكتبها في Google Sheets."""
-    if not firestore_available or db is None:
-        return
-    try:
-        docs = db.collection("registrations").where("processed", "==", False).limit(5).stream()
-        for doc in docs:
-            data = doc.to_dict()
-            gs_data = {
-                'player_name': data.get('player_name', ''),
-                'age_group': data.get('age_group', ''),
-                'position': data.get('position', ''),
-                'parent_phone': data.get('parent_phone', ''),
-                'notes': data.get('notes', ''),
-                'timestamp': data.get('timestamp', '') or ''
-            }
-            success, msg = save_to_google_sheets(gs_data)
-            if success:
-                try:
-                    doc.reference.update({"processed": True})
-                except Exception:
-                    pass
-            else:
-                print(f"[Worker] فشل نقل سجل: {msg}")
-            time.sleep(3)
-    except Exception as e:
-        print(f"[Worker Error] {str(e)}")
-
-def start_worker():
-    """تشغيل العامل الخلفي في خيط منفصل"""
-    def run():
-        while True:
-            process_pending_registrations()
-            time.sleep(30)
-    if "worker_started" not in st.session_state:
-        thread = threading.Thread(target=run, daemon=True)
-        thread.start()
-        st.session_state.worker_started = True
-        print("[Worker] شغال")
-
-start_worker()
+def get_player_count():
+    return get_real_count_from_sheets()
 
 # ====================================================================================================
 # Telegram Messaging Function
@@ -1449,7 +1279,7 @@ elif page in ("coaches", "captains"):
     """, unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (Firestore درع واقي + Google Sheets مصدر نهائي)
+# REGISTRATION PAGE (Google Sheets فقط - بدون Firestore)
 # ====================================================================================================
 elif page == "registration":
     st.markdown("""
@@ -1536,16 +1366,11 @@ elif page == "registration":
                             'timestamp': timestamp
                         }
 
-                        # الخطوة 1: التحقق السريع من التكرار في Firestore
-                        if check_duplicate_in_firestore(data_dict):
-                            st.session_state.registration_error = "⚠️ هذه البيانات مسجلة مسبقاً."
-                            st.rerun()
+                        # الحفظ المباشر في Google Sheets
+                        sheets_success, sheets_msg = save_to_google_sheets(data_dict)
 
-                        # الخطوة 2: الحفظ الفوري في Firestore (أقل من 100ms)
-                        success, msg = save_to_firestore(data_dict)
-
-                        if success:
-                            # الخطوة 3: إرسال إشعار Telegram (صامت)
+                        if sheets_success:
+                            # إرسال إشعار Telegram (صامت)
                             try:
                                 telegram_msg = f"""
 📢 <b>تسجيل جديد - الكوتش أكاديمي</b>
@@ -1568,7 +1393,7 @@ elif page == "registration":
                             st.session_state.registration_error = None
                             st.rerun()
                         else:
-                            st.session_state.registration_error = msg
+                            st.session_state.registration_error = sheets_msg
                             st.rerun()
 
         # رسالة خطأ
