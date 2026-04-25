@@ -4,8 +4,8 @@ import base64
 import re
 from datetime import datetime
 import requests
-import firebase_admin
-from firebase_admin import credentials, firestore
+from google.cloud import firestore as fs
+from google.oauth2 import service_account
 import threading
 import time
 
@@ -15,23 +15,27 @@ import time
 MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
-# إعدادات Firebase Firestore
+# إعدادات قاعدة بيانات Firestore (مخصصة وليست الافتراضية)
 # ====================================================================================================
-# غيّر هذا إلى اسم قاعدة بياناتك إذا استخدمت اسماً مختلفاً
+# ⚠️ غيّر هذا الاسم إلى اسم قاعدة بياناتك الذي أنشأته بالضبط
 FIRESTORE_DATABASE = "coach-registrations"
 
 def init_firestore():
-    """تهيئة Firestore مع تحديد اسم قاعدة البيانات"""
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(dict(st.secrets["google"]["service_account"]))
-        firebase_admin.initialize_app(cred)
-    return firestore.client(database=FIRESTORE_DATABASE)
+    """إنشاء عميل Firestore موجه لقاعدة بيانات مخصصة"""
+    creds_info = dict(st.secrets["google"]["service_account"])
+    credentials = service_account.Credentials.from_service_account_info(creds_info)
+    # استخدم project_id الموجود في ملف الخدمة، وحدد قاعدة البيانات المخصصة
+    return fs.Client(
+        project=creds_info["project_id"],
+        credentials=credentials,
+        database=FIRESTORE_DATABASE
+    )
 
 db = init_firestore()
 
 # ---------- عداد اللاعبين (ذري، سريع) ----------
 def get_player_count():
-    """قراءة العدد الحالي من Firestore (عداد ذري سريع)"""
+    """قراءة العدد الحالي من Firestore"""
     try:
         doc = db.collection("counters").document("player_count").get()
         if doc.exists:
@@ -41,17 +45,17 @@ def get_player_count():
     return 0
 
 def increment_player_counter():
-    """يزيد العداد بمقدار 1 بشكل آمن (ذري)"""
+    """زيادة العداد بمقدار 1 بشكل ذري"""
     try:
         db.collection("counters").document("player_count").set(
-            {"count": firestore.Increment(1)}, merge=True
+            {"count": fs.Increment(1)}, merge=True
         )
     except Exception as e:
         st.error(f"❌ خطأ في تحديث العداد: {str(e)}")
 
-# ---------- مزامنة العداد الأولية (مرة واحدة) ----------
+# ---------- مزامنة أولية من Google Sheets إلى Firestore ----------
 def sync_counter_from_sheets_once():
-    """تحديث عداد Firestore من العدد الحقيقي في Google Sheets (يستخدم مرة واحدة عند الإعداد)"""
+    """تحديث عداد Firestore من العدد الحقيقي في Google Sheets (تشغيل مرة واحدة)"""
     try:
         import gspread
         from google.oauth2.service_account import Credentials
@@ -66,10 +70,10 @@ def sync_counter_from_sheets_once():
         db.collection("counters").document("player_count").set({"count": real_count})
         return real_count
     except Exception as e:
-        st.error(f"❌ فشل مزامنة العداد من Google Sheets: {e}")
+        st.error(f"❌ فشل مزامنة العداد من Google Sheets: {str(e)}")
         return 0
 
-# استدعاء المزامنة مرة واحدة عند بدء التطبيق (إذا كان العداد غير موجود أو صفر)
+# استدعاء مرة واحدة عند بدء التطبيق إذا كان العداد صفراً
 if get_player_count() == 0:
     sync_counter_from_sheets_once()
 
@@ -178,7 +182,7 @@ def save_to_firestore(data_dict):
             "position": data_dict["position"],
             "parent_phone": data_dict["parent_phone"],
             "notes": data_dict.get("notes", ""),
-            "timestamp": firestore.SERVER_TIMESTAMP,
+            "timestamp": fs.SERVER_TIMESTAMP,
             "processed": False
         })
         increment_player_counter()
@@ -206,12 +210,11 @@ def process_pending_registrations():
             if success:
                 doc.reference.update({"processed": True})
             else:
-                # يمكن تسجيل الخطأ أو إعادة المحاولة لاحقاً
+                # يمكن تسجيل الخطأ
                 pass
             time.sleep(2)   # احترام حدود Google Sheets API
     except Exception as e:
-        # تجاهل أخطاء المعالج الخلفي حتى لا تؤثر على المستخدم
-        pass
+        pass  # تجاهل أي خطأ في الخلفية
 
 def start_worker():
     """تشغيل العامل الخلفي في خيط منفصل"""
@@ -1396,7 +1399,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (باستخدام Firebase + Google Sheets)
+# REGISTRATION PAGE
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1421,7 +1424,6 @@ elif page == "registration":
         </div>
         ''', unsafe_allow_html=True)
     else:
-        # نموذج التسجيل مباشرة بدون عرض الأماكن المتبقية
         with st.form("registration_form"):
             st.markdown("### 📋 معلومات اللاعب")
             col1, col2 = st.columns(2)
