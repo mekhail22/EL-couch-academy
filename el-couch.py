@@ -18,6 +18,7 @@ MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 # إعدادات قاعدة بيانات Firestore (مخصصة وليست الافتراضية)
 # ====================================================================================================
 # ⚠️ غيّر هذا الاسم إلى اسم قاعدة بياناتك الذي أنشأته بالضبط
+# إذا استخدمت الاسم الافتراضي '(default)' فاجعل القيمة None أو '(default)'
 FIRESTORE_DATABASE = "coach-registrations"
 
 def init_firestore():
@@ -25,11 +26,14 @@ def init_firestore():
     creds_info = dict(st.secrets["google"]["service_account"])
     credentials = service_account.Credentials.from_service_account_info(creds_info)
     # استخدم project_id الموجود في ملف الخدمة، وحدد قاعدة البيانات المخصصة
-    return fs.Client(
-        project=creds_info["project_id"],
-        credentials=credentials,
-        database=FIRESTORE_DATABASE
-    )
+    client_kwargs = {
+        "project": creds_info["project_id"],
+        "credentials": credentials,
+    }
+    # إذا كان FIRESTORE_DATABASE موجودًا وغير فارغ نمرره
+    if FIRESTORE_DATABASE and FIRESTORE_DATABASE.strip() != "":
+        client_kwargs["database"] = FIRESTORE_DATABASE
+    return fs.Client(**client_kwargs)
 
 db = init_firestore()
 
@@ -1399,7 +1403,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE
+# REGISTRATION PAGE (Firebase + Google Sheets)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1499,7 +1503,7 @@ elif page == "registration":
                             st.session_state.registration_error = msg
                             st.rerun()
 
-        # عرض رسالة الخطأ إن وجدت
+        # رسالة خطأ
         if st.session_state.get("registration_error"):
             st.markdown(
                 f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
@@ -1507,7 +1511,7 @@ elif page == "registration":
             )
             st.session_state.registration_error = None
 
-        # عرض رسالة النجاح إن وجدت
+        # رسالة نجاح
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
