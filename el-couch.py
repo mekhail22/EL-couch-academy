@@ -18,14 +18,14 @@ MAX_PLAYERS = 50
 FIRESTORE_DATABASE = "coach-registrations"
 
 # ====================================================================================================
-# Firestore Client (مع معالجة آمنة للأخطاء وعرضها للمستخدم)
+# Firestore Client (مع معالجة صامتة - يفشل بصمت ويستخدم Sheets)
 # ====================================================================================================
 db = None
 firestore_available = False
 firestore_error_msg = ""
 
 def init_firestore():
-    """إنشاء عميل Firestore مع اختبار الاتصال الفعلي"""
+    """إنشاء عميل Firestore - لو فشل، يشتغل على Sheets بدون ما يعطل المستخدم"""
     try:
         from google.cloud import firestore as fs
         from google.oauth2 import service_account
@@ -40,12 +40,11 @@ def init_firestore():
             client_kwargs["database"] = FIRESTORE_DATABASE
 
         client = fs.Client(**client_kwargs)
-        # اختبار الاتصال الفعلي
         client.collection("counters").document("test").get()
         return client, ""
     except Exception as e:
         err = str(e)
-        print(f"[Firestore Init] غير متاح: {err}")
+        print(f"[Firestore Init] غير متاح (مش مشكلة - هنشتغل على Sheets): {err}")
         return None, err
 
 try:
