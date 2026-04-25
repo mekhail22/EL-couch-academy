@@ -8,45 +8,32 @@ import requests
 # ====================================================================================================
 # إعدادات الحد الأقصى
 # ====================================================================================================
-MAX_PLAYERS = 50
+MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
-# Google Sheets Helper (المصدر الوحيد والأساسي)
+# دوال Google Sheets (بما فيها قراءة العدد)
 # ====================================================================================================
-def get_sheets_client():
-    import gspread
-    from google.oauth2.service_account import Credentials
-    creds_info = dict(st.secrets["google"]["service_account"])
-    spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive",
-    ]
-    credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
-    gc = gspread.authorize(credentials)
-    return gc.open_by_key(spreadsheet_id).sheet1
-
-def get_sheets_headers(sheet):
-    headers = sheet.row_values(1)
-    expected_headers = ["الاسم", "الفئة العمرية", "المركز المفضل", "رقم الهاتف", "ملاحظات", "تاريخ التسجيل"]
-    if not headers:
-        sheet.append_row(expected_headers, value_input_option="USER_ENTERED")
-        return expected_headers
-    else:
-        for h in expected_headers:
-            if h not in headers:
-                col_index = len(headers) + 1
-                sheet.update_cell(1, col_index, h)
-                headers.append(h)
-        return headers
-
-def get_real_count_from_sheets():
+def get_player_count():
+    """ترجع عدد اللاعبين المسجلين حالياً في Google Sheets"""
     try:
-        sheet = get_sheets_client()
+        import gspread
+        from google.oauth2.service_account import Credentials
+
+        creds_info = dict(st.secrets["google"]["service_account"])
+        spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
+
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
+        gc = gspread.authorize(credentials)
+        sheet = gc.open_by_key(spreadsheet_id).sheet1
+
         all_rows = sheet.get_all_values()
         return max(0, len(all_rows) - 1)
     except Exception as e:
-        print(f"[Sheets Count Error] {str(e)}")
+        st.error(f"❌ خطأ في قراءة عدد اللاعبين: {str(e)}")
         return 0
 
 def normalize_phone(phone):
@@ -57,40 +44,70 @@ def normalize_phone(phone):
     phone = re.sub(r'[^0-9]', '', phone)
     return "'" + phone
 
-def check_duplicate_in_sheets(sheet, headers, data_dict):
-    try:
-        name_col = headers.index("الاسم")
-        age_col = headers.index("الفئة العمرية")
-        pos_col = headers.index("المركز المفضل")
-        phone_col = headers.index("رقم الهاتف")
-    except ValueError:
-        return False
-    all_rows = sheet.get_all_values()
-    if len(all_rows) <= 1:
-        return False
-    normalized_phone = normalize_phone(data_dict.get('parent_phone', ''))
-    phone_for_comparison = normalized_phone.lstrip("'")
-    new_name = data_dict.get('player_name', '').strip()
-    new_age = data_dict.get('age_group', '').strip()
-    new_pos = data_dict.get('position', '').strip()
-    for row in all_rows[1:]:
-        if len(row) > max(name_col, age_col, pos_col, phone_col):
-            existing_name = row[name_col].strip()
-            existing_age = row[age_col].strip()
-            existing_pos = row[pos_col].strip()
-            existing_phone = row[phone_col].lstrip("'").strip()
-            if (existing_name == new_name and existing_age == new_age and 
-                existing_pos == new_pos and existing_phone == phone_for_comparison):
-                return True
-    return False
-
 def save_to_google_sheets(data_dict):
     try:
-        sheet = get_sheets_client()
-        headers = get_sheets_headers(sheet)
-        if check_duplicate_in_sheets(sheet, headers, data_dict):
-            return False, "⚠️ هذه البيانات مسجلة مسبقاً."
-        normalized_phone = normalize_phone(data_dict.get('parent_phone', ''))
+        import gspread
+        from google.oauth2.service_account import Credentials
+
+        creds_info = dict(st.secrets["google"]["service_account"])
+        spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
+
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
+        gc = gspread.authorize(credentials)
+        sheet = gc.open_by_key(spreadsheet_id).sheet1
+
+        expected_headers = ["الاسم", "الفئة العمرية", "المركز المفضل", "رقم الهاتف", "ملاحظات", "تاريخ التسجيل"]
+
+        headers = sheet.row_values(1)
+        if not headers:
+            sheet.append_row(expected_headers, value_input_option="USER_ENTERED")
+            headers = expected_headers
+        else:
+            for h in expected_headers:
+                if h not in headers:
+                    col_index = len(headers) + 1
+                    sheet.update_cell(1, col_index, h)
+                    headers.append(h)
+
+        raw_phone = data_dict.get('parent_phone', '')
+        normalized_phone = normalize_phone(raw_phone)
+        phone_for_comparison = normalized_phone.lstrip("'")
+
+        all_rows = sheet.get_all_values()
+        if len(all_rows) > 1:
+            try:
+                name_col = headers.index("الاسم")
+                age_col = headers.index("الفئة العمرية")
+                pos_col = headers.index("المركز المفضل")
+                phone_col = headers.index("رقم الهاتف")
+            except ValueError:
+                pass
+            else:
+                for row in all_rows[1:]:
+                    if len(row) > max(name_col, age_col, pos_col, phone_col):
+                        existing_name = row[name_col].strip()
+                        existing_age = row[age_col].strip()
+                        existing_pos = row[pos_col].strip()
+                        existing_phone = row[phone_col].lstrip("'").strip()
+                        
+                        new_name = data_dict.get('player_name', '').strip()
+                        new_age = data_dict.get('age_group', '').strip()
+                        new_pos = data_dict.get('position', '').strip()
+                        
+                        if (existing_name == new_name and 
+                            existing_age == new_age and 
+                            existing_pos == new_pos and 
+                            existing_phone == phone_for_comparison):
+                            return False, "⚠️ هذه البيانات مسجلة مسبقاً. لا يمكن التسجيل مرة أخرى بنفس البيانات."
+
+        current_count = len(all_rows) - 1 if len(all_rows) > 1 else 0
+        if current_count >= MAX_PLAYERS:
+            return False, f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب). التسجيل مغلق حالياً."
+
         row_values = []
         for col in headers:
             if col == "الاسم":
@@ -107,16 +124,11 @@ def save_to_google_sheets(data_dict):
                 row_values.append(data_dict.get('timestamp', ''))
             else:
                 row_values.append('')
+
         sheet.append_row(row_values, value_input_option="USER_ENTERED")
         return True, "✅ تم التسجيل بنجاح!"
     except Exception as e:
         return False, f"❌ خطأ في Google Sheets: {str(e)}"
-
-# ====================================================================================================
-# عداد اللاعبين (من Google Sheets مباشرة)
-# ====================================================================================================
-def get_player_count():
-    return get_real_count_from_sheets()
 
 # ====================================================================================================
 # Telegram Messaging Function
@@ -132,13 +144,17 @@ def send_telegram_message(message_text):
             "parse_mode": "HTML"
         }
         response = requests.post(send_message_url, params=params)
-        return response.status_code == 200
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"خطأ في إرسال رسالة التيليجرام: {response.status_code} - {response.text}")
+            return False
     except Exception as e:
-        print(f"[Telegram Error] {str(e)}")
+        print(f"استثناء في إرسال رسالة التيليجرام: {str(e)}")
         return False
 
 # ====================================================================================================
-# Page Config & Session State
+# Page Config
 # ====================================================================================================
 st.set_page_config(
     page_title="الكوتش أكاديمي - أكاديمية كرة القدم المتخصصة",
@@ -147,6 +163,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# ====================================================================================================
+# Session State
+# ====================================================================================================
 if "page" not in st.session_state:
     st.session_state.page = "home"
 if "show_success" not in st.session_state:
@@ -161,7 +180,7 @@ if "registration_error" not in st.session_state:
     st.session_state.registration_error = None
 
 # ====================================================================================================
-# Logo
+# Logo Base64
 # ====================================================================================================
 def get_image_base64(image_path):
     try:
@@ -175,7 +194,7 @@ logo_base64 = get_image_base64("logo.jpg")
 # ====================================================================================================
 # Main CSS
 # ====================================================================================================
-st.markdown("""
+st.markdown('''
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
@@ -889,7 +908,7 @@ div[data-testid="stForm"] h3 {
     .ec-info-banner .ec-banner-stats { gap: 16px; }
 }
 </style>
-""", unsafe_allow_html=True)
+''', unsafe_allow_html=True)
 
 # ====================================================================================================
 # Helper function to generate navigation link
@@ -974,7 +993,7 @@ st.markdown('<div class="ec-container">', unsafe_allow_html=True)
 # HOME PAGE
 # ====================================================================================================
 if page == "home":
-    st.markdown("""
+    st.markdown('''
     <div class="ec-hero">
         <h1>⚽ الكوتش <span>أكاديمي</span></h1>
         <p class="ec-hero-desc">
@@ -987,10 +1006,10 @@ if page == "home":
             <a href="?page=contact" target="_self" class="ec-btn ec-btn-outline">📞 اتصل بنا</a>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     st.markdown('<div class="ec-section-title">إنجازات الأكاديمية</div>', unsafe_allow_html=True)
-    st.markdown("""
+    st.markdown('''
     <div class="ec-stats">
         <div class="ec-stat-card">
             <div class="ec-stat-icon">👥</div>
@@ -1008,10 +1027,10 @@ if page == "home":
             <div class="ec-stat-label">لاعب محترف</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     st.markdown('<div class="ec-section-title">لماذا تختار الكوتش أكاديمي؟</div>', unsafe_allow_html=True)
-    st.markdown("""
+    st.markdown('''
     <div class="ec-features">
         <div class="ec-feature-card">
             <div class="ec-feature-icon">🧠</div>
@@ -1029,20 +1048,20 @@ if page == "home":
             <p>لدينا شراكات مع أندية محلية ودولية لتمكين الموهوبين من الانضمام للمنتخبات والأندية الكبرى. نوفر فرص احتراف حقيقية.</p>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
 # ====================================================================================================
 # ABOUT PAGE
 # ====================================================================================================
 elif page == "about":
-    st.markdown("""
+    st.markdown('''
     <div class="ec-page-header">
         <h1>من نحن</h1>
         <p>الكوتش أكاديمي.. رؤية جديدة في عالم تدريب كرة القدم</p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown('''
     <div class="ec-about-grid">
         <div class="ec-about-visual">⚽</div>
         <div>
@@ -1087,9 +1106,9 @@ elif page == "about":
             </ul>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown('''
     <div class="ec-info-banner" style="margin-top:40px;">
         <h3>📊 أرقام وإحصائيات</h3>
         <div class="ec-banner-stats">
@@ -1099,20 +1118,20 @@ elif page == "about":
             <div class="ec-banner-stat"><span>⭐ 1000+</span>لاعب محترف</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
 # ====================================================================================================
 # PROGRAMS PAGE
 # ====================================================================================================
 elif page == "programs":
-    st.markdown("""
+    st.markdown('''
     <div class="ec-page-header">
         <h1>البرامج التدريبية</h1>
         <p>مواعيد تدريبية مصممة لكل فئة عمرية</p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown('''
     <div class="ec-programs-grid">
         <div class="ec-program-card">
             <div class="ec-program-hdr">📅</div>
@@ -1139,9 +1158,9 @@ elif page == "programs":
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown('''
     <div class="ec-program-card" style="margin-bottom:30px;">
         <div class="ec-program-hdr">⚽</div>
         <div class="ec-program-body">
@@ -1167,26 +1186,26 @@ elif page == "programs":
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown('''
     <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe); border-radius:24px; padding:30px; text-align:center;">
         <h3 style="color:#1e3a8a; margin:0 0 12px;">📞 للتسجيل والاستفسار</h3>
         <p style="color:#334155; margin:0 0 18px;">تواصل معنا الآن للحصول على عرض تجريبي مجاني</p>
         <a href="?page=registration" target="_self" class="ec-btn ec-btn-gold" style="padding:12px 35px; font-size:1rem;">سجل الآن</a>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
 # ====================================================================================================
 # CAPTAINS PAGE
 # ====================================================================================================
 elif page in ("coaches", "captains"):
-    st.markdown("""
+    st.markdown('''
     <div class="ec-page-header">
         <h1>صفحة الكباتن</h1>
         <p>فريقنا من الكباتن والمدربين ذوي الخبرة والكفاءة</p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     def get_img_base64(img_path):
         try:
@@ -1198,7 +1217,7 @@ elif page in ("coaches", "captains"):
     mikhail_img = get_img_base64("C1.jpg")
     mikhail_img_html = f'<img src="data:image/jpeg;base64,{mikhail_img}" alt="كابتن ميخائيل">' if mikhail_img else '<span>👨‍🏫</span>'
 
-    st.markdown(f"""
+    st.markdown(f'''
     <div class="ec-lead-captain">
         <div class="ec-lead-avatar">{mikhail_img_html}</div>
         <div class="ec-lead-info">
@@ -1214,7 +1233,7 @@ elif page in ("coaches", "captains"):
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     mina_img = get_img_base64("C2.jpg")
     mina_img_html = f'<img src="data:image/jpeg;base64,{mina_img}" alt="كابتن مينا">' if mina_img else '<span>🧤</span>'
@@ -1225,7 +1244,7 @@ elif page in ("coaches", "captains"):
     merola_img = get_img_base64("C4.jpg")
     merola_img_html = f'<img src="data:image/jpeg;base64,{merola_img}" alt="كابتن ميرولا">' if merola_img else '<span>👩‍🏫</span>'
 
-    st.markdown(f"""
+    st.markdown(f'''
     <div class="ec-captains-grid">
         <div class="ec-captain-card">
             <div class="ec-captain-avatar">{mina_img_html}</div>
@@ -1264,9 +1283,9 @@ elif page in ("coaches", "captains"):
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown('''
     <div class="ec-info-banner">
         <h3>🌟 فريق تدريب متكامل</h3>
         <p>يجمع فريقنا بين الخبرات الأكاديمية والعملية لضمان أفضل تدريب</p>
@@ -1276,23 +1295,23 @@ elif page in ("coaches", "captains"):
             <div class="ec-banner-stat"><span>20+</span>سنة خبرة</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (Google Sheets فقط - بدون Firestore)
+# REGISTRATION PAGE
 # ====================================================================================================
 elif page == "registration":
-    st.markdown("""
+    st.markdown('''
     <div class="ec-page-header">
         <h1>تسجيل لاعب جديد</h1>
         <p>انضم إلى الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     current_count = get_player_count()
 
     if current_count >= MAX_PLAYERS:
-        st.markdown(f"""
+        st.markdown(f'''
         <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 24px; padding: 50px 30px; text-align: center; max-width: 700px; margin: 0 auto;">
             <div style="font-size: 4rem; margin-bottom: 20px;">🚫</div>
             <h2 style="color: #1e3a8a; font-size: 2rem; margin-bottom: 20px; font-weight: 900;">التسجيل مغلق حالياً</h2>
@@ -1302,7 +1321,7 @@ elif page == "registration":
             </p>
             <a href="?page=contact" target="_self" class="ec-btn ec-btn-gold" style="padding: 16px 40px; font-size: 1.2rem;">📞 اتصل بنا للاستفسار</a>
         </div>
-        """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
     else:
         with st.form("registration_form"):
             st.markdown("### 📋 معلومات اللاعب")
@@ -1353,7 +1372,7 @@ elif page == "registration":
                 else:
                     current_count = get_player_count()
                     if current_count >= MAX_PLAYERS:
-                        st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب)."
+                        st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب) أثناء محاولة التسجيل. لم يعد هناك أماكن متاحة."
                         st.rerun()
                     else:
                         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1365,26 +1384,9 @@ elif page == "registration":
                             'notes': notes,
                             'timestamp': timestamp
                         }
+                        success, msg = save_to_google_sheets(data_dict)
 
-                        # الحفظ المباشر في Google Sheets
-                        sheets_success, sheets_msg = save_to_google_sheets(data_dict)
-
-                        if sheets_success:
-                            # إرسال إشعار Telegram (صامت)
-                            try:
-                                telegram_msg = f"""
-📢 <b>تسجيل جديد - الكوتش أكاديمي</b>
-━━━━━━━━━━━━━━━━━━━━
-👤 <b>الاسم:</b> {player_name}
-📅 <b>الفئة:</b> {age_group}
-📞 <b>الهاتف:</b> {parent_phone}
-⏰ <b>الوقت:</b> {timestamp}
-━━━━━━━━━━━━━━━━━━━━
-                                """
-                                send_telegram_message(telegram_msg)
-                            except Exception:
-                                pass
-
+                        if success:
                             for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
                                 if key in st.session_state:
                                     del st.session_state[key]
@@ -1393,10 +1395,10 @@ elif page == "registration":
                             st.session_state.registration_error = None
                             st.rerun()
                         else:
-                            st.session_state.registration_error = sheets_msg
+                            st.session_state.registration_error = msg
                             st.rerun()
 
-        # رسالة خطأ
+        # عرض رسالة الخطأ (إن وجدت) أسفل النموذج مباشرة
         if st.session_state.get("registration_error"):
             st.markdown(
                 f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
@@ -1404,7 +1406,7 @@ elif page == "registration":
             )
             st.session_state.registration_error = None
 
-        # رسالة نجاح
+        # عرض رسالة النجاح (إن وجدت) أسفل النموذج مباشرة
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
@@ -1416,12 +1418,12 @@ elif page == "registration":
 # FAQ PAGE
 # ====================================================================================================
 elif page == "faq":
-    st.markdown("""
+    st.markdown('''
     <div class="ec-page-header">
         <h1>الأسئلة الشائعة</h1>
         <p>إجابات على أكثر الأسئلة شيوعًا من أولياء الأمور واللاعبين</p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     faqs = [
         ("ما هو سن القبول في الأكاديمية؟", "نستقبل اللاعبين والبنات من سن الصف الأول الابتدائي وحتى الصف الثاني الإعدادي. لدينا فئات عمرية مختلفة لكل مرحلة لضمان تدريب مناسب لكل سن."),
@@ -1434,23 +1436,23 @@ elif page == "faq":
     ]
 
     for question, answer in faqs:
-        st.markdown(f"""
+        st.markdown(f'''
         <div class="ec-faq-card">
             <h4>❓ {question}</h4>
             <p>{answer}</p>
         </div>
-        """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
 
 # ====================================================================================================
 # CONTACT PAGE
 # ====================================================================================================
 elif page == "contact":
-    st.markdown("""
+    st.markdown('''
     <div class="ec-page-header">
         <h1>اتصل بنا</h1>
         <p>نسعد بتواصلكم معنا في أي وقت</p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     col_form, col_info = st.columns(2)
 
@@ -1493,7 +1495,7 @@ elif page == "contact":
             st.session_state.show_contact_success = False
 
     with col_info:
-        st.markdown("""
+        st.markdown('''
         <div class="ec-contact-card">
             <h3 style="color:#000000; margin:0 0 18px; font-size:1.3rem; font-weight:800;">📍 معلومات التواصل</h3>
             <div class="ec-contact-item">
@@ -1525,9 +1527,9 @@ elif page == "contact":
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
 
-        st.markdown("""
+        st.markdown('''
         <div style="margin-top: 20px; text-align: center;">
             <a href="https://wa.me/201285197778?text=مرحباً%20بالكوتش%20أكاديمي" target="_blank" class="ec-whatsapp-btn">
                 💬 تواصل معنا عبر واتساب
@@ -1541,18 +1543,18 @@ elif page == "contact":
         <div class="ec-map-container" style="margin-top: 15px;">
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.123456789!2d31.201543!3d27.171729!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x144c4d4b4b4b4b4b%3A0x4b4b4b4b4b4b4b4b!2z2YXYrdmF2K8g2KfZhNio2K8g2KfZhNipINmF2YjZgyDYp9mE2K_Ys9mF!5e0!3m2!1sar!2seg!4v1234567890123!5m2!1sar!2seg" allowfullscreen="" loading="lazy"></iframe>
         </div>
-        """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
 
 # ====================================================================================================
 # NEWS PAGE
 # ====================================================================================================
 elif page == "news":
-    st.markdown("""
+    st.markdown('''
     <div class="ec-page-header">
         <h1>الأخبار</h1>
         <p>آخر أخبار وأنشطة الكوتش أكاديمي</p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     news_items = [
         {"title": "بدء التسجيل للموسم الجديد 2025/2026", "date": "2025-08-15", "desc": "يسعدنا الإعلان عن فتح باب التسجيل للموسم التدريبي الجديد 2025/2026. سارعوا بالتسجيل للاستفادة من خصم التسجيل المبكر."},
@@ -1564,13 +1566,13 @@ elif page == "news":
     ]
 
     for item in news_items:
-        st.markdown(f"""
+        st.markdown(f'''
         <div class="ec-news-card">
             <h3>📌 {item['title']}</h3>
             <div class="ec-news-date">🗓️ {item['date']}</div>
             <p>{item['desc']}</p>
         </div>
-        """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
