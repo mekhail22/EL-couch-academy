@@ -4,6 +4,10 @@ import base64
 import re
 from datetime import datetime
 import requests
+import firebase_admin
+from firebase_admin import credentials, firestore
+import threading
+import time
 
 # ====================================================================================================
 # إعدادات الحد الأقصى
@@ -11,31 +15,63 @@ import requests
 MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
-# دوال Google Sheets (بما فيها قراءة العدد)
+# تهيئة Firebase Firestore (للاستجابة السريعة وتحمل الضغط العالي)
 # ====================================================================================================
+def init_firestore():
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(dict(st.secrets["google"]["service_account"]))
+        firebase_admin.initialize_app(cred)
+    return firestore.client()
+
+db = init_firestore()
+
+# ---------- عداد اللاعبين (ذري، سريع) ----------
 def get_player_count():
-    """ترجع عدد اللاعبين المسجلين حالياً في Google Sheets"""
+    """قراءة العدد الحالي من Firestore (عداد ذري سريع)"""
+    try:
+        doc = db.collection("counters").document("player_count").get()
+        if doc.exists:
+            return doc.to_dict().get("count", 0)
+    except Exception as e:
+        st.error(f"❌ خطأ في قراءة العدد من Firestore: {str(e)}")
+    return 0
+
+def increment_player_counter():
+    """يزيد العداد بمقدار 1 بشكل آمن (ذري)"""
+    try:
+        db.collection("counters").document("player_count").set(
+            {"count": firestore.Increment(1)}, merge=True
+        )
+    except Exception as e:
+        st.error(f"❌ خطأ في تحديث العداد: {str(e)}")
+
+# ---------- مزامنة العداد الأولية (مرة واحدة) ----------
+def sync_counter_from_sheets_once():
+    """تحديث عداد Firestore من العدد الحقيقي في Google Sheets (يستخدم مرة واحدة عند الإعداد)"""
     try:
         import gspread
         from google.oauth2.service_account import Credentials
-
         creds_info = dict(st.secrets["google"]["service_account"])
         spreadsheet_id = st.secrets["google"]["spreadsheet_id"]
-
-        scopes = [
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive",
-        ]
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
         gc = gspread.authorize(credentials)
         sheet = gc.open_by_key(spreadsheet_id).sheet1
-
         all_rows = sheet.get_all_values()
-        return max(0, len(all_rows) - 1)
+        real_count = max(0, len(all_rows) - 1)
+        db.collection("counters").document("player_count").set({"count": real_count})
+        return real_count
     except Exception as e:
-        st.error(f"❌ خطأ في قراءة عدد اللاعبين: {str(e)}")
+        st.error(f"❌ فشل مزامنة العداد من Google Sheets: {e}")
         return 0
 
+# استدعاء المزامنة مرة واحدة عند تشغيل التطبيق (إذا كان العداد غير موجود أو صفر)
+if get_player_count() == 0:
+    sync_counter_from_sheets_once()
+
+# ====================================================================================================
+# دوال Google Sheets (المعالجة الخلفية فقط)
+# ====================================================================================================
 def normalize_phone(phone):
     if not phone:
         return ''
@@ -45,6 +81,7 @@ def normalize_phone(phone):
     return "'" + phone
 
 def save_to_google_sheets(data_dict):
+    """الكتابة الفعلية في Google Sheets (تُستدعى من المعالج الخلفي فقط)"""
     try:
         import gspread
         from google.oauth2.service_account import Credentials
@@ -93,21 +130,18 @@ def save_to_google_sheets(data_dict):
                         existing_age = row[age_col].strip()
                         existing_pos = row[pos_col].strip()
                         existing_phone = row[phone_col].lstrip("'").strip()
-
+                        
                         new_name = data_dict.get('player_name', '').strip()
                         new_age = data_dict.get('age_group', '').strip()
                         new_pos = data_dict.get('position', '').strip()
-
-                        if (existing_name == new_name and
-                            existing_age == new_age and
-                            existing_pos == new_pos and
+                        
+                        if (existing_name == new_name and 
+                            existing_age == new_age and 
+                            existing_pos == new_pos and 
                             existing_phone == phone_for_comparison):
                             return False, "⚠️ هذه البيانات مسجلة مسبقاً. لا يمكن التسجيل مرة أخرى بنفس البيانات."
 
-        current_count = len(all_rows) - 1 if len(all_rows) > 1 else 0
-        if current_count >= MAX_PLAYERS:
-            return False, f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب). التسجيل مغلق حالياً."
-
+        # نكتب الصف الجديد (لا نزيد العداد هنا، لأنه زيد في Firestore)
         row_values = []
         for col in headers:
             if col == "الاسم":
@@ -126,9 +160,69 @@ def save_to_google_sheets(data_dict):
                 row_values.append('')
 
         sheet.append_row(row_values, value_input_option="USER_ENTERED")
-        return True, "✅ تم التسجيل بنجاح!"
+        return True, "✅ تم التسجيل بنجاح في Google Sheets!"
     except Exception as e:
         return False, f"❌ خطأ في Google Sheets: {str(e)}"
+
+# ---------- حفظ التسجيل في Firestore (استجابة فورية) ----------
+def save_to_firestore(data_dict):
+    """تخزين الطلب في Firestore والعودة فوراً بنجاح"""
+    try:
+        db.collection("registrations").add({
+            "player_name": data_dict["player_name"],
+            "age_group": data_dict["age_group"],
+            "position": data_dict["position"],
+            "parent_phone": data_dict["parent_phone"],
+            "notes": data_dict.get("notes", ""),
+            "timestamp": firestore.SERVER_TIMESTAMP,
+            "processed": False
+        })
+        increment_player_counter()
+        return True, "✅ تم تسجيلك بنجاح! سنؤكد طلبك خلال دقائق."
+    except Exception as e:
+        return False, f"❌ خطأ: {str(e)}"
+
+# ---------- العامل الخلفي: نقل السجلات من Firestore إلى Google Sheets ----------
+def process_pending_registrations():
+    """تأخذ سجلات غير معالجة من Firestore وتكتبها في Google Sheets"""
+    try:
+        docs = db.collection("registrations").where("processed", "==", False).limit(5).stream()
+        for doc in docs:
+            data = doc.to_dict()
+            # تحويل إلى التنسيق المطلوب لـ save_to_google_sheets
+            gs_data = {
+                'player_name': data.get('player_name', ''),
+                'age_group': data.get('age_group', ''),
+                'position': data.get('position', ''),
+                'parent_phone': data.get('parent_phone', ''),
+                'notes': data.get('notes', ''),
+                'timestamp': data.get('timestamp', '') or ''
+            }
+            success, msg = save_to_google_sheets(gs_data)
+            if success:
+                doc.reference.update({"processed": True})
+            else:
+                # يمكن تسجيل الخطأ أو إعادة المحاولة لاحقاً
+                pass
+            time.sleep(2)   # احترام حدود Google Sheets API
+    except Exception as e:
+        # تجاهل أخطاء المعالج الخلفي حتى لا تؤثر على المستخدم
+        pass
+
+def start_worker():
+    """تشغيل العامل الخلفي في خيط منفصل"""
+    def run():
+        while True:
+            process_pending_registrations()
+            time.sleep(10)  # يفحص كل 10 ثوانٍ
+
+    if "worker_started" not in st.session_state:
+        thread = threading.Thread(target=run, daemon=True)
+        thread.start()
+        st.session_state.worker_started = True
+
+# بدء العامل الخلفي
+start_worker()
 
 # ====================================================================================================
 # Telegram Messaging Function
@@ -1298,7 +1392,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (تم إزالة عرض الأماكن المتبقية)
+# REGISTRATION PAGE (باستخدام Firebase)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1308,10 +1402,10 @@ elif page == "registration":
     </div>
     ''', unsafe_allow_html=True)
 
-    current_count = get_player_count()
+    current_count = get_player_count()  # من Firestore
 
     if current_count >= MAX_PLAYERS:
-        # رسالة إغلاق مع زر اتصل بنا
+        # رسالة إغلاق التسجيل
         st.markdown(f'''
         <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 24px; padding: 50px 30px; text-align: center; max-width: 700px; margin: 0 auto;">
             <div style="font-size: 4rem; margin-bottom: 20px;">🚫</div>
@@ -1324,12 +1418,12 @@ elif page == "registration":
         </div>
         ''', unsafe_allow_html=True)
     else:
-        # لم نعد نعرض عدد الأماكن المتبقية هنا - تمت إزالة جزء "الأماكن المتبقية"
+        # نموذج التسجيل مباشرة بدون عرض الأماكن المتبقية
         with st.form("registration_form"):
             st.markdown("### 📋 معلومات اللاعب")
             col1, col2 = st.columns(2)
             with col1:
-                player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود",
+                player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود", 
                                             value=st.session_state.get("reg_name", ""))
                 age_group = st.selectbox(
                     "الفئة العمرية *",
@@ -1339,14 +1433,14 @@ elif page == "registration":
                         "🏃 بنين (الصف الأول - الخامس الابتدائي)",
                         "🏃 بنين (الصف السادس - الثاني الإعدادي)",
                     ],
-                    index=0 if not st.session_state.get("reg_age") else
+                    index=0 if not st.session_state.get("reg_age") else 
                           ["", "🏃‍♀️ بنات (جميع الأعمار)", "🏃 بنين (الصف الأول - الخامس الابتدائي)", "🏃 بنين (الصف السادس - الثاني الإعدادي)"].index(st.session_state.get("reg_age", ""))
                 )
             with col2:
                 position = st.selectbox(
                     "المركز المفضل",
                     ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
-                    index=0 if not st.session_state.get("reg_pos") else
+                    index=0 if not st.session_state.get("reg_pos") else 
                           ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
                 )
 
@@ -1362,6 +1456,7 @@ elif page == "registration":
             submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
             if submitted:
+                # تخزين القيم مؤقتاً
                 st.session_state.reg_name = player_name
                 st.session_state.reg_age = age_group
                 st.session_state.reg_pos = position
@@ -1372,6 +1467,7 @@ elif page == "registration":
                     st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
                     st.rerun()
                 else:
+                    # التحقق من الحد الأقصى مرة أخرى (قد يكون تغير)
                     current_count = get_player_count()
                     if current_count >= MAX_PLAYERS:
                         st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب) أثناء محاولة التسجيل. لم يعد هناك أماكن متاحة."
@@ -1386,9 +1482,11 @@ elif page == "registration":
                             'notes': notes,
                             'timestamp': timestamp
                         }
-                        success, msg = save_to_google_sheets(data_dict)
+                        # استخدام الحفظ السريع في Firestore
+                        success, msg = save_to_firestore(data_dict)
 
                         if success:
+                            # تنظيف الحقول والرسائل
                             for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
                                 if key in st.session_state:
                                     del st.session_state[key]
