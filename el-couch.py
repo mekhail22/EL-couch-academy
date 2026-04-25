@@ -15,13 +15,17 @@ import time
 MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
-# تهيئة Firebase Firestore (للاستجابة السريعة وتحمل الضغط العالي)
+# إعدادات Firebase Firestore
 # ====================================================================================================
+# غيّر هذا إلى اسم قاعدة بياناتك إذا استخدمت اسماً مختلفاً
+FIRESTORE_DATABASE = "coach-registrations"
+
 def init_firestore():
+    """تهيئة Firestore مع تحديد اسم قاعدة البيانات"""
     if not firebase_admin._apps:
         cred = credentials.Certificate(dict(st.secrets["google"]["service_account"]))
         firebase_admin.initialize_app(cred)
-    return firestore.client()
+    return firestore.client(database=FIRESTORE_DATABASE)
 
 db = init_firestore()
 
@@ -65,7 +69,7 @@ def sync_counter_from_sheets_once():
         st.error(f"❌ فشل مزامنة العداد من Google Sheets: {e}")
         return 0
 
-# استدعاء المزامنة مرة واحدة عند تشغيل التطبيق (إذا كان العداد غير موجود أو صفر)
+# استدعاء المزامنة مرة واحدة عند بدء التطبيق (إذا كان العداد غير موجود أو صفر)
 if get_player_count() == 0:
     sync_counter_from_sheets_once()
 
@@ -1392,7 +1396,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE (باستخدام Firebase)
+# REGISTRATION PAGE (باستخدام Firebase + Google Sheets)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1405,7 +1409,6 @@ elif page == "registration":
     current_count = get_player_count()  # من Firestore
 
     if current_count >= MAX_PLAYERS:
-        # رسالة إغلاق التسجيل
         st.markdown(f'''
         <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 24px; padding: 50px 30px; text-align: center; max-width: 700px; margin: 0 auto;">
             <div style="font-size: 4rem; margin-bottom: 20px;">🚫</div>
@@ -1456,7 +1459,6 @@ elif page == "registration":
             submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
             if submitted:
-                # تخزين القيم مؤقتاً
                 st.session_state.reg_name = player_name
                 st.session_state.reg_age = age_group
                 st.session_state.reg_pos = position
@@ -1467,7 +1469,6 @@ elif page == "registration":
                     st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
                     st.rerun()
                 else:
-                    # التحقق من الحد الأقصى مرة أخرى (قد يكون تغير)
                     current_count = get_player_count()
                     if current_count >= MAX_PLAYERS:
                         st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب) أثناء محاولة التسجيل. لم يعد هناك أماكن متاحة."
@@ -1482,11 +1483,9 @@ elif page == "registration":
                             'notes': notes,
                             'timestamp': timestamp
                         }
-                        # استخدام الحفظ السريع في Firestore
                         success, msg = save_to_firestore(data_dict)
 
                         if success:
-                            # تنظيف الحقول والرسائل
                             for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
                                 if key in st.session_state:
                                     del st.session_state[key]
@@ -1498,7 +1497,7 @@ elif page == "registration":
                             st.session_state.registration_error = msg
                             st.rerun()
 
-        # عرض رسالة الخطأ (إن وجدت) أسفل النموذج مباشرة
+        # عرض رسالة الخطأ إن وجدت
         if st.session_state.get("registration_error"):
             st.markdown(
                 f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
@@ -1506,7 +1505,7 @@ elif page == "registration":
             )
             st.session_state.registration_error = None
 
-        # عرض رسالة النجاح (إن وجدت) أسفل النموذج مباشرة
+        # عرض رسالة النجاح إن وجدت
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
