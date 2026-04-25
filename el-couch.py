@@ -18,12 +18,12 @@ MAX_PLAYERS = 50
 FIRESTORE_DATABASE = "coach-registrations"
 
 # ====================================================================================================
-# Firestore Client (مع معالجة آمنة للأخطاء)
+# Firestore Client (مع معالجة آمنة للأخطاء وعرضها للمستخدم)
 # ====================================================================================================
 db = None
 firestore_available = False
+firestore_error_msg = ""
 
-@st.cache_resource
 def init_firestore():
     """إنشاء عميل Firestore مع اختبار الاتصال الفعلي"""
     try:
@@ -40,18 +40,23 @@ def init_firestore():
             client_kwargs["database"] = FIRESTORE_DATABASE
 
         client = fs.Client(**client_kwargs)
+        # اختبار الاتصال الفعلي
         client.collection("counters").document("test").get()
-        return client
+        return client, ""
     except Exception as e:
-        print(f"[Firestore Init] غير متاح: {str(e)}")
-        return None
+        err = str(e)
+        print(f"[Firestore Init] غير متاح: {err}")
+        return None, err
 
 try:
-    db = init_firestore()
+    db, firestore_error_msg = init_firestore()
     if db is not None:
         firestore_available = True
         print("[Firestore] متصل وجاهز")
-except Exception:
+    else:
+        firestore_available = False
+except Exception as e:
+    firestore_error_msg = str(e)
     db = None
     firestore_available = False
 
