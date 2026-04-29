@@ -11,7 +11,7 @@ import requests
 MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
-# دوال Google Sheets (بما فيها قراءة العدد)
+# دوال Google Sheets (مباشرة، بدون وسيط)
 # ====================================================================================================
 def get_player_count():
     """ترجع عدد اللاعبين المسجلين حالياً في Google Sheets"""
@@ -1121,42 +1121,93 @@ elif page == "about":
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# PROGRAMS PAGE
+# PROGRAMS PAGE - جدول المواعيد الصيفية 2026 (جميع الحصص مساءً)
 # ====================================================================================================
 elif page == "programs":
     st.markdown('''
     <div class="ec-page-header">
         <h1>البرامج التدريبية</h1>
-        <p>مواعيد تدريبية مصممة لكل فئة عمرية</p>
+        <p>🗓️ جدول المواعيد الصيفية 2026 - جميع الحصص مساءً</p>
     </div>
     ''', unsafe_allow_html=True)
 
+    # عرض الجدول في كروت متجاوبة
     st.markdown('''
     <div class="ec-programs-grid">
         <div class="ec-program-card">
-            <div class="ec-program-hdr">📅</div>
+            <div class="ec-program-hdr">🧒</div>
             <div class="ec-program-body">
-                <h3>مواعيد تدريب السبت</h3>
+                <h3>مرحلة KG1</h3>
                 <div class="ec-schedule-box">
-                    <div class="ec-schedule-item"><strong>🕔 ٥:٠٠ - ٦:٠٠ م</strong> ← 🏃‍♀️ بنات (جميع الأعمار)</div>
-                    <div class="ec-schedule-item"><strong>🕕 ٦:٠٠ - ٧:٣٠ م</strong> ← 🏃 بنين (الصف الأول - الخامس الابتدائي)</div>
-                    <div class="ec-schedule-item"><strong>🕢 ٧:٣٠ - ٩:٠٠ م</strong> ← 🏃 بنين (الصف السادس - الثاني الإعدادي)</div>
-                    <div style="margin-top:14px; color:#64748b; font-size:0.88rem;">📍 ملاعب مدرسة السلام المتطورة - أسيوط</div>
+                    <div class="ec-schedule-item"><strong>📅 الأحد والأربعاء</strong></div>
+                    <div class="ec-schedule-item"><strong>🕔 5:00 - 6:00 م</strong></div>
                 </div>
             </div>
         </div>
         <div class="ec-program-card">
-            <div class="ec-program-hdr">📅</div>
+            <div class="ec-program-hdr">🧒</div>
             <div class="ec-program-body">
-                <h3>مواعيد تدريب الخميس</h3>
+                <h3>مرحلة KG2</h3>
                 <div class="ec-schedule-box">
-                    <div class="ec-schedule-item"><strong>🕟 ٤:٣٠ - ٦:٠٠ م</strong> ← 🏃‍♀️ بنات (جميع الأعمار)</div>
-                    <div class="ec-schedule-item"><strong>🕕 ٦:٠٠ - ٨:٠٠ م</strong> ← 🏃 بنين (الصف الأول - الخامس الابتدائي)</div>
-                    <div class="ec-schedule-item"><strong>🕗 ٨:٠٠ - ١٠:٠٠ م</strong> ← 🏃 بنين (الصف السادس - الثاني الإعدادي)</div>
-                    <div style="margin-top:14px; color:#64748b; font-size:0.88rem;">📍 ملاعب مدرسة السلام المتطورة - أسيوط</div>
+                    <div class="ec-schedule-item"><strong>📅 السبت والثلاثاء</strong></div>
+                    <div class="ec-schedule-item"><strong>🕔 5:00 - 6:00 م</strong></div>
                 </div>
             </div>
         </div>
+        <div class="ec-program-card">
+            <div class="ec-program-hdr">👦</div>
+            <div class="ec-program-body">
+                <h3>الصف الأول والثاني الابتدائي</h3>
+                <div class="ec-schedule-box">
+                    <div class="ec-schedule-item"><strong>📅 الإثنين والخميس</strong></div>
+                    <div class="ec-schedule-item"><strong>🕕 6:00 - 7:30 م</strong></div>
+                </div>
+            </div>
+        </div>
+        <div class="ec-program-card">
+            <div class="ec-program-hdr">👦</div>
+            <div class="ec-program-body">
+                <h3>الصف الثالث والرابع الابتدائي</h3>
+                <div class="ec-schedule-box">
+                    <div class="ec-schedule-item"><strong>المجموعة أ: الإثنين والخميس</strong><br>🕕 6:00 - 8:00 م</div>
+                    <div class="ec-schedule-item"><strong>المجموعة ب: السبت والثلاثاء</strong><br>🕗 8:00 - 10:00 م</div>
+                </div>
+            </div>
+        </div>
+        <div class="ec-program-card">
+            <div class="ec-program-hdr">👦</div>
+            <div class="ec-program-body">
+                <h3>الصف الخامس والسادس الابتدائي</h3>
+                <div class="ec-schedule-box">
+                    <div class="ec-schedule-item"><strong>المجموعة أ: الأحد والأربعاء</strong><br>🕗 8:00 - 10:00 م</div>
+                    <div class="ec-schedule-item"><strong>المجموعة ب: السبت والثلاثاء</strong><br>🕕 6:00 - 8:00 م</div>
+                </div>
+            </div>
+        </div>
+        <div class="ec-program-card">
+            <div class="ec-program-hdr">👦</div>
+            <div class="ec-program-body">
+                <h3>الصف الأول والثاني والثالث الإعدادي</h3>
+                <div class="ec-schedule-box">
+                    <div class="ec-schedule-item"><strong>📅 الأحد والأربعاء</strong></div>
+                    <div class="ec-schedule-item"><strong>🕕 6:00 - 8:00 م</strong></div>
+                </div>
+            </div>
+        </div>
+        <div class="ec-program-card">
+            <div class="ec-program-hdr">👧</div>
+            <div class="ec-program-body">
+                <h3>البنات</h3>
+                <div class="ec-schedule-box">
+                    <div class="ec-schedule-item"><strong>📅 الإثنين والخميس</strong></div>
+                    <div class="ec-schedule-item"><strong>🕖 7:00 - 8:30 م</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin:20px 0; font-weight:bold; color:#1e3a8a;">
+        📌 الجمعة إجازة رسمية للجميع
     </div>
     ''', unsafe_allow_html=True)
 
@@ -1174,7 +1225,7 @@ elif page == "programs":
                     <li><strong>الذكاء الكروي:</strong> القراءة التحليلية للملعب واتخاذ القرار</li>
                     <li><strong>بناء الشخصية:</strong> الثقة بالنفس والقيم الرياضية</li>
                 </ul>
-                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه الاكاديمه:</h4>
+                <h4 style="color:#1e3a8a; margin:0 0 14px; font-size:1.15rem;">💼 ما يقدمه الاكاديمية:</h4>
                 <ul style="margin:0 20px 0 0; color:#334155; line-height:2;">
                     <li>ملابس تدريب رسمية (قميص - شورت)</li>
                     <li>مسابقات دورية داخلية وخارجية</li>
@@ -1197,108 +1248,7 @@ elif page == "programs":
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# CAPTAINS PAGE
-# ====================================================================================================
-elif page in ("coaches", "captains"):
-    st.markdown('''
-    <div class="ec-page-header">
-        <h1>صفحة الكباتن</h1>
-        <p>فريقنا من الكباتن والمدربين ذوي الخبرة والكفاءة</p>
-    </div>
-    ''', unsafe_allow_html=True)
-
-    def get_img_base64(img_path):
-        try:
-            with open(img_path, "rb") as f:
-                return base64.b64encode(f.read()).decode()
-        except:
-            return None
-
-    mikhail_img = get_img_base64("C1.jpg")
-    mikhail_img_html = f'<img src="data:image/jpeg;base64,{mikhail_img}" alt="كابتن ميخائيل">' if mikhail_img else '<span>👨‍🏫</span>'
-
-    st.markdown(f'''
-    <div class="ec-lead-captain">
-        <div class="ec-lead-avatar">{mikhail_img_html}</div>
-        <div class="ec-lead-info">
-            <h3>كابتن / ميخائيل كميل رؤف</h3>
-            <div class="ec-title-badge">المدير الفني - مؤسس الأكاديمية</div>
-            <div class="ec-qualifications">
-                🎓 بكالوريوس تربية رياضية<br>
-                📜 رخصة تدريب CAF لمراحل البراعم<br>
-                📜 دبلومة الإعداد البدني المتقدم<br>
-                📜 دبلومة إصابات الملاعب والعلاج الطبيعي<br>
-                🏫 مدرس تربية رياضية بمدارس السلام الخاصة<br>
-                ⭐ خبرة أكثر من 10 سنوات في تدريب الناشئين
-            </div>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
-
-    mina_img = get_img_base64("C2.jpg")
-    mina_img_html = f'<img src="data:image/jpeg;base64,{mina_img}" alt="كابتن مينا">' if mina_img else '<span>🧤</span>'
-
-    ebanob_img = get_img_base64("C3.jpg")
-    ebanob_img_html = f'<img src="data:image/jpeg;base64,{ebanob_img}" alt="كابتن أبانوب">' if ebanob_img else '<span>⚽</span>'
-
-    merola_img = get_img_base64("C4.jpg")
-    merola_img_html = f'<img src="data:image/jpeg;base64,{merola_img}" alt="كابتن ميرولا">' if merola_img else '<span>👩‍🏫</span>'
-
-    st.markdown(f'''
-    <div class="ec-captains-grid">
-        <div class="ec-captain-card">
-            <div class="ec-captain-avatar">{mina_img_html}</div>
-            <div class="ec-captain-info">
-                <h3>كابتن / مينا أسامة</h3>
-                <div class="ec-coach-title">شهرته / دبابة</div>
-                <div class="ec-coach-desc">
-                    • مدرب حراس براعم معتمد من الاتحاد الأفريقي<br>
-                    • حاصل على كورسات إسعافات أولية وإصابات ملاعب<br>
-                    • حاصل على كورس لرفع اللياقة البدنية الخاصة بلاعب كرة القدم
-                </div>
-            </div>
-        </div>
-        <div class="ec-captain-card">
-            <div class="ec-captain-avatar">{ebanob_img_html}</div>
-            <div class="ec-captain-info">
-                <h3>كابتن / أبانوب جمال</h3>
-                <div class="ec-coach-title">شهرته / بيبو</div>
-                <div class="ec-coach-desc">
-                    طالب في كلية تربية رياضية جامعة أسيوط<br>
-                    كابتن في أكاديمية الكوتش<br>
-                    حاصل على شهادة معتمدة من الاتحاد المصري مُعِد بدني<br>
-                    عضو في الشباب والرياضة<br>
-                    لديه قدرات على تناسق التمرينات المهاري + التكتيك
-                </div>
-            </div>
-        </div>
-        <div class="ec-captain-card">
-            <div class="ec-captain-avatar">{merola_img_html}</div>
-            <div class="ec-captain-info">
-                <h3>كابتن / ميرولا شهير</h3>
-                <div class="ec-coach-title">شهرتها / توتا</div>
-                <div class="ec-coach-desc">
-                    مدربة براعم وحاصلة على كورسات تدريبية في مجال كرة القدم
-                </div>
-            </div>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
-
-    st.markdown('''
-    <div class="ec-info-banner">
-        <h3>🌟 فريق تدريب متكامل</h3>
-        <p>يجمع فريقنا بين الخبرات الأكاديمية والعملية لضمان أفضل تدريب</p>
-        <div class="ec-banner-stats">
-            <div class="ec-banner-stat"><span>12+</span>مدرب معتمد</div>
-            <div class="ec-banner-stat"><span>100+</span>دورة تدريبية</div>
-            <div class="ec-banner-stat"><span>20+</span>سنة خبرة</div>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
-
-# ====================================================================================================
-# REGISTRATION PAGE
+# REGISTRATION PAGE - الفئات العمرية الجديدة
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1327,24 +1277,29 @@ elif page == "registration":
             st.markdown("### 📋 معلومات اللاعب")
             col1, col2 = st.columns(2)
             with col1:
-                player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود", 
+                player_name = st.text_input("اسم اللاعب الثلاثي *", placeholder="مثال: محمد أحمد محمود",
                                             value=st.session_state.get("reg_name", ""))
                 age_group = st.selectbox(
                     "الفئة العمرية *",
                     [
                         "",
-                        "🏃‍♀️ بنات (جميع الأعمار)",
-                        "🏃 بنين (الصف الأول - الخامس الابتدائي)",
-                        "🏃 بنين (الصف السادس - الثاني الإعدادي)",
+                        "KG1",
+                        "KG2",
+                        "الصف الأول والثاني الابتدائي",
+                        "الصف الثالث والرابع الابتدائي",
+                        "الصف الخامس والسادس الابتدائي",
+                        "الصف الأول والثاني والثالث الإعدادي",
+                        "بنات",
                     ],
-                    index=0 if not st.session_state.get("reg_age") else 
-                          ["", "🏃‍♀️ بنات (جميع الأعمار)", "🏃 بنين (الصف الأول - الخامس الابتدائي)", "🏃 بنين (الصف السادس - الثاني الإعدادي)"].index(st.session_state.get("reg_age", ""))
+                    index=0 if not st.session_state.get("reg_age") else
+                          ["", "KG1", "KG2", "الصف الأول والثاني الابتدائي", "الصف الثالث والرابع الابتدائي",
+                           "الصف الخامس والسادس الابتدائي", "الصف الأول والثاني والثالث الإعدادي", "بنات"].index(st.session_state.get("reg_age", ""))
                 )
             with col2:
                 position = st.selectbox(
                     "المركز المفضل",
                     ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"],
-                    index=0 if not st.session_state.get("reg_pos") else 
+                    index=0 if not st.session_state.get("reg_pos") else
                           ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
                 )
 
@@ -1398,7 +1353,6 @@ elif page == "registration":
                             st.session_state.registration_error = msg
                             st.rerun()
 
-        # عرض رسالة الخطأ (إن وجدت) أسفل النموذج مباشرة
         if st.session_state.get("registration_error"):
             st.markdown(
                 f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
@@ -1406,7 +1360,6 @@ elif page == "registration":
             )
             st.session_state.registration_error = None
 
-        # عرض رسالة النجاح (إن وجدت) أسفل النموذج مباشرة
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
