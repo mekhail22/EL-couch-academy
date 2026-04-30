@@ -1155,13 +1155,13 @@ elif page == "about":
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# PROGRAMS PAGE - جدول المواعيد الصيفية 2026 (جميع الحصص مساءً)
+# PROGRAMS PAGE - جدول المواعيد الصيفية 2026 (مصحح بالكامل)
 # ====================================================================================================
 elif page == "programs":
     st.markdown('''
     <div class="ec-page-header">
-        <h1>البرامج التدريبية</h1>
-        <p>🗓️ جدول المواعيد الصيفية 2026 - جميع الحصص مساءً</p>
+        <h1>⚽️ البرامج التدريبية</h1>
+        <p>🗓️ جدول المواعيد الصيفية 2026</p>
     </div>
     ''', unsafe_allow_html=True)
 
@@ -1173,7 +1173,7 @@ elif page == "programs":
                 <h3>مرحلة KG1</h3>
                 <div class="ec-schedule-box">
                     <div class="ec-schedule-item"><strong>📅 الأحد والأربعاء</strong></div>
-                    <div class="ec-schedule-item"><strong>🕔 5:00 - 6:00 م</strong></div>
+                    <div class="ec-schedule-item"><strong>🕗 8:00 - 9:00 م</strong></div>
                 </div>
             </div>
         </div>
@@ -1183,7 +1183,7 @@ elif page == "programs":
                 <h3>مرحلة KG2</h3>
                 <div class="ec-schedule-box">
                     <div class="ec-schedule-item"><strong>📅 السبت والثلاثاء</strong></div>
-                    <div class="ec-schedule-item"><strong>🕔 5:00 - 6:00 م</strong></div>
+                    <div class="ec-schedule-item"><strong>🕗 8:00 - 9:00 م</strong></div>
                 </div>
             </div>
         </div>
@@ -1193,7 +1193,7 @@ elif page == "programs":
                 <h3>الصف الأول والثاني الابتدائي</h3>
                 <div class="ec-schedule-box">
                     <div class="ec-schedule-item"><strong>📅 الإثنين والخميس</strong></div>
-                    <div class="ec-schedule-item"><strong>🕕 6:00 - 7:30 م</strong></div>
+                    <div class="ec-schedule-item"><strong>🕗 8:00 - 9:30 م</strong></div>
                 </div>
             </div>
         </div>
@@ -1203,7 +1203,7 @@ elif page == "programs":
                 <h3>الصف الثالث والرابع الابتدائي</h3>
                 <div class="ec-schedule-box">
                     <div class="ec-schedule-item"><strong>المجموعة أ: الإثنين والخميس</strong><br>🕕 6:00 - 8:00 م</div>
-                    <div class="ec-schedule-item"><strong>المجموعة ب: السبت والثلاثاء</strong><br>🕗 8:00 - 10:00 م</div>
+                    <div class="ec-schedule-item"><strong>المجموعة ب: السبت والثلاثاء</strong><br>🕕 6:00 - 8:00 م</div>
                 </div>
             </div>
         </div>
@@ -1212,8 +1212,8 @@ elif page == "programs":
             <div class="ec-program-body">
                 <h3>الصف الخامس والسادس الابتدائي</h3>
                 <div class="ec-schedule-box">
-                    <div class="ec-schedule-item"><strong>المجموعة أ: الأحد والأربعاء</strong><br>🕗 8:00 - 10:00 م</div>
-                    <div class="ec-schedule-item"><strong>المجموعة ب: السبت والثلاثاء</strong><br>🕕 6:00 - 8:00 م</div>
+                    <div class="ec-schedule-item"><strong>المجموعة أ: الأحد والأربعاء</strong><br>🕕 6:00 - 8:00 م</div>
+                    <div class="ec-schedule-item"><strong>المجموعة ب: السبت والثلاثاء</strong><br>🕘 9:00 - 11:00 م</div>
                 </div>
             </div>
         </div>
@@ -1223,7 +1223,7 @@ elif page == "programs":
                 <h3>الصف الأول والثاني والثالث الإعدادي</h3>
                 <div class="ec-schedule-box">
                     <div class="ec-schedule-item"><strong>📅 الأحد والأربعاء</strong></div>
-                    <div class="ec-schedule-item"><strong>🕕 6:00 - 8:00 م</strong></div>
+                    <div class="ec-schedule-item"><strong>🕘 9:00 - 11:00 م</strong></div>
                 </div>
             </div>
         </div>
@@ -1233,7 +1233,7 @@ elif page == "programs":
                 <h3>البنات</h3>
                 <div class="ec-schedule-box">
                     <div class="ec-schedule-item"><strong>📅 الإثنين والخميس</strong></div>
-                    <div class="ec-schedule-item"><strong>🕖 7:00 - 8:30 م</strong></div>
+                    <div class="ec-schedule-item"><strong>🕤 9:30 - 11:00 م</strong></div>
                 </div>
             </div>
         </div>
@@ -1382,7 +1382,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE - مع تاريخ بدء التسديد الجديد
+# REGISTRATION PAGE - مع تفاصيل الاشتراك
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1392,7 +1392,7 @@ elif page == "registration":
     </div>
     ''', unsafe_allow_html=True)
 
-    # بطاقة تفاصيل الاشتراك (مع تاريخ بدء التسديد ٥/٦)
+    # بطاقة تفاصيل الاشتراك
     st.markdown('''
     <div class="ec-subscription-card">
         <h3>📋 تفاصيل الاشتراك - الموسم الصيفي 2026</h3>
