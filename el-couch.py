@@ -570,6 +570,40 @@ div[data-testid="stDecoration"] { display: none !important; }
 }
 .ec-schedule-item:last-child { border-bottom: none; }
 
+.ec-subscription-card {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 2px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.ec-subscription-card h3 {
+    color: #1e3a8a;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: 900;
+    text-align: center;
+}
+.ec-subscription-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    color: #334155;
+    line-height: 2;
+}
+.ec-subscription-details strong {
+    color: #1e3a8a;
+}
+.ec-price-badge {
+    background: #f59e0b;
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-weight: 800;
+    display: inline-block;
+}
+
 .ec-lead-captain {
     max-width: 600px; margin: 0 auto 40px;
     background: white; border-radius: 24px; overflow: hidden;
@@ -1131,7 +1165,6 @@ elif page == "programs":
     </div>
     ''', unsafe_allow_html=True)
 
-    # عرض الجدول في كروت متجاوبة
     st.markdown('''
     <div class="ec-programs-grid">
         <div class="ec-program-card">
@@ -1248,13 +1281,142 @@ elif page == "programs":
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE - الفئات العمرية الجديدة
+# CAPTAINS PAGE
+# ====================================================================================================
+elif page in ("coaches", "captains"):
+    st.markdown('''
+    <div class="ec-page-header">
+        <h1>صفحة الكباتن</h1>
+        <p>فريقنا من الكباتن والمدربين ذوي الخبرة والكفاءة</p>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    def get_img_base64(img_path):
+        try:
+            with open(img_path, "rb") as f:
+                return base64.b64encode(f.read()).decode()
+        except:
+            return None
+
+    mikhail_img = get_img_base64("C1.jpg")
+    mikhail_img_html = f'<img src="data:image/jpeg;base64,{mikhail_img}" alt="كابتن ميخائيل">' if mikhail_img else '<span>👨‍🏫</span>'
+
+    st.markdown(f'''
+    <div class="ec-lead-captain">
+        <div class="ec-lead-avatar">{mikhail_img_html}</div>
+        <div class="ec-lead-info">
+            <h3>كابتن / ميخائيل كميل رؤف</h3>
+            <div class="ec-title-badge">المدير الفني - مؤسس الأكاديمية</div>
+            <div class="ec-qualifications">
+                🎓 بكالوريوس تربية رياضية<br>
+                📜 رخصة تدريب CAF لمراحل البراعم<br>
+                📜 دبلومة الإعداد البدني المتقدم<br>
+                📜 دبلومة إصابات الملاعب والعلاج الطبيعي<br>
+                🏫 مدرس تربية رياضية بمدارس السلام الخاصة<br>
+                ⭐ خبرة أكثر من 10 سنوات في تدريب الناشئين
+            </div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    mina_img = get_img_base64("C2.jpg")
+    mina_img_html = f'<img src="data:image/jpeg;base64,{mina_img}" alt="كابتن مينا">' if mina_img else '<span>🧤</span>'
+
+    ebanob_img = get_img_base64("C3.jpg")
+    ebanob_img_html = f'<img src="data:image/jpeg;base64,{ebanob_img}" alt="كابتن أبانوب">' if ebanob_img else '<span>⚽</span>'
+
+    merola_img = get_img_base64("C4.jpg")
+    merola_img_html = f'<img src="data:image/jpeg;base64,{merola_img}" alt="كابتن ميرولا">' if merola_img else '<span>👩‍🏫</span>'
+
+    st.markdown(f'''
+    <div class="ec-captains-grid">
+        <div class="ec-captain-card">
+            <div class="ec-captain-avatar">{mina_img_html}</div>
+            <div class="ec-captain-info">
+                <h3>كابتن / مينا أسامة</h3>
+                <div class="ec-coach-title">شهرته / دبابة</div>
+                <div class="ec-coach-desc">
+                    • مدرب حراس براعم معتمد من الاتحاد الأفريقي<br>
+                    • حاصل على كورسات إسعافات أولية وإصابات ملاعب<br>
+                    • حاصل على كورس لرفع اللياقة البدنية الخاصة بلاعب كرة القدم
+                </div>
+            </div>
+        </div>
+        <div class="ec-captain-card">
+            <div class="ec-captain-avatar">{ebanob_img_html}</div>
+            <div class="ec-captain-info">
+                <h3>كابتن / أبانوب جمال</h3>
+                <div class="ec-coach-title">شهرته / بيبو</div>
+                <div class="ec-coach-desc">
+                    طالب في كلية تربية رياضية جامعة أسيوط<br>
+                    كابتن في أكاديمية الكوتش<br>
+                    حاصل على شهادة معتمدة من الاتحاد المصري مُعِد بدني<br>
+                    عضو في الشباب والرياضة<br>
+                    لديه قدرات على تناسق التمرينات المهاري + التكتيك
+                </div>
+            </div>
+        </div>
+        <div class="ec-captain-card">
+            <div class="ec-captain-avatar">{merola_img_html}</div>
+            <div class="ec-captain-info">
+                <h3>كابتن / ميرولا شهير</h3>
+                <div class="ec-coach-title">شهرتها / توتا</div>
+                <div class="ec-coach-desc">
+                    مدربة براعم وحاصلة على كورسات تدريبية في مجال كرة القدم
+                </div>
+            </div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    st.markdown('''
+    <div class="ec-info-banner">
+        <h3>🌟 فريق تدريب متكامل</h3>
+        <p>يجمع فريقنا بين الخبرات الأكاديمية والعملية لضمان أفضل تدريب</p>
+        <div class="ec-banner-stats">
+            <div class="ec-banner-stat"><span>12+</span>مدرب معتمد</div>
+            <div class="ec-banner-stat"><span>100+</span>دورة تدريبية</div>
+            <div class="ec-banner-stat"><span>20+</span>سنة خبرة</div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+# ====================================================================================================
+# REGISTRATION PAGE - مع تفاصيل الاشتراك الجديدة
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
     <div class="ec-page-header">
         <h1>تسجيل لاعب جديد</h1>
         <p>انضم إلى الكوتش أكاديمي وابدأ رحلتك نحو الاحتراف</p>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    # بطاقة تفاصيل الاشتراك
+    st.markdown('''
+    <div class="ec-subscription-card">
+        <h3>📋 تفاصيل الاشتراك - الموسم الصيفي 2026</h3>
+        <div class="ec-subscription-details">
+            <div>
+                <strong>🏷️ مدة الوحدة التدريبية:</strong> 3 شهور<br>
+                <strong>📅 الفترة:</strong> من 5/1 حتى 31/8<br>
+                <strong>🏟️ عدد التمارين:</strong> 24 تمرينة (2 أسبوعياً)<br>
+                <strong>👥 الأعمار:</strong> من KG1 حتى تانية إعدادي (بنين - بنات)<br>
+            </div>
+            <div>
+                <strong>💰 قيمة الاشتراك:</strong> <span class="ec-price-badge">1700 LE</span><br>
+                <strong>📍 الدفع كاش:</strong> مقر الأكاديمية - مدرسة السلام المتطورة بالهلالي<br>
+                <strong>🕕 مواعيد الدفع:</strong> من 6 إلى 9 مساءً<br>
+                <strong>🚪 الدخول:</strong> الباب الخلفي بشارع التليفونات
+            </div>
+            <div>
+                <strong>📱 الدفع أون لاين:</strong><br>
+                <strong>إنستا باي:</strong> 01285197778<br>
+                <strong>فودافون كاش:</strong> 01069238878<br>
+                <strong>📩 بعد التحويل:</strong> أرسل سكرين بالتحويل + بيانات اللاعب على رقم الاستعلام<br>
+                <strong>📞 للاستعلام:</strong> 01069238878
+            </div>
+        </div>
     </div>
     ''', unsafe_allow_html=True)
 
