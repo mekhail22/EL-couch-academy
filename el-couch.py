@@ -8,7 +8,7 @@ import requests
 # ====================================================================================================
 # إعدادات الحد الأقصى
 # ====================================================================================================
-MAX_PLAYERS = 250  # يمكن تغيير الرقم حسب الحاجة
+MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
 # دوال Google Sheets (مباشرة، بدون وسيط)
@@ -1384,7 +1384,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE - مع إضافة مجموعات للصف الثالث/الرابع والخامس/السادس
+# REGISTRATION PAGE - مع إضافة مجموعات للصف الثالث/الرابع والخامس/السادس (حل ثابت)
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1438,16 +1438,6 @@ elif page == "registration":
         </div>
         ''', unsafe_allow_html=True)
     else:
-        # سنقوم ببناء النموذج مع التحكم في المجموعات بناءً على الفئة العمرية
-        groups_3_4 = ["", "المجموعة أ (الإثنين والخميس 6:00 - 8:00 م)", "المجموعة ب (السبت والثلاثاء 6:00 - 8:00 م)"]
-        groups_5_6 = ["", "المجموعة أ (الأحد والأربعاء 6:00 - 8:00 م)", "المجموعة ب (السبت والثلاثاء 9:00 - 11:00 م)"]
-
-        # الفئات التي تحتاج اختيار مجموعة
-        age_requires_group = [
-            "الصف الثالث والرابع الابتدائي (بنين)",
-            "الصف الخامس والسادس الابتدائي (بنين)"
-        ]
-
         with st.form("registration_form"):
             st.markdown("### 📋 معلومات اللاعب")
             col1, col2 = st.columns(2)
@@ -1471,9 +1461,6 @@ elif page == "registration":
                            "الصف الثالث والرابع الابتدائي (بنين)", "الصف الخامس والسادس الابتدائي (بنين)",
                            "الصف الأول والثاني والثالث الإعدادي (بنين)", "بنات (جميع الأعمار)"].index(st.session_state.get("reg_age", ""))
                 )
-                # حفظ الفئة المختارة في session_state لاستخدامها في حقل المجموعة
-                st.session_state.reg_age = age_group
-
             with col2:
                 position = st.selectbox(
                     "المركز المفضل",
@@ -1482,23 +1469,23 @@ elif page == "registration":
                           ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
                 )
 
-            # حقل المجموعة يظهر فقط إذا كانت الفئة تتطلب مجموعة
-            selected_age = st.session_state.get("reg_age", "")
-            if selected_age in age_requires_group:
-                if selected_age == "الصف الثالث والرابع الابتدائي (بنين)":
-                    group_list = groups_3_4
-                else:
-                    group_list = groups_5_6
-
-                group = st.selectbox(
-                    "المجموعة *",
-                    group_list,
-                    index=0 if not st.session_state.get("reg_group") else group_list.index(st.session_state.get("reg_group", ""))
-                )
-                st.session_state.reg_group = group
-            else:
-                group = ""  # لا مجموعة للفئات الأخرى
-                st.session_state.reg_group = ""
+            # حقل المجموعة - ثابت لجميع الفئات، مع خيارات واضحة
+            group = st.selectbox(
+                "المجموعة",
+                [
+                    "لا توجد مجموعة",
+                    "المجموعة أ (الإثنين والخميس 6:00 - 8:00 م)",
+                    "المجموعة ب (السبت والثلاثاء 6:00 - 8:00 م)",
+                    "المجموعة أ (الأحد والأربعاء 6:00 - 8:00 م)",
+                    "المجموعة ب (السبت والثلاثاء 9:00 - 11:00 م)",
+                ],
+                index=0 if not st.session_state.get("reg_group") else
+                      ["لا توجد مجموعة",
+                       "المجموعة أ (الإثنين والخميس 6:00 - 8:00 م)",
+                       "المجموعة ب (السبت والثلاثاء 6:00 - 8:00 م)",
+                       "المجموعة أ (الأحد والأربعاء 6:00 - 8:00 م)",
+                       "المجموعة ب (السبت والثلاثاء 9:00 - 11:00 م)"].index(st.session_state.get("reg_group", ""))
+            )
 
             st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
             col1, col2 = st.columns(2)
@@ -1512,13 +1499,41 @@ elif page == "registration":
             submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
             if submitted:
+                # حفظ القيم في session_state
+                st.session_state.reg_name = player_name
+                st.session_state.reg_age = age_group
+                st.session_state.reg_pos = position
+                st.session_state.reg_phone = parent_phone
+                st.session_state.reg_notes = notes
+                st.session_state.reg_group = group
+
                 # التحقق من الحقول المطلوبة
                 if not player_name or not age_group or not parent_phone:
                     st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
                     st.rerun()
-                if age_group in age_requires_group and not group:
-                    st.session_state.registration_error = "⚠️ يرجى اختيار المجموعة للفئة المحددة"
-                    st.rerun()
+
+                # التحقق من المجموعة للفئات المطلوبة
+                if age_group in ["الصف الثالث والرابع الابتدائي (بنين)", "الصف الخامس والسادس الابتدائي (بنين)"]:
+                    if group == "لا توجد مجموعة":
+                        st.session_state.registration_error = "⚠️ يرجى اختيار المجموعة المناسبة للفئة العمرية"
+                        st.rerun()
+                    # التحقق من أن المجموعة المختارة تنتمي للفئة الصحيحة
+                    if age_group == "الصف الثالث والرابع الابتدائي (بنين)":
+                        allowed_groups = [
+                            "المجموعة أ (الإثنين والخميس 6:00 - 8:00 م)",
+                            "المجموعة ب (السبت والثلاثاء 6:00 - 8:00 م)"
+                        ]
+                    else:
+                        allowed_groups = [
+                            "المجموعة أ (الأحد والأربعاء 6:00 - 8:00 م)",
+                            "المجموعة ب (السبت والثلاثاء 9:00 - 11:00 م)"
+                        ]
+                    if group not in allowed_groups:
+                        st.session_state.registration_error = "⚠️ المجموعة المختارة غير متوافقة مع الفئة العمرية"
+                        st.rerun()
+                else:
+                    # للفئات الأخرى نترك المجموعة فارغة (لا توجد مجموعة)
+                    group = ""
 
                 current_count = get_player_count()
                 if current_count >= MAX_PLAYERS:
@@ -1538,7 +1553,6 @@ elif page == "registration":
                 success, msg = save_to_google_sheets(data_dict)
 
                 if success:
-                    # تنظيف الحقول المخزنة
                     for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes", "reg_group"]:
                         if key in st.session_state:
                             del st.session_state[key]
@@ -1550,7 +1564,6 @@ elif page == "registration":
                     st.session_state.registration_error = msg
                     st.rerun()
 
-        # عرض رسالة الخطأ إن وجدت
         if st.session_state.get("registration_error"):
             st.markdown(
                 f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
@@ -1558,7 +1571,6 @@ elif page == "registration":
             )
             st.session_state.registration_error = None
 
-        # عرض رسالة النجاح إن وجدت
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
