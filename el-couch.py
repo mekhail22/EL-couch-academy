@@ -8,7 +8,7 @@ import requests
 # ====================================================================================================
 # إعدادات الحد الأقصى
 # ====================================================================================================
-MAX_PLAYERS = 250  # يمكن تغيير الرقم حسب الحاجة
+MAX_PLAYERS = 50  # يمكن تغيير الرقم حسب الحاجة
 
 # ====================================================================================================
 # دوال Google Sheets (مباشرة، بدون وسيط)
@@ -60,7 +60,7 @@ def save_to_google_sheets(data_dict):
         gc = gspread.authorize(credentials)
         sheet = gc.open_by_key(spreadsheet_id).sheet1
 
-        expected_headers = ["الاسم", "الفئة العمرية", "المركز المفضل", "رقم الهاتف", "ملاحظات", "تاريخ التسجيل"]
+        expected_headers = ["الاسم", "الفئة العمرية", "المجموعة", "المركز المفضل", "رقم الهاتف", "ملاحظات", "تاريخ التسجيل"]
 
         headers = sheet.row_values(1)
         if not headers:
@@ -114,6 +114,8 @@ def save_to_google_sheets(data_dict):
                 row_values.append(data_dict.get('player_name', ''))
             elif col == "الفئة العمرية":
                 row_values.append(data_dict.get('age_group', ''))
+            elif col == "المجموعة":
+                row_values.append(data_dict.get('group', ''))
             elif col == "المركز المفضل":
                 row_values.append(data_dict.get('position', ''))
             elif col == "رقم الهاتف":
@@ -1382,7 +1384,7 @@ elif page in ("coaches", "captains"):
     ''', unsafe_allow_html=True)
 
 # ====================================================================================================
-# REGISTRATION PAGE - مع تفاصيل الاشتراك
+# REGISTRATION PAGE - مع إضافة مجموعات للصف الثالث/الرابع والخامس/السادس
 # ====================================================================================================
 elif page == "registration":
     st.markdown('''
@@ -1436,6 +1438,16 @@ elif page == "registration":
         </div>
         ''', unsafe_allow_html=True)
     else:
+        # سنقوم ببناء النموذج مع التحكم في المجموعات بناءً على الفئة العمرية
+        groups_3_4 = ["", "المجموعة أ (الإثنين والخميس 6:00 - 8:00 م)", "المجموعة ب (السبت والثلاثاء 6:00 - 8:00 م)"]
+        groups_5_6 = ["", "المجموعة أ (الأحد والأربعاء 6:00 - 8:00 م)", "المجموعة ب (السبت والثلاثاء 9:00 - 11:00 م)"]
+
+        # الفئات التي تحتاج اختيار مجموعة
+        age_requires_group = [
+            "الصف الثالث والرابع الابتدائي (بنين)",
+            "الصف الخامس والسادس الابتدائي (بنين)"
+        ]
+
         with st.form("registration_form"):
             st.markdown("### 📋 معلومات اللاعب")
             col1, col2 = st.columns(2)
@@ -1459,6 +1471,9 @@ elif page == "registration":
                            "الصف الثالث والرابع الابتدائي (بنين)", "الصف الخامس والسادس الابتدائي (بنين)",
                            "الصف الأول والثاني والثالث الإعدادي (بنين)", "بنات (جميع الأعمار)"].index(st.session_state.get("reg_age", ""))
                 )
+                # حفظ الفئة المختارة في session_state لاستخدامها في حقل المجموعة
+                st.session_state.reg_age = age_group
+
             with col2:
                 position = st.selectbox(
                     "المركز المفضل",
@@ -1466,6 +1481,24 @@ elif page == "registration":
                     index=0 if not st.session_state.get("reg_pos") else
                           ["", "حارس مرمى", "مدافع", "لاعب وسط", "مهاجم", "أكثر من مركز"].index(st.session_state.get("reg_pos", ""))
                 )
+
+            # حقل المجموعة يظهر فقط إذا كانت الفئة تتطلب مجموعة
+            selected_age = st.session_state.get("reg_age", "")
+            if selected_age in age_requires_group:
+                if selected_age == "الصف الثالث والرابع الابتدائي (بنين)":
+                    group_list = groups_3_4
+                else:
+                    group_list = groups_5_6
+
+                group = st.selectbox(
+                    "المجموعة *",
+                    group_list,
+                    index=0 if not st.session_state.get("reg_group") else group_list.index(st.session_state.get("reg_group", ""))
+                )
+                st.session_state.reg_group = group
+            else:
+                group = ""  # لا مجموعة للفئات الأخرى
+                st.session_state.reg_group = ""
 
             st.markdown("### 👨‍👩‍👦 معلومات ولي الأمر")
             col1, col2 = st.columns(2)
@@ -1479,44 +1512,45 @@ elif page == "registration":
             submitted = st.form_submit_button("📝 تقديم طلب التسجيل", use_container_width=True)
 
             if submitted:
-                st.session_state.reg_name = player_name
-                st.session_state.reg_age = age_group
-                st.session_state.reg_pos = position
-                st.session_state.reg_phone = parent_phone
-                st.session_state.reg_notes = notes
-
+                # التحقق من الحقول المطلوبة
                 if not player_name or not age_group or not parent_phone:
                     st.session_state.registration_error = "⚠️ يرجى ملء جميع الحقول المطلوبة"
                     st.rerun()
+                if age_group in age_requires_group and not group:
+                    st.session_state.registration_error = "⚠️ يرجى اختيار المجموعة للفئة المحددة"
+                    st.rerun()
+
+                current_count = get_player_count()
+                if current_count >= MAX_PLAYERS:
+                    st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب) أثناء محاولة التسجيل. لم يعد هناك أماكن متاحة."
+                    st.rerun()
+
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                data_dict = {
+                    'player_name': player_name,
+                    'age_group': age_group,
+                    'group': group,
+                    'position': position,
+                    'parent_phone': parent_phone,
+                    'notes': notes,
+                    'timestamp': timestamp
+                }
+                success, msg = save_to_google_sheets(data_dict)
+
+                if success:
+                    # تنظيف الحقول المخزنة
+                    for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes", "reg_group"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.session_state.show_success = True
+                    st.session_state.registration_submitted = True
+                    st.session_state.registration_error = None
+                    st.rerun()
                 else:
-                    current_count = get_player_count()
-                    if current_count >= MAX_PLAYERS:
-                        st.session_state.registration_error = f"⚠️ عذراً، تم الوصول للحد الأقصى ({MAX_PLAYERS} لاعب) أثناء محاولة التسجيل. لم يعد هناك أماكن متاحة."
-                        st.rerun()
-                    else:
-                        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        data_dict = {
-                            'player_name': player_name,
-                            'age_group': age_group,
-                            'position': position,
-                            'parent_phone': parent_phone,
-                            'notes': notes,
-                            'timestamp': timestamp
-                        }
-                        success, msg = save_to_google_sheets(data_dict)
+                    st.session_state.registration_error = msg
+                    st.rerun()
 
-                        if success:
-                            for key in ["reg_name", "reg_age", "reg_pos", "reg_phone", "reg_notes"]:
-                                if key in st.session_state:
-                                    del st.session_state[key]
-                            st.session_state.show_success = True
-                            st.session_state.registration_submitted = True
-                            st.session_state.registration_error = None
-                            st.rerun()
-                        else:
-                            st.session_state.registration_error = msg
-                            st.rerun()
-
+        # عرض رسالة الخطأ إن وجدت
         if st.session_state.get("registration_error"):
             st.markdown(
                 f'<div class="ec-error-msg">{st.session_state.registration_error}</div>',
@@ -1524,6 +1558,7 @@ elif page == "registration":
             )
             st.session_state.registration_error = None
 
+        # عرض رسالة النجاح إن وجدت
         if st.session_state.get("show_success", False):
             st.markdown(
                 '<div class="ec-success-msg">✅ تم إرسال طلب التسجيل بنجاح! سنتواصل معكم خلال 24 ساعة.</div>',
